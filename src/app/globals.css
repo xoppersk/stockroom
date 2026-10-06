@@ -1,0 +1,163 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Stockroom design tokens — "Cardboard & ink" (Design Brief §3).
+ * Warm paper background, deep ink text, one confident tape-amber accent.
+ * Status is carried by solid pills: success / warning / destructive / info,
+ * each with a 12% tint (--*-soft) for pill backgrounds.
+ * Radius 10px (0.625rem). Light theme is the v1 theme.
+ */
+:root {
+  --radius: 0.625rem;
+  --background: #faf9f7;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f4f2;
+  --secondary-foreground: #1c1917;
+  --muted: #f5f4f2;
+  --muted-foreground: #78716c;
+  --accent: #f5f4f2;
+  --accent-foreground: #1c1917;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-soft: color-mix(in srgb, #15803d 12%, #ffffff);
+  --warning: #b45309;
+  --warning-soft: color-mix(in srgb, #b45309 12%, #ffffff);
+  --info: #1d4ed8;
+  --info-soft: color-mix(in srgb, #1d4ed8 12%, #ffffff);
+  --destructive-soft: color-mix(in srgb, #dc2626 12%, #ffffff);
+  --border: #e7e2dc;
+  --input: #e7e2dc;
+  --ring: #d97706;
+  --chart-1: #d97706;
+  --chart-2: #78716c;
+  --chart-3: #1c1917;
+  --chart-4: #b45309;
+  --chart-5: #a8a29e;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c1917;
+  --sidebar-primary: #d97706;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f4f2;
+  --sidebar-accent-foreground: #1c1917;
+  --sidebar-border: #e7e2dc;
+  --sidebar-ring: #d97706;
+}
+
+.dark {
+  --background: #1c1917;
+  --foreground: #faf9f7;
+  --card: #292524;
+  --card-foreground: #faf9f7;
+  --popover: #292524;
+  --popover-foreground: #faf9f7;
+  --primary: #d97706;
+  --primary-hover: #f59e0b;
+  --primary-foreground: #ffffff;
+  --secondary: #292524;
+  --secondary-foreground: #faf9f7;
+  --muted: #292524;
+  --muted-foreground: #a8a29e;
+  --accent: #292524;
+  --accent-foreground: #faf9f7;
+  --destructive: #f87171;
+  --destructive-foreground: #1c1917;
+  --success: #4ade80;
+  --success-soft: color-mix(in srgb, #4ade80 12%, #1c1917);
+  --warning: #f59e0b;
+  --warning-soft: color-mix(in srgb, #f59e0b 12%, #1c1917);
+  --info: #60a5fa;
+  --info-soft: color-mix(in srgb, #60a5fa 12%, #1c1917);
+  --destructive-soft: color-mix(in srgb, #f87171 12%, #1c1917);
+  --border: #44403c;
+  --input: #44403c;
+  --ring: #d97706;
+  --chart-1: #d97706;
+  --chart-2: #a8a29e;
+  --chart-3: #faf9f7;
+  --chart-4: #f59e0b;
+  --chart-5: #78716c;
+  --sidebar: #292524;
+  --sidebar-foreground: #faf9f7;
+  --sidebar-primary: #d97706;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #44403c;
+  --sidebar-accent-foreground: #faf9f7;
+  --sidebar-border: #44403c;
+  --sidebar-ring: #d97706;
+}
+
+@theme {
+  /* Inter, self-hosted via next/font (variable set on <html> in layout.tsx). */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Tabular numerals for money and counts (Design Brief §3). */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
