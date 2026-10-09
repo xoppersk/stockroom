@@ -1,34 +1,36 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { DiscountForm } from "@/components/discounts/discount-form";
 import { requireRole } from "@/lib/auth/roles";
-import { createProductsClient } from "@/lib/products/types";
-import { ProductWizard } from "@/components/products/product-wizard";
 
-export const metadata: Metadata = { title: "New product" };
+export const metadata: Metadata = { title: "New discount" };
 
 /**
- * New-product wizard. Admin-only: every mutation in the catalog is gated by
- * `requireRole("admin")` in the server actions, and the page itself redirects
- * non-admin staff away rather than showing a dead form.
+ * Discount builder (admin only). Support staff are redirected — they issue
+ * one-time apology codes from the customer screen instead.
  */
-export default async function NewProductPage() {
-  await requireRole("admin", "/products/new");
-
-  const supabase = await createProductsClient();
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name")
-    .order("name");
+export default async function NewDiscountPage() {
+  await requireRole("admin", "/discounts/new");
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">New product</h1>
+        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
+          <Link href="/discounts">
+            <ArrowLeft className="size-4" /> Discounts
+          </Link>
+        </Button>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">New discount</h1>
         <p className="text-muted-foreground">
-          Four calm steps — details, variants, media, review — then save as a draft or publish.
+          Build a campaign code. The preview shows the discount math and the
+          status the code will carry.
         </p>
       </div>
-      <ProductWizard categories={categories ?? []} />
+
+      <DiscountForm />
     </div>
   );
 }
