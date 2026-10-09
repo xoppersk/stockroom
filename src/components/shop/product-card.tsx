@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Image as ImageIcon } from "lucide-react";
 
 import { formatUSD, shimmerPlaceholder } from "@/lib/shop/format";
 
@@ -13,7 +14,11 @@ export interface ProductCardData {
   imageAlt: string;
 }
 
-/** Storefront product card: 4:5 imagery, price range, compare-at handled on detail. */
+/**
+ * Storefront product card (Flagship UI Designs §2.15): 4:5 imagery, 16px
+ * semibold title, 16px semibold tabular price range, warm-neutral icon tile
+ * when there is no image (never a broken-image icon).
+ */
 export function ProductCard({ product }: { product: ProductCardData }) {
   const priceLabel =
     product.minPrice === product.maxPrice
@@ -22,10 +27,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={`/shop/${product.slug}`}
       className="group block overflow-hidden rounded-[var(--radius)] border border-border bg-card transition-shadow hover:shadow-[0_1px_2px_rgb(28_25_23/0.06),0_8px_24px_-12px_rgb(28_25_23/0.25)]"
     >
-      <div className="relative aspect-[4/5] bg-muted">
+      <div className="relative aspect-[4/5] bg-[#efe9df]">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -37,8 +42,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             blurDataURL={shimmerPlaceholder(600, 750)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted p-6 text-center text-sm text-muted-foreground">
-            {product.title}
+          <div className="flex h-full w-full items-center justify-center border border-border bg-[#efe9df]">
+            <ImageIcon className="size-8 text-muted-foreground" aria-label={product.title} />
           </div>
         )}
       </div>
@@ -48,10 +53,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             {product.categoryName}
           </p>
         )}
-        <h3 className="mt-1 font-medium tracking-tight group-hover:underline">
+        <h3 className="mt-1 text-base leading-6 font-semibold tracking-tight group-hover:underline">
           {product.title}
         </h3>
-        <p className="mt-1 text-sm font-semibold tabular-nums">{priceLabel}</p>
+        <p className="mt-1 text-base font-semibold tabular-nums">{priceLabel}</p>
       </div>
     </Link>
   );
