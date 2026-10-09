@@ -34,8 +34,8 @@ export function deriveDiscountStatus(
 
 /** Pill styling per derived status, using the Stockroom status tokens. */
 export const DISCOUNT_STATUS_STYLES: Record<DerivedDiscountStatus, string> = {
-  Active: "bg-emerald-600/15 text-emerald-700 dark:text-emerald-400",
-  Scheduled: "bg-blue-600/15 text-blue-700 dark:text-blue-400",
-  Paused: "bg-amber-600/15 text-amber-700 dark:text-amber-400",
-  Expired: "bg-stone-500/15 text-stone-500",
+  Active: "bg-success-soft text-success",
+  Scheduled: "bg-info-soft text-info",
+  Paused: "bg-warning-soft text-warning",
+  Expired: "bg-neutral-soft text-neutral",
 };
