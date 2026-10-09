@@ -120,7 +120,7 @@ export function CartClient({ initial }: { initial: CartDetails }) {
               className="flex gap-4 rounded-[var(--radius)] border border-border bg-card p-4"
             >
               <Link
-                href={`/products/${line.productSlug}`}
+                href={`/shop/${line.productSlug}`}
                 className="relative h-24 w-20 shrink-0 overflow-hidden rounded-md bg-muted"
                 aria-label={line.productTitle}
               >
@@ -144,7 +144,7 @@ export function CartClient({ initial }: { initial: CartDetails }) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <Link
-                      href={`/products/${line.productSlug}`}
+                      href={`/shop/${line.productSlug}`}
                       className="font-medium tracking-tight hover:underline"
                     >
                       {line.productTitle}
@@ -294,6 +294,29 @@ export function CartClient({ initial }: { initial: CartDetails }) {
             Secure checkout. Totals are confirmed before you pay.
           </p>
         </div>
+      </div>
+
+      {/* Mobile sticky checkout bar (Flagship UI Designs §2.18) */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-4 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-lg font-semibold tabular-nums">{formatUSD(total)}</p>
+          </div>
+          <Button
+            size="lg"
+            className="flex-1"
+            disabled={checkout.pending || lines.length === 0}
+            onClick={handleCheckout}
+          >
+            {checkout.pending ? "Starting checkout…" : `Pay ${formatUSD(total)}`}
+          </Button>
+        </div>
+        {checkout.error && (
+          <p role="alert" className="mx-auto mt-2 max-w-6xl text-sm font-medium text-destructive">
+            {checkout.error}
+          </p>
+        )}
       </div>
     </div>
   );
