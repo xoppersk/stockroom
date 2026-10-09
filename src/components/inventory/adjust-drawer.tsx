@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,6 +85,10 @@ export function AdjustDrawer({
         setError(result.error);
         return;
       }
+      // Spec §2.9: toast "+50 Linen Apron — Charcoal (Received shipment)".
+      toast.success(
+        `${delta > 0 ? "+" : ""}${delta} ${row.productTitle} — ${row.variantTitle} (${ADJUST_REASON_LABELS[reason as ReasonKey]})`,
+      );
       onClose();
       router.refresh();
     });

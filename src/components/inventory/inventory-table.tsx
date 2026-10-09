@@ -73,7 +73,7 @@ export function InventoryManager({
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.variantId}>
+                  <TableRow key={row.variantId} className="h-14">
                     <TableCell>
                       <div className="text-[13px] font-medium">{row.productTitle}</div>
                       <div className="text-xs text-muted-foreground">{row.variantTitle}</div>
