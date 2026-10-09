@@ -3,8 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Minus, Plus, ShoppingBag } from "lucide-react";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { addItem } from "@/lib/cart/cart";
 import { formatUSD, shimmerPlaceholder } from "@/lib/shop/format";
@@ -98,10 +104,17 @@ export function ProductDetailClient({ product, variants, images }: ProductDetail
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 pb-28 sm:px-6 md:pb-12">
+      <Link
+        href="/shop"
+        className="mb-6 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        Back to shop
+      </Link>
       <div className="grid gap-10 md:grid-cols-2">
         {/* Gallery */}
         <div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius)] border border-border bg-muted">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius)] border border-border bg-[#efe9df]">
             {activeImage ? (
               <Image
                 key={activeImage.url}
@@ -115,8 +128,8 @@ export function ProductDetailClient({ product, variants, images }: ProductDetail
                 priority
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center p-8 text-center text-sm text-muted-foreground">
-                {product.title}
+              <div className="flex h-full w-full items-center justify-center">
+                <ImageIcon className="size-10 text-muted-foreground" aria-label={product.title} />
               </div>
             )}
           </div>
@@ -152,13 +165,13 @@ export function ProductDetailClient({ product, variants, images }: ProductDetail
         <div>
           {product.categoryName && (
             <Link
-              href={product.categorySlug ? `/products?category=${product.categorySlug}` : "/shop"}
+              href={product.categorySlug ? `/shop?category=${product.categorySlug}` : "/shop"}
               className="text-xs font-medium tracking-widest text-muted-foreground uppercase hover:text-foreground"
             >
               {product.categoryName}
             </Link>
           )}
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{product.title}</h1>
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">{product.title}</h1>
 
           {variant && (
             <div className="mt-4 flex items-baseline gap-3">
@@ -173,13 +186,13 @@ export function ProductDetailClient({ product, variants, images }: ProductDetail
 
           <div className="mt-2 min-h-6" aria-live="polite">
             {outOfStock ? (
-              <p className="text-sm font-medium text-destructive">Out of stock</p>
+              <p className="text-sm text-muted-foreground">Out of stock</p>
             ) : lowStock ? (
-              <p className="text-sm font-medium text-[var(--warning)]">
+              <p className="text-sm font-medium text-warning">
                 Only {variant.stockOnHand} left
               </p>
             ) : (
-              <p className="text-sm font-medium text-[var(--success)]">In stock</p>
+              <p className="text-sm text-muted-foreground">In stock</p>
             )}
           </div>
 
@@ -253,17 +266,38 @@ export function ProductDetailClient({ product, variants, images }: ProductDetail
             </p>
           )}
 
-          {product.description && (
-            <div className="mt-8 border-t border-border pt-6">
-              <h2 className="text-sm font-semibold tracking-wide uppercase">Details</h2>
-              <p className="mt-2 text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
-                {product.description}
-              </p>
+          {product.description || variant ? (
+            <Accordion type="multiple" defaultValue={["details"]} className="mt-8 border-t border-border">
+              <AccordionItem value="details">
+                <AccordionTrigger>Details</AccordionTrigger>
+                <AccordionContent>
+                  {product.description ? (
+                    <p className="leading-relaxed whitespace-pre-line">{product.description}</p>
+                  ) : (
+                    <p>No description yet.</p>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="shipping">
+                <AccordionTrigger>Shipping &amp; returns</AccordionTrigger>
+                <AccordionContent>
+                  <p className="leading-relaxed">
+                    Orders ship within 2 business days. Unused items in original
+                    packaging can be returned within 30 days for a full refund —
+                    just reply to your receipt email.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
               {variant && (
-                <p className="mt-3 text-xs text-muted-foreground tabular-nums">SKU {variant.sku}</p>
+                <AccordionItem value="sku">
+                  <AccordionTrigger>SKU</AccordionTrigger>
+                  <AccordionContent>
+                    <p className="font-mono text-[13px] tabular-nums">{variant.sku}</p>
+                  </AccordionContent>
+                </AccordionItem>
               )}
-            </div>
-          )}
+            </Accordion>
+          ) : null}
         </div>
       </div>
 
