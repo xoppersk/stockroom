@@ -181,8 +181,11 @@ export function ProductWizard({ categories }: { categories: { id: string; name: 
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Stepper */}
-      <ol className="flex items-center gap-1 sm:gap-2" aria-label="Progress">
+      {/* Stepper — compresses to "Step X of 4" on mobile (Flagship UI Designs §2.7) */}
+      <p className="text-sm font-medium text-muted-foreground tabular-nums sm:hidden" aria-live="polite">
+        Step {step + 1} of {STEPS.length}: {STEPS[step]}
+      </p>
+      <ol className="hidden items-center gap-1 sm:flex sm:gap-2" aria-label="Progress">
         {STEPS.map((label, i) => {
           const done = i < step;
           const current = i === step;

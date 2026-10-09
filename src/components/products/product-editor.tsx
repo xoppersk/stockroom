@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, TriangleAlert } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 import {
   archiveProduct,
@@ -138,10 +139,7 @@ export function ProductEditor({
         setNotice({ type: "error", message: result.error ?? "Something went wrong." });
         return;
       }
-      setNotice({
-        type: "ok",
-        message: result.warning ? `${okMessage} Warning: ${result.warning}` : okMessage,
-      });
+      toast.success(result.warning ? `${okMessage} Warning: ${result.warning}` : okMessage);
       router.refresh();
     });
   }

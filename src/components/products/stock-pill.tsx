@@ -7,9 +7,9 @@ import { getStockStatus, type StockStatus } from "@/lib/products/utils";
  * Mirrors the inventory module's pill language so the two read the same.
  */
 const PILL_STYLES: Record<StockStatus, string> = {
-  in: "border-transparent bg-[#15803D]/12 text-[#15803D]",
-  low: "border-transparent bg-[#B45309]/12 text-[#B45309]",
-  out: "border-transparent bg-[#DC2626]/12 text-[#DC2626]",
+  in: "border-transparent bg-success-soft text-success",
+  low: "border-transparent bg-warning-soft text-warning",
+  out: "border-transparent bg-destructive-soft text-destructive",
 };
 
 const PILL_LABELS: Record<StockStatus, string> = {

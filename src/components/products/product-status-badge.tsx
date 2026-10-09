@@ -7,9 +7,9 @@ import type { ProductStatus } from "@/lib/products/types";
  * a warehouse staffer should read the state at a glance.
  */
 const STATUS_STYLES: Record<ProductStatus, string> = {
-  published: "border-transparent bg-[#15803D]/12 text-[#15803D]",
-  draft: "border-transparent bg-[#B45309]/12 text-[#B45309]",
-  archived: "border-transparent bg-[#78716C]/15 text-[#57534E]",
+  published: "border-transparent bg-success-soft text-success",
+  draft: "border-transparent bg-warning-soft text-warning",
+  archived: "border-transparent bg-neutral-soft text-neutral",
 };
 
 const STATUS_LABELS: Record<ProductStatus, string> = {
