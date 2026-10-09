@@ -32,6 +32,7 @@
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --exception: #a95412;
+  --soft: #faead3;
   --neutral: #57534e;
   --neutral-soft: color-mix(in srgb, #57534e 12%, #ffffff);
   --success: #15803d;
@@ -130,6 +131,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-exception: var(--exception);
+  --color-soft: var(--soft);
   --color-neutral: var(--neutral);
   --color-neutral-soft: var(--neutral-soft);
   --color-destructive-soft: var(--destructive-soft);
@@ -164,6 +166,42 @@
 /* Tabular numerals for money and counts (Design Brief §3). */
 @utility tnum {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Flagship UI Designs type scale (Stockroom · System §01):
+ * Display 34/34·500 · Heading 22/26·600 · Body 15/25·400 · Label 11/16·600.
+ * Archivo carries display/headings/labels; IBM Plex Sans carries body.
+ */
+@utility text-display {
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+@utility text-heading {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@utility text-body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 25px;
+  font-weight: 400;
+}
+
+@utility text-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 /* Toasts: top-center on mobile, bottom-right on desktop (System §2.20). */
