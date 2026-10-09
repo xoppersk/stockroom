@@ -1,97 +1,226 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Plus, TicketPercent } from "lucide-react";
 
+import { EmptyState } from "@/components/app/empty-state";
 import { Button } from "@/components/ui/button";
-import { ProductCard } from "@/components/shop/product-card";
-import { getCategoriesWithCounts, getPublishedProducts } from "@/lib/shop/catalog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { DiscountRowActions } from "@/components/discounts/discount-row-actions";
+import { DiscountStatusBadge } from "@/components/discounts/discount-status-badge";
+import { ValidateCodeDialog } from "@/components/discounts/validate-code-dialog";
+import { requireRole } from "@/lib/auth/roles";
+import { formatDate, formatDiscountValue, formatMoney } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Juniper Supply Co. — Home & Lifestyle Goods",
-};
+export const metadata: Metadata = { title: "Discounts" };
 
-/** Storefront home: hero, featured categories, featured products. */
-export default async function ShopHomePage() {
-  const [categories, products] = await Promise.all([
-    getCategoriesWithCounts(),
-    getPublishedProducts(8),
+/**
+ * Discounts list (Phase 6): derived status (Active/Scheduled/Paused/Expired),
+ * redemption counts, pause/resume (admin). Admin + support can read; only
+ * admin sees the management controls.
+ */
+export default async function DiscountsPage() {
+  const { role } = await requireRole(["admin", "support"], "/discounts");
+  const isAdmin = role === "admin";
+
+  const supabase = await createClient();
+  const [{ data: discounts }, { data: redemptionRows }] = await Promise.all([
+    supabase
+      .from("discounts")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("discount_redemptions").select("discount_id"),
   ]);
-  const featuredCategories = categories.filter((c) => c.productCount > 0).slice(0, 4);
+
+  const list = discounts ?? [];
+  const redemptionCount = new Map<string, number>();
+  for (const row of redemptionRows ?? []) {
+    redemptionCount.set(
+      row.discount_id,
+      (redemptionCount.get(row.discount_id) ?? 0) + 1,
+    );
+  }
 
   return (
-    <div>
-      {/* Hero — compact: headline + one CTA (Flagship UI Designs §2.15) */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-          <h1 className="max-w-2xl font-display text-[32px] leading-[40px] font-semibold tracking-tight">
-            Good goods for home &amp; life.
-          </h1>
-          <div className="mt-8">
-            <Button asChild size="lg">
-              <Link href="/shop">
-                Shop the collection <ArrowRight className="size-4" aria-hidden />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Discounts</h1>
+          <p className="text-muted-foreground">
+            {list.length} {list.length === 1 ? "code" : "codes"}. Status is
+            derived from schedule, limits, and pause state.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ValidateCodeDialog />
+          {isAdmin ? (
+            <Button asChild>
+              <Link href="/discounts/new">
+                <Plus className="size-4" /> New discount
               </Link>
             </Button>
-          </div>
+          ) : null}
         </div>
-      </section>
+      </div>
 
-      {/* Featured categories */}
-      {featuredCategories.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-xl font-semibold tracking-tight">Shop by category</h2>
-            <Link
-              href="/shop"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              View all
-            </Link>
+      {list.length === 0 ? (
+        <EmptyState
+          icon={TicketPercent}
+          title="No discount codes yet"
+          description="Create a campaign code — or issue a one-time apology code from a customer record."
+          action={
+            isAdmin ? (
+              <Button asChild>
+                <Link href="/discounts/new">
+                  <Plus className="size-4" /> New discount
+                </Link>
+              </Button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <>
+          {/* Desktop table */}
+          <Card className="hidden md:block">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Value</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Redeemed</TableHead>
+                    <TableHead className="text-right">Min. order</TableHead>
+                    <TableHead>Window</TableHead>
+                    {isAdmin ? <TableHead className="text-right">Actions</TableHead> : null}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {list.map((discount) => {
+                    const used = redemptionCount.get(discount.id) ?? 0;
+                    return (
+                      <TableRow key={discount.id} className="h-14">
+                        <TableCell className="font-mono font-semibold">
+                          {discount.code}
+                        </TableCell>
+                        <TableCell>
+                          {formatDiscountValue(discount.kind, discount.value)}
+                        </TableCell>
+                        <TableCell>
+                          <DiscountStatusBadge
+                            discount={discount}
+                            redemptionCount={used}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          <div>
+                            {used}
+                            {discount.usage_limit ? (
+                              <span className="text-muted-foreground">
+                                {" "}
+                                / {discount.usage_limit}
+                              </span>
+                            ) : null}
+                          </div>
+                          {discount.usage_limit ? (
+                            <Progress
+                              value={Math.min(100, (used / discount.usage_limit) * 100)}
+                              className="ml-auto mt-1.5 w-20"
+                              aria-label={`${used} of ${discount.usage_limit} redemptions used`}
+                            />
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {Number(discount.min_order_value) > 0
+                            ? formatMoney(discount.min_order_value)
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                          {formatDate(discount.starts_at)} →{" "}
+                          {discount.ends_at ? formatDate(discount.ends_at) : "No end"}
+                        </TableCell>
+                        {isAdmin ? (
+                          <TableCell>
+                            <DiscountRowActions
+                              id={discount.id}
+                              code={discount.code}
+                              paused={discount.status === "paused"}
+                              canDelete={used === 0}
+                            />
+                          </TableCell>
+                        ) : null}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Mobile cards */}
+          <div className="grid gap-3 md:hidden">
+            {list.map((discount) => {
+              const used = redemptionCount.get(discount.id) ?? 0;
+              return (
+                <Card key={discount.id}>
+                  <CardContent className="space-y-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-mono font-semibold">{discount.code}</p>
+                      <DiscountStatusBadge
+                        discount={discount}
+                        redemptionCount={used}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        {formatDiscountValue(discount.kind, discount.value)}
+                      </span>
+                      <span className="tabular-nums">
+                        {used}
+                        {discount.usage_limit ? ` / ${discount.usage_limit}` : ""}{" "}
+                        redeemed
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(discount.starts_at)} →{" "}
+                      {discount.ends_at ? formatDate(discount.ends_at) : "No end"}
+                      {Number(discount.min_order_value) > 0
+                        ? ` · min ${formatMoney(discount.min_order_value)}`
+                        : ""}
+                    </p>
+                    {isAdmin ? (
+                      <div className="flex justify-end border-t pt-2">
+                        <DiscountRowActions
+                          id={discount.id}
+                          code={discount.code}
+                          paused={discount.status === "paused"}
+                          canDelete={used === 0}
+                        />
+                      </div>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {featuredCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/shop?category=${encodeURIComponent(category.slug)}`}
-                className="group rounded-[var(--radius)] border border-border bg-card p-6 transition-shadow hover:shadow-[0_1px_2px_rgb(28_25_23/0.06),0_8px_24px_-12px_rgb(28_25_23/0.25)]"
-              >
-                <h3 className="font-medium tracking-tight group-hover:underline">
-                  {category.name}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
-                  {category.productCount} product{category.productCount === 1 ? "" : "s"}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
+        </>
       )}
 
-      {/* Featured products */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-xl font-semibold tracking-tight">Featured products</h2>
-          <Link
-            href="/shop"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            View all
-          </Link>
-        </div>
-        {products.length === 0 ? (
-          <p className="mt-6 rounded-[var(--radius)] border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            New arrivals are on their way — check back soon.
-          </p>
-        ) : (
-          <div className="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 sm:gap-6 lg:grid-cols-4">
-            {products.map((product) => (
-              <div key={product.id} className="w-44 shrink-0 snap-start sm:w-auto">
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      {!isAdmin ? (
+        <p className="text-sm text-muted-foreground">
+          Support staff can read codes and test them, and issue one-time apology
+          codes from a customer record. Campaign management is admin-only.
+        </p>
+      ) : null}
     </div>
   );
 }
