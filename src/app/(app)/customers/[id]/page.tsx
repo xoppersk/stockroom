@@ -123,7 +123,7 @@ export default async function CustomerDetailPage({
             {initials || "?"}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">
+            <h1 className="truncate font-display text-2xl font-semibold tracking-tight">
               {fullName}
             </h1>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
