@@ -24,7 +24,7 @@ export default async function NewCustomerPage() {
             <ArrowLeft className="size-4" /> Customers
           </Link>
         </Button>
-        <h1 className="text-2xl font-semibold tracking-tight">New customer</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">New customer</h1>
         <p className="text-muted-foreground">
           Add someone to the directory. Tags and addresses come next, on their
           profile.
