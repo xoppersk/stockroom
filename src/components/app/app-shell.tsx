@@ -9,34 +9,34 @@ import type { UserRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 import { AppHeader } from "./app-header";
-import { AppSidebar, AppSidebarMobile } from "./app-sidebar";
+import { AppSidebar, AppSidebarMobile, type NavBadges } from "./app-sidebar";
 import { CommandPalette, openCommandPalette, type PaletteCommand } from "./command-palette";
 
 /**
  * Client shell composing sidebar + header + command palette around page content.
- * The (app)/layout.tsx server component fetches the user/profile/role and
- * renders this; all interactive state (collapsed sidebar, palette) lives here.
+ * The (app)/layout.tsx server component fetches the user/profile/role plus
+ * live nav badge counts; all interactive state (mobile drawer, palette) lives
+ * here.
  */
 export function AppShell({
   email,
   displayName,
   role,
+  badges,
   userMenu,
   children,
 }: {
   email: string | undefined;
   displayName: string | null;
   role: UserRole;
+  badges: NavBadges | null;
   userMenu?: ReactNode;
   children: ReactNode;
 }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Default palette actions. Later phases extend this array — e.g. "New order",
-  // entity search — without touching the palette component itself.
   const commands = useMemo<PaletteCommand[]>(
     () => [
       {
@@ -78,10 +78,12 @@ export function AppShell({
     [router, theme, setTheme],
   );
 
+  const sidebarProps = { role, badges, displayName, email };
+
   return (
     <div className="flex min-h-svh">
-      <AppSidebar role={role} collapsed={collapsed} onToggleCollapse={() => setCollapsed((value) => !value)} />
-      <AppSidebarMobile role={role} open={mobileOpen} onOpenChange={setMobileOpen} />
+      <AppSidebar {...sidebarProps} />
+      <AppSidebarMobile {...sidebarProps} open={mobileOpen} onOpenChange={setMobileOpen} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader
@@ -91,8 +93,8 @@ export function AppShell({
           onMenuClick={() => setMobileOpen(true)}
           onPaletteOpen={openCommandPalette}
         />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="mx-auto w-full max-w-5xl">{children}</div>
+        <main className="flex-1 px-4 py-6 md:px-8">
+          <div className="mx-auto w-full max-w-6xl">{children}</div>
         </main>
       </div>
 
