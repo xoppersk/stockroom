@@ -60,8 +60,8 @@ export async function isStaff(): Promise<boolean> {
  *
  * Failure behavior (deliberate):
  *   * signed out            → requireUser() redirects to /login?next=...
- *   * signed in, wrong role  → redirect("/dashboard") — never confirm the
- *                             protected page exists to an under-ranked user.
+ *   * signed in, wrong role  → redirect("/unauthorized") — the spec's
+ *                             role-gated page (F8), never a silent bounce.
  *   * signed in, no role yet → redirect("/login") — an admin must grant a
  *                             role via Settings → Invite before the account
  *                             can use the app.
@@ -79,7 +79,7 @@ export async function requireRole(
 
   const allowed = Array.isArray(roles) ? roles : [roles];
   if (!allowed.includes(role)) {
-    redirect("/dashboard");
+    redirect("/unauthorized");
   }
 
   return { user, role };
