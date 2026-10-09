@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Plus, TicketPercent } from "lucide-react";
 
-import { EmptyState } from "@/components/app/empty-state";
-import { Button } from "@/components/ui/button";
+import { requireRole } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -14,213 +11,247 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DiscountRowActions } from "@/components/discounts/discount-row-actions";
-import { DiscountStatusBadge } from "@/components/discounts/discount-status-badge";
-import { ValidateCodeDialog } from "@/components/discounts/validate-code-dialog";
-import { requireRole } from "@/lib/auth/roles";
-import { formatDate, formatDiscountValue, formatMoney } from "@/lib/format";
-import { createClient } from "@/lib/supabase/server";
+import { InventoryFilters } from "@/components/inventory/inventory-filters";
+import { InventoryManager, type InventoryRow } from "@/components/inventory/inventory-table";
+import { cn } from "@/lib/utils";
+import type { Database } from "@/lib/supabase/types";
 
-export const metadata: Metadata = { title: "Discounts" };
+export const metadata: Metadata = { title: "Inventory" };
+
+type AdjustmentReason = Database["public"]["Tables"]["inventory_adjustments"]["Row"]["reason"];
+
+const REASON_LABELS: Record<string, string> = {
+  sale: "Sale",
+  restock_received: "Restock received",
+  damaged: "Damaged / lost",
+  recount: "Recount correction",
+  return: "Customer return",
+  cancelled_order: "Cancelled order",
+  manual: "Manual correction",
+};
+
+type SearchParams = {
+  q?: string;
+  alert?: string;
+  hReason?: string;
+  hActor?: string;
+  hFrom?: string;
+  hTo?: string;
+};
 
 /**
- * Discounts list (Phase 6): derived status (Active/Scheduled/Paused/Expired),
- * redemption counts, pause/resume (admin). Admin + support can read; only
- * admin sees the management controls.
+ * Inventory (Phase 5): summary cards, variant stock table with OK/Low/Out
+ * pills, the adjust drawer (via the `adjust_inventory` RPC), the `?alert=low`
+ * deep link, and a filterable adjustment history log.
  */
-export default async function DiscountsPage() {
-  const { role } = await requireRole(["admin", "support"], "/discounts");
-  const isAdmin = role === "admin";
-
+export default async function InventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const { role } = await requireRole(["admin", "warehouse", "support"], "/inventory");
+  const params = await searchParams;
   const supabase = await createClient();
-  const [{ data: discounts }, { data: redemptionRows }] = await Promise.all([
-    supabase
-      .from("discounts")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase.from("discount_redemptions").select("discount_id"),
-  ]);
 
-  const list = discounts ?? [];
-  const redemptionCount = new Map<string, number>();
-  for (const row of redemptionRows ?? []) {
-    redemptionCount.set(
-      row.discount_id,
-      (redemptionCount.get(row.discount_id) ?? 0) + 1,
+  const alertLow = params.alert === "low";
+  const canAdjust = role === "admin" || role === "warehouse";
+
+  // --- Stock levels + variant/product info -----------------------------
+  const { data: levels } = await supabase
+    .from("inventory_levels")
+    .select("variant_id, quantity_on_hand, low_stock_threshold")
+    .limit(5000);
+
+  const levelRows = levels ?? [];
+  const totalUnits = levelRows.reduce((sum, l) => sum + l.quantity_on_hand, 0);
+  const lowCount = levelRows.filter(
+    (l) => l.quantity_on_hand > 0 && l.quantity_on_hand < l.low_stock_threshold,
+  ).length;
+  const outCount = levelRows.filter((l) => l.quantity_on_hand <= 0).length;
+
+  const variantIds = levelRows.map((l) => l.variant_id);
+  const { data: variants } = variantIds.length > 0
+    ? await supabase
+        .from("product_variants")
+        .select("id, sku, title, product_id")
+        .in("id", variantIds)
+        .limit(5000)
+    : { data: null };
+  const productIds = [...new Set((variants ?? []).map((v) => v.product_id))];
+  const { data: products } = productIds.length > 0
+    ? await supabase.from("products").select("id, title").in("id", productIds).limit(1000)
+    : { data: null };
+  const productTitle = new Map((products ?? []).map((p) => [p.id, p.title]));
+  const levelOf = new Map(levelRows.map((l) => [l.variant_id, l]));
+
+  const q = (params.q ?? "").trim().toLowerCase().replace(/[%_\\]/g, "");
+  let rows: InventoryRow[] = (variants ?? []).map((v) => {
+    const level = levelOf.get(v.id);
+    return {
+      variantId: v.id,
+      sku: v.sku,
+      variantTitle: v.title,
+      productTitle: productTitle.get(v.product_id) ?? "Unknown product",
+      quantity: level?.quantity_on_hand ?? 0,
+      threshold: level?.low_stock_threshold ?? 0,
+    };
+  });
+  if (q) {
+    rows = rows.filter(
+      (r) =>
+        r.sku.toLowerCase().includes(q) ||
+        r.variantTitle.toLowerCase().includes(q) ||
+        r.productTitle.toLowerCase().includes(q),
     );
   }
+  if (alertLow) {
+    rows = rows.filter((r) => r.quantity < r.threshold);
+  }
+  rows.sort((a, b) => a.sku.localeCompare(b.sku));
+  const shownRows = rows.slice(0, 200);
+
+  // --- Adjustment history ------------------------------------------------
+  const hActor = params.hActor;
+  const hFrom = params.hFrom;
+  const hTo = params.hTo;
+  const hReason = params.hReason && params.hReason in REASON_LABELS ? params.hReason : undefined;
+
+  let historyQuery = supabase
+    .from("inventory_adjustments")
+    .select("id, variant_id, delta, quantity_before, quantity_after, reason, reference, note, created_by, created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (hReason) {
+    historyQuery = historyQuery.eq("reason", hReason as AdjustmentReason);
+  }
+  if (hActor) historyQuery = historyQuery.eq("created_by", hActor);
+  if (hFrom) historyQuery = historyQuery.gte("created_at", `${hFrom}T00:00:00Z`);
+  if (hTo) historyQuery = historyQuery.lte("created_at", `${hTo}T23:59:59Z`);
+  const { data: adjustments } = await historyQuery;
+
+  const historyVariantIds = [...new Set((adjustments ?? []).map((a) => a.variant_id))];
+  const { data: historyVariants } = historyVariantIds.length > 0
+    ? await supabase.from("product_variants").select("id, sku, title").in("id", historyVariantIds)
+    : { data: null };
+  const historyVariantOf = new Map((historyVariants ?? []).map((v) => [v.id, v]));
+
+  const historyActorIds = [...new Set((adjustments ?? []).map((a) => a.created_by).filter((id): id is string => id !== null))];
+  const { data: staff } = await supabase.from("profiles").select("id, full_name").order("full_name");
+  const actorName = new Map((staff ?? []).map((s) => [s.id, s.full_name]));
+  const actorOptions = (staff ?? []).filter((s) => historyActorIds.includes(s.id)).map((s) => ({ id: s.id, name: s.full_name }));
+
+  const summary = [
+    { label: "Units on hand", value: totalUnits.toLocaleString("en-US"), tone: "text-foreground" },
+    { label: "Low stock", value: String(lowCount), tone: lowCount > 0 ? "text-[#B45309]" : "text-foreground" },
+    { label: "Out of stock", value: String(outCount), tone: outCount > 0 ? "text-[#DC2626]" : "text-foreground" },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Discounts</h1>
-          <p className="text-muted-foreground">
-            {list.length} {list.length === 1 ? "code" : "codes"}. Status is
-            derived from schedule, limits, and pause state.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ValidateCodeDialog />
-          {isAdmin ? (
-            <Button asChild>
-              <Link href="/discounts/new">
-                <Plus className="size-4" /> New discount
-              </Link>
-            </Button>
-          ) : null}
-        </div>
+      <div>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Inventory</h1>
+        <p className="text-muted-foreground">
+          Stock levels by variant. Every change needs a reason and lands in the history log.
+        </p>
       </div>
 
-      {list.length === 0 ? (
-        <EmptyState
-          icon={TicketPercent}
-          title="No discount codes yet"
-          description="Create a campaign code — or issue a one-time apology code from a customer record."
-          action={
-            isAdmin ? (
-              <Button asChild>
-                <Link href="/discounts/new">
-                  <Plus className="size-4" /> New discount
-                </Link>
-              </Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <>
-          {/* Desktop table */}
-          <Card className="hidden md:block">
-            <CardContent className="p-0">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {summary.map((card) => (
+          <Card key={card.label}>
+            <CardContent className="p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {card.label}
+              </div>
+              <div className={cn("mt-1 font-display text-2xl font-semibold tracking-tight tabular-nums", card.tone)}>
+                {card.value}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <InventoryFilters actors={actorOptions} />
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-semibold tracking-tight">Stock levels</h2>
+        <InventoryManager rows={shownRows} canAdjust={canAdjust} alertLow={alertLow} />
+        {rows.length > shownRows.length && (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            Showing {shownRows.length} of {rows.length} variants — refine the search to see more.
+          </p>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-semibold tracking-tight">Adjustment history</h2>
+        {(adjustments ?? []).length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">No adjustments match these filters.</p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border bg-card">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Redeemed</TableHead>
-                    <TableHead className="text-right">Min. order</TableHead>
-                    <TableHead>Window</TableHead>
-                    {isAdmin ? <TableHead className="text-right">Actions</TableHead> : null}
+                    <TableHead>When</TableHead>
+                    <TableHead>Variant</TableHead>
+                    <TableHead className="text-right">Change</TableHead>
+                    <TableHead className="text-right">Before → after</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Reference</TableHead>
+                    <TableHead>By</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {list.map((discount) => {
-                    const used = redemptionCount.get(discount.id) ?? 0;
+                  {(adjustments ?? []).map((adj) => {
+                    const variant = historyVariantOf.get(adj.variant_id);
                     return (
-                      <TableRow key={discount.id} className="h-14">
-                        <TableCell className="font-mono font-semibold">
-                          {discount.code}
+                      <TableRow key={adj.id}>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                          {new Date(adj.created_at).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
                         </TableCell>
                         <TableCell>
-                          {formatDiscountValue(discount.kind, discount.value)}
+                          <div className="text-[13px] font-medium tabular-nums">{variant?.sku ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground">{variant?.title ?? ""}</div>
                         </TableCell>
-                        <TableCell>
-                          <DiscountStatusBadge
-                            discount={discount}
-                            redemptionCount={used}
-                          />
+                        <TableCell
+                          className={cn(
+                            "text-right font-semibold tabular-nums",
+                            adj.delta > 0 ? "text-[#15803D]" : "text-[#DC2626]",
+                          )}
+                        >
+                          {adj.delta > 0 ? `+${adj.delta}` : adj.delta}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          <div>
-                            {used}
-                            {discount.usage_limit ? (
-                              <span className="text-muted-foreground">
-                                {" "}
-                                / {discount.usage_limit}
-                              </span>
-                            ) : null}
-                          </div>
-                          {discount.usage_limit ? (
-                            <Progress
-                              value={Math.min(100, (used / discount.usage_limit) * 100)}
-                              className="ml-auto mt-1.5 w-20"
-                              aria-label={`${used} of ${discount.usage_limit} redemptions used`}
-                            />
-                          ) : null}
+                        <TableCell className="whitespace-nowrap text-right text-[13px] tabular-nums text-muted-foreground">
+                          {adj.quantity_before} → {adj.quantity_after}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {Number(discount.min_order_value) > 0
-                            ? formatMoney(discount.min_order_value)
-                            : "—"}
+                        <TableCell className="text-[13px]">
+                          {REASON_LABELS[adj.reason] ?? adj.reason}
+                          {adj.note && (
+                            <div className="max-w-48 truncate text-xs text-muted-foreground" title={adj.note}>
+                              {adj.note}
+                            </div>
+                          )}
                         </TableCell>
-                        <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                          {formatDate(discount.starts_at)} →{" "}
-                          {discount.ends_at ? formatDate(discount.ends_at) : "No end"}
+                        <TableCell className="text-[13px] tabular-nums">{adj.reference ?? "—"}</TableCell>
+                        <TableCell className="text-[13px]">
+                          {adj.created_by ? (actorName.get(adj.created_by) ?? "—") : "System"}
                         </TableCell>
-                        {isAdmin ? (
-                          <TableCell>
-                            <DiscountRowActions
-                              id={discount.id}
-                              code={discount.code}
-                              paused={discount.status === "paused"}
-                              canDelete={used === 0}
-                            />
-                          </TableCell>
-                        ) : null}
                       </TableRow>
                     );
                   })}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-
-          {/* Mobile cards */}
-          <div className="grid gap-3 md:hidden">
-            {list.map((discount) => {
-              const used = redemptionCount.get(discount.id) ?? 0;
-              return (
-                <Card key={discount.id}>
-                  <CardContent className="space-y-2 p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-mono font-semibold">{discount.code}</p>
-                      <DiscountStatusBadge
-                        discount={discount}
-                        redemptionCount={used}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {formatDiscountValue(discount.kind, discount.value)}
-                      </span>
-                      <span className="tabular-nums">
-                        {used}
-                        {discount.usage_limit ? ` / ${discount.usage_limit}` : ""}{" "}
-                        redeemed
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(discount.starts_at)} →{" "}
-                      {discount.ends_at ? formatDate(discount.ends_at) : "No end"}
-                      {Number(discount.min_order_value) > 0
-                        ? ` · min ${formatMoney(discount.min_order_value)}`
-                        : ""}
-                    </p>
-                    {isAdmin ? (
-                      <div className="flex justify-end border-t pt-2">
-                        <DiscountRowActions
-                          id={discount.id}
-                          code={discount.code}
-                          paused={discount.status === "paused"}
-                          canDelete={used === 0}
-                        />
-                      </div>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            </div>
           </div>
-        </>
-      )}
-
-      {!isAdmin ? (
-        <p className="text-sm text-muted-foreground">
-          Support staff can read codes and test them, and issue one-time apology
-          codes from a customer record. Campaign management is admin-only.
-        </p>
-      ) : null}
+        )}
+      </section>
     </div>
   );
 }
