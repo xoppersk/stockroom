@@ -304,7 +304,7 @@ export function OrdersTable({
               </TableHeader>
               <TableBody>
                 {orders.map((order) => (
-                  <TableRow key={order.id} className={cn(selected.includes(order.id) && "bg-muted/50")}>
+                  <TableRow key={order.id} className={cn("h-14", selected.includes(order.id) && "bg-muted/50")}>
                     {canFulfill && (
                       <TableCell>
                         <Checkbox
@@ -315,7 +315,12 @@ export function OrdersTable({
                       </TableCell>
                     )}
                     <TableCell>
-                      <div className="font-medium tabular-nums">{order.order_number}</div>
+                      <Link
+                        href={`/orders/${order.order_number}`}
+                        className="font-mono text-[13px] font-medium tabular-nums hover:underline"
+                      >
+                        {order.order_number}
+                      </Link>
                       <div className="text-xs text-muted-foreground tabular-nums">
                         {new Date(order.created_at).toLocaleDateString("en-US", {
                           month: "short",
@@ -369,7 +374,12 @@ export function OrdersTable({
                 className="rounded-lg border bg-card p-4 active:bg-muted/50"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium tabular-nums">{order.order_number}</span>
+                  <Link
+                    href={`/orders/${order.order_number}`}
+                    className="font-mono text-[13px] font-medium tabular-nums hover:underline"
+                  >
+                    {order.order_number}
+                  </Link>
                   <OrderStatusPill status={order.status} />
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2 text-sm">

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -66,7 +67,6 @@ export function OrderActions({
   const [cancelReason, setCancelReason] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
   const canFulfill = (role === "admin" || role === "warehouse") && status === "paid";
   const refundable =
@@ -77,14 +77,13 @@ export function OrderActions({
 
   function run(action: () => Promise<{ ok: boolean; error?: string; message?: string }>, close: () => void) {
     setError(null);
-    setNotice(null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (result.message) setNotice(result.message);
+      if (result.message) toast.success(result.message);
       close();
       router.refresh();
     });
@@ -92,12 +91,6 @@ export function OrderActions({
 
   return (
     <div className="flex flex-col gap-3">
-      {notice && (
-        <p className="rounded-lg border bg-muted px-3 py-2 text-sm" role="status">
-          {notice}
-        </p>
-      )}
-
       <div className="flex flex-wrap gap-2">
         {canFulfill && (
           <Dialog open={fulfillOpen} onOpenChange={setFulfillOpen}>
