@@ -89,7 +89,7 @@ export function SuccessClient({ order, items, isDemo }: SuccessClientProps) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
         <Loader2 className="mx-auto size-12 animate-spin text-primary" aria-hidden />
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight">Confirming your payment…</h1>
+        <h1 className="mt-6 font-display text-2xl font-semibold tracking-tight">Confirming your payment…</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Order <span className="font-medium text-foreground tabular-nums">{order.orderNumber}</span>
         </p>
@@ -106,7 +106,7 @@ export function SuccessClient({ order, items, isDemo }: SuccessClientProps) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
         <XCircle className="mx-auto size-12 text-destructive" aria-hidden />
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight">Payment didn&apos;t go through</h1>
+        <h1 className="mt-6 font-display text-2xl font-semibold tracking-tight">Payment didn&apos;t go through</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Order <span className="font-medium text-foreground tabular-nums">{order.orderNumber}</span>{" "}
           was not charged. You can try again from your cart.
@@ -122,11 +122,11 @@ export function SuccessClient({ order, items, isDemo }: SuccessClientProps) {
     <div className="mx-auto max-w-2xl py-12">
       <div className="text-center">
         <CheckCircle2 className="mx-auto size-14 text-[var(--success)]" aria-hidden />
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">Order confirmed</h1>
+        <h1 className="mt-6 font-display text-3xl font-semibold tracking-tight">Order confirmed</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Thank you! Your order{" "}
           <span className="font-semibold text-foreground tabular-nums">{order.orderNumber}</span>{" "}
-          is confirmed. A confirmation email is on its way.
+          is confirmed. We&apos;ve emailed your receipt.
         </p>
       </div>
 
@@ -167,6 +167,9 @@ export function SuccessClient({ order, items, isDemo }: SuccessClientProps) {
         <Button asChild>
           <Link href="/shop">Continue shopping</Link>
         </Button>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Questions about your order? Contact us and we&apos;ll sort it out.
+        </p>
       </div>
     </div>
   );
