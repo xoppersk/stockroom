@@ -24,7 +24,10 @@ export const instant = false;
  * counts (unfulfilled orders, low-stock variants) for the sidebar.
  *
  * A signed-in user with no `user_roles` row yet (invite not completed) is
- * sent back to /login — an admin must grant a role in Settings first.
+ * sent to /unauthorized, which renders its "no access yet" state — an admin
+ * must grant a role in Settings → Invite first. (Sending them to /login
+ * looped: the middleware bounces signed-in users away from /login, back to
+ * a page that redirected here again, settling on a blank page.)
  */
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -34,7 +37,7 @@ export default async function AppGroupLayout({ children }: { children: React.Rea
 
   const role = await currentRole();
   if (!role) {
-    redirect("/login");
+    redirect("/unauthorized");
   }
 
   const supabase = await createClient();
