@@ -62,9 +62,13 @@ export async function isStaff(): Promise<boolean> {
  *   * signed out            → requireUser() redirects to /login?next=...
  *   * signed in, wrong role  → redirect("/unauthorized") — the spec's
  *                             role-gated page (F8), never a silent bounce.
- *   * signed in, no role yet → redirect("/login") — an admin must grant a
- *                             role via Settings → Invite before the account
- *                             can use the app.
+ *   * signed in, no role yet → redirect("/unauthorized") — the same page in
+ *                             its "no access yet" state explains that an
+ *                             admin must grant a role via Settings → Invite
+ *                             before the account can use the app. (This path
+ *                             used to redirect to /login, which bounced
+ *                             signed-in users straight back — an infinite
+ *                             loop that settled on a blank page.)
  */
 export async function requireRole(
   roles: UserRole | readonly UserRole[],
@@ -74,7 +78,7 @@ export async function requireRole(
   const role = await currentRole();
 
   if (!role) {
-    redirect("/login");
+    redirect("/unauthorized");
   }
 
   const allowed = Array.isArray(roles) ? roles : [roles];
