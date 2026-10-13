@@ -63,7 +63,7 @@ export function ShopFilters({ categories, initial }: FiltersProps) {
             className="mt-1"
           />
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <div>
             <Label htmlFor="price-min">Min price</Label>
             <Input
