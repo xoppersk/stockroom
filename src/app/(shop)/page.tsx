@@ -70,11 +70,15 @@ export default function ShopHomePage() {
           </Link>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {STOREFRONT_HOME.categories.map((category) => (
+          {STOREFRONT_HOME.categories.map((category, i) => (
             <Link
               key={category}
               href="/shop"
-              className="group rounded-[10px] border border-[#e7e2dc] bg-[#fffdf8] p-6 transition-colors hover:border-[#d97706]"
+              className={`group rounded-[10px] border border-[#e7e2dc] bg-[#fffdf8] p-6 transition-colors hover:border-[#d97706] ${
+                i === STOREFRONT_HOME.categories.length - 1
+                  ? "col-span-2 sm:col-span-1"
+                  : ""
+              }`}
             >
               <h3 className="font-display text-[15px] font-semibold text-[#1c1917] group-hover:underline">
                 {category}
@@ -116,7 +120,7 @@ export default function ShopHomePage() {
                 >
                   <Icon className="size-10" strokeWidth={1.5} />
                 </div>
-                <div className="flex items-baseline justify-between gap-2 p-4">
+                <div className="flex items-baseline justify-between gap-2 p-4 max-[389px]:min-h-[95px]">
                   <h3 className="text-[15px] font-medium leading-snug text-[#1c1917] group-hover:underline">
                     {product.name}
                   </h3>

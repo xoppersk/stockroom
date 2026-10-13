@@ -34,10 +34,10 @@ export default async function ShopLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
           <Link
             href="/"
-            className="text-lg font-semibold tracking-tight"
+            className="shrink-0 text-lg font-semibold tracking-tight whitespace-nowrap"
             aria-label="Juniper Supply Co. home"
           >
             Juniper<span className="text-primary"> Supply Co.</span>
@@ -45,7 +45,7 @@ export default async function ShopLayout({
           <nav className="flex items-center gap-1 text-sm">
             <Link
               href="/shop"
-              className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-md px-2 py-2 font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground sm:px-3"
             >
               Shop all
             </Link>
