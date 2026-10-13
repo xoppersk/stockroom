@@ -81,7 +81,12 @@ export default async function SettingsPage() {
               {staff.map((member) => (
                 <TableRow key={member.user_id}>
                   <TableCell className="font-medium">{member.profile?.full_name ?? "—"}</TableCell>
-                  <TableCell>{member.profile?.email ?? "—"}</TableCell>
+                  {/* Mobile: let the email wrap inside its column so the
+                      table fits its card and the Role pill is fully
+                      visible at rest (no hidden sideways scroll). */}
+                  <TableCell className="max-sm:whitespace-normal max-sm:break-all">
+                    {member.profile?.email ?? "—"}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">
                       {member.role}
