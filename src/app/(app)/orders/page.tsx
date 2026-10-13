@@ -34,11 +34,11 @@ export default async function OrdersPage() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="h-10 sm:h-9">
             <Link href="/dashboard">Signature</Link>
           </Button>
           {canCreate && (
-            <Button asChild>
+            <Button asChild className="h-10 sm:h-9">
               <Link href="/orders/new">
                 <Plus className="size-4" /> New order
               </Link>
