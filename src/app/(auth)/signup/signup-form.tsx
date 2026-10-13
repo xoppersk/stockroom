@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
@@ -61,6 +60,13 @@ export function SignupForm() {
 
   async function onMagicSubmit(event: FormEvent) {
     event.preventDefault();
+    if (email.trim() === "") {
+      setStatus({
+        kind: "error",
+        message: "Enter your email above first — the magic link is sent to that address.",
+      });
+      return;
+    }
     setPending(true);
     setStatus(null);
 
@@ -132,7 +138,7 @@ export function SignupForm() {
       </div>
 
       <form onSubmit={onMagicSubmit} className="flex flex-col gap-2">
-        <Button type="submit" variant="outline" disabled={pending || email.trim() === ""} className="w-full">
+        <Button type="submit" variant="outline" disabled={pending} className="w-full">
           Sign up with a magic link
         </Button>
         <p className="text-xs text-muted-foreground">
@@ -141,10 +147,7 @@ export function SignupForm() {
       </form>
 
       <p className="text-xs text-muted-foreground">
-        By creating an account you agree to the project&apos;s terms.{" "}
-        <Link href="/login" className="underline-offset-4 hover:underline">
-          Already have an account?
-        </Link>
+        By creating an account you agree to the project&apos;s terms.
       </p>
     </div>
   );
