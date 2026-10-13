@@ -29,9 +29,9 @@ export function InventoryWatch({
       <div className="mb-[13px] flex items-center justify-between">
         <div className="grid gap-[3px]">
           <strong className="text-[11px] font-semibold">Inventory watch</strong>
-          <span className="text-[8px] text-muted-foreground">Counted {countedLabel}</span>
+          <span className="text-[10px] text-muted-foreground sm:text-[8px]">Counted {countedLabel}</span>
         </div>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" asChild className="h-10 sm:h-8">
           <Link href="/inventory?alert=low">Open inventory</Link>
         </Button>
       </div>
@@ -63,7 +63,10 @@ export function InventoryWatch({
                   >
                     <td className="px-1.5 py-2.5">
                       <span className="flex items-end gap-1.5">
-                        <span className="shrink-0">
+                        {/* Mobile: the name may shrink + wrap so it never
+                            crushes into the SKU column; desktop keeps the
+                            designed single-line + dotted leader. */}
+                        <span className="min-w-0 sm:shrink-0">
                           {row.productTitle}
                           {row.variantTitle ? ` — ${row.variantTitle}` : ""}
                         </span>

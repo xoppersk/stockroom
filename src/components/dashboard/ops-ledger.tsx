@@ -33,9 +33,11 @@ export function OpsLedger({
       aria-label="Operations ledger"
       className="border-b border-[#9f9689] border-t-[3px] border-t-[#c05e19] bg-[#fffdf8]"
     >
-      <div className="flex justify-between gap-4 border-b border-dashed border-[#b7ac9d] px-4 py-3 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-[#756f65] sm:px-5">
+      <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-dashed border-[#b7ac9d] px-4 py-3 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-[#756f65] sm:px-5 sm:text-[8px]">
         <span>Operations ledger · {periodLabel}</span>
-        <span>{cutoffLabel}</span>
+        {/* nowrap + flex-wrap on the row: the cut-off phrase moves to its
+            own line whole instead of breaking mid-phrase ("2:00 / PM"). */}
+        <span className="whitespace-nowrap">{cutoffLabel}</span>
       </div>
       {lines.map((line) => (
         <Link
@@ -46,7 +48,7 @@ export function OpsLedger({
             line.exception && "text-[#a95412]",
           )}
         >
-          <span className="font-display text-[9px] font-semibold uppercase tracking-[0.06em]">
+          <span className="font-display text-[10px] font-semibold uppercase tracking-[0.06em] sm:text-[9px]">
             {line.label}
           </span>
           <i aria-hidden className="border-b border-dotted border-[#9f9689]" />
@@ -65,7 +67,7 @@ export function OpsLedger({
           </strong>
           <small
             className={cn(
-              "col-span-full text-[8px] min-[760px]:col-span-1",
+              "col-span-full text-[10px] min-[760px]:col-span-1 sm:text-[8px]",
               line.exception ? "text-[#a95412]" : "text-[#756f65]",
             )}
           >
