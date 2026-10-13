@@ -48,13 +48,13 @@ export default async function DashboardPage() {
           <h1 className="font-display text-[24px] font-semibold tracking-[-0.05em]">
             Good morning, Sheku
           </h1>
-          <p className="mt-1 text-[9px] text-muted-foreground">
+          <p className="mt-1 text-[11px] text-muted-foreground sm:text-[9px]">
             Tuesday, October 6, 2026 · Store operations
           </p>
         </div>
         <div className="flex items-center gap-2">
           <ExportOrdersButton />
-          <Button asChild>
+          <Button asChild className="h-10 sm:h-9">
             <Link href="/orders/new">
               <Plus className="size-4" />
               New order
