@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,8 +40,13 @@ const CUTOFF_NOTES: Array<[string, string]> = [
  * Signature fulfillment queue (Flagship UI Designs, stockroom Orders).
  * The eight canonical orders; the status filter narrows the visible rows
  * and re-totals the summary, exactly like the artifact prototype.
+ *
+ * Rows navigate to the order detail (/orders/<order number> — the same
+ * route the orders data uses): the whole row is tappable and the order
+ * number cell carries a real link for keyboard / assistive tech.
  */
 export function SignatureQueue() {
+  const router = useRouter();
   const [status, setStatus] = useState<string>("All orders");
 
   const visible = useMemo(
@@ -75,7 +82,7 @@ export function SignatureQueue() {
           id="orderStatusFilter"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="min-h-9 border border-border bg-card px-2.5 py-1 text-[12px] text-foreground"
+          className="min-h-10 border border-border bg-card px-2.5 py-1 text-[12px] text-foreground sm:min-h-9"
         >
           {QUEUE_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -83,7 +90,7 @@ export function SignatureQueue() {
             </option>
           ))}
         </select>
-        <Button variant="outline" size="sm" onClick={exportQueue}>
+        <Button variant="outline" size="sm" onClick={exportQueue} className="h-10 sm:h-8">
           <Download className="size-4" aria-hidden />
           Export queue
         </Button>
@@ -109,9 +116,19 @@ export function SignatureQueue() {
               {visible.map((o) => (
                 <tr
                   key={o.orderNumber}
-                  className="h-[56px] border-b border-dashed border-border last:border-0"
+                  onClick={() => router.push(`/orders/${encodeURIComponent(o.orderNumber)}`)}
+                  className="h-[56px] cursor-pointer border-b border-dashed border-border transition-colors last:border-0 hover:bg-[#f7eddf] active:bg-[#ecd9bf]"
                 >
-                  <td className="tnum whitespace-nowrap px-1.5 py-2.5 font-mono">{o.orderNumber}</td>
+                  <td className="tnum whitespace-nowrap px-1.5 py-2.5 font-mono">
+                    <Link
+                      href={`/orders/${encodeURIComponent(o.orderNumber)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`Open order ${o.orderNumber}`}
+                      className="underline-offset-2 hover:text-primary hover:underline"
+                    >
+                      {o.orderNumber}
+                    </Link>
+                  </td>
                   <td className="whitespace-nowrap px-1.5 py-2.5 font-semibold">{o.customer}</td>
                   <td className="tnum whitespace-nowrap px-1.5 py-2.5 font-mono">
                     {o.items} item{o.items === 1 ? "" : "s"}
