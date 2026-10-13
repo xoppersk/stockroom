@@ -185,7 +185,10 @@ export default async function ProductsPage({
                 <Link href="/products">Clear filters</Link>
               </Button>
             ) : isAdmin ? (
-              <Button asChild>
+              // Mobile: the toolbar's "New product" stays as the single
+              // create action; the duplicate inside the empty state is
+              // desktop-only.
+              <Button asChild className="max-sm:hidden">
                 <Link href="/products/new">New product</Link>
               </Button>
             ) : undefined
