@@ -157,8 +157,8 @@ export default async function InventoryPage({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {summary.map((card) => (
-          <Card key={card.label}>
-            <CardContent className="p-5">
+          <Card key={card.label} className="max-sm:py-0">
+            <CardContent className="p-5 max-sm:px-4 max-sm:py-4">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {card.label}
               </div>
