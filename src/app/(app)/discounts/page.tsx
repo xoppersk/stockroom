@@ -79,7 +79,9 @@ export default async function DiscountsPage() {
           description="Create a campaign code — or issue a one-time apology code from a customer record."
           action={
             isAdmin ? (
-              <Button asChild>
+              // Mobile: the header's "New discount" stays as the single
+              // create action; this duplicate is desktop-only.
+              <Button asChild className="max-sm:hidden">
                 <Link href="/discounts/new">
                   <Plus className="size-4" /> New discount
                 </Link>
