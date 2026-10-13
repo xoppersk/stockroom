@@ -179,7 +179,9 @@ export default async function CustomersPage({
           }
           action={
             !q && !tag ? (
-              <Button asChild>
+              // Mobile: the header's "New customer" stays as the single
+              // create action; this duplicate is desktop-only.
+              <Button asChild className="max-sm:hidden">
                 <Link href="/customers/new">
                   <Plus className="size-4" /> New customer
                 </Link>
