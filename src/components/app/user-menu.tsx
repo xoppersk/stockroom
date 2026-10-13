@@ -49,7 +49,7 @@ export function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full" aria-label="User menu">
+        <Button variant="ghost" size="icon" className="size-10 rounded-full sm:size-9" aria-label="User menu">
           <Avatar className="size-8">
             <AvatarFallback>{initials(displayName, email)}</AvatarFallback>
           </Avatar>

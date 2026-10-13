@@ -64,7 +64,7 @@ export function AppHeader({
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
-      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick} aria-label="Open navigation">
+      <Button variant="ghost" size="icon" className="size-10 sm:size-9 lg:hidden" onClick={onMenuClick} aria-label="Open navigation">
         <Menu className="size-[18px]" />
       </Button>
 
@@ -98,7 +98,7 @@ export function AppHeader({
         <span className="text-sm">Search or command…</span>
         <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px] font-medium">⌘K</kbd>
       </Button>
-      <Button variant="ghost" size="icon" className="sm:hidden" onClick={onPaletteOpen} aria-label="Search">
+      <Button variant="ghost" size="icon" className="size-10 sm:hidden" onClick={onPaletteOpen} aria-label="Search">
         <Search className="size-[18px]" />
       </Button>
 
