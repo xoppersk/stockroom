@@ -1,63 +1,30 @@
-/**
- * Shared formatting helpers for the Stockroom admin.
- *
- * Money is stored as numeric(12,2) and arrives from Supabase as a string.
- * All formatting goes through here so every screen renders the same way:
- * tabular numerals, right-aligned in tables (see DESIGN-BRIEF.md §3).
- */
+/* Money + number formatting shared by console and storefront.
+   All money is integer cents in fixtures; display is dollars. */
 
-const USD = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
-/** Accepts the string-or-number shape Supabase returns for numeric columns. */
-export function formatMoney(value: string | number | null | undefined): string {
-  const n = typeof value === "string" ? Number(value) : (value ?? 0);
-  if (Number.isNaN(n)) return USD.format(0);
-  return USD.format(n);
+export function money(cents: number, opts?: { decimals?: boolean }): string {
+  const sign = cents < 0 ? "-" : "";
+  const abs = Math.abs(cents);
+  const dollars = Math.floor(abs / 100);
+  const rem = abs % 100;
+  const d = dollars.toLocaleString("en-US");
+  if (opts?.decimals === false && rem === 0) return `${sign}$${d}`;
+  return `${sign}$${d}.${String(rem).padStart(2, "0")}`;
 }
 
-/** Compact "Jan 4, 2026" style dates for table cells. */
-const SHORT_DATE = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
-
-export function formatDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
-  return SHORT_DATE.format(d);
+/** $18,420 style (no cents) for ledger figures drawn without decimals. */
+export function money0(cents: number): string {
+  return money(cents, { decimals: false });
 }
 
-/** Full "Jan 4, 2026, 3:04 PM" for detail headers and timelines. */
-const LONG_DATE = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
-
-export function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
-  return LONG_DATE.format(d);
+export function num(n: number): string {
+  return n.toLocaleString("en-US");
 }
 
-/** "WEL-10" style display for a discount: 10% off / $5.00 off. */
-export function formatDiscountValue(
-  kind: "percentage" | "fixed",
-  value: string | number,
-): string {
-  const n = typeof value === "string" ? Number(value) : value;
-  if (kind === "percentage") return `${trimNumber(n)}% off`;
-  return `${formatMoney(n)} off`;
-}
-
-function trimNumber(n: number): string {
-  return Number.isInteger(n) ? String(n) : String(n);
+/** Countdown label like "3 h 12 min" / "12 min". */
+export function countdownLabel(totalMinutes: number): string {
+  if (totalMinutes <= 0) return "Cut-off passed";
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h <= 0) return `${m} min`;
+  return `${h} h ${String(m).padStart(2, "0")} min`;
 }
