@@ -1,6 +1,6 @@
 import "@/styles/console-ops.css";
 
-export default function CustomersLayout({
+export default function DiscountsLayout({
   children,
 }: {
   children: React.ReactNode;
