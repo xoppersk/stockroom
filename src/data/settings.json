@@ -1,0 +1,92 @@
+{
+  "unsavedCount": 2,
+  "store": {
+    "name": "Larder & Loom",
+    "address": "2214 Fitzwater St, Philadelphia, PA",
+    "pickupDays": "Tue – Sat",
+    "pickupOpens": "10:00 AM",
+    "pickupCloses": "6:00 PM",
+    "replyEmail": "hello@sevynlabs.io"
+  },
+  "fulfillment": {
+    "cutoffSavedLabel": "2:00 PM",
+    "cutoffDraftLabel": "1:00 PM",
+    "cutoffChanged": true,
+    "carriers": [
+      {
+        "name": "USPS Ground Advantage",
+        "fromCents": 980
+      },
+      {
+        "name": "UPS Ground",
+        "fromCents": 1140
+      },
+      {
+        "name": "UPS 2nd Day Air",
+        "fromCents": 1840
+      },
+      {
+        "name": "Local pickup",
+        "fromCents": 0,
+        "note": "free, ready in 2 hours"
+      }
+    ],
+    "defaultBoxSaved": "Medium flat · 12 × 10 × 4 in",
+    "defaultBoxDraft": "Small · 9 × 6 × 3 in",
+    "defaultBoxChanged": true,
+    "boxOptions": [
+      "Small · 9 × 6 × 3 in",
+      "Medium flat · 12 × 10 × 4 in",
+      "Large · 16 × 12 × 6 in"
+    ],
+    "slipNote": "Thanks for buying from a small workshop. Wash linen before first use; it softens every time."
+  },
+  "payments": {
+    "provider": "Stripe",
+    "status": "connected",
+    "accountEnding": "4X2Q",
+    "payoutScheduleLabel": "Every weekday, 2-day delay",
+    "nextPayoutCents": 218460,
+    "nextPayoutLabel": "Wed, Oct 7",
+    "bankEnding": "••81",
+    "tax": [
+      {
+        "region": "Pennsylvania",
+        "ratePct": 6,
+        "collecting": "Yes, registered"
+      },
+      {
+        "region": "All other states",
+        "ratePct": 0,
+        "collecting": "Below thresholds"
+      }
+    ]
+  },
+  "alerts": [
+    {
+      "when": "An order is held (payment, address or stock)",
+      "who": "Kofi, Rosa",
+      "how": "Email + dashboard"
+    },
+    {
+      "when": "A variant drops below its low-stock level",
+      "who": "Kofi",
+      "how": "Morning digest"
+    },
+    {
+      "when": "A variant sells out on the storefront",
+      "who": "Kofi, Sheku",
+      "how": "Email right away"
+    },
+    {
+      "when": "A refund over $100 is requested",
+      "who": "Sheku",
+      "how": "Email right away"
+    },
+    {
+      "when": "Payout sent",
+      "who": "Ben",
+      "how": "Weekly summary"
+    }
+  ]
+}

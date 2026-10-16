@@ -1,0 +1,46 @@
+{
+  "purchaseOrders": [
+    {
+      "id": "PO-0214",
+      "supplier": "Ashby Pottery",
+      "dayLabel": "Thursday, October 8",
+      "dateISO": "2026-10-08",
+      "lines": [
+        {
+          "sku": "SM-TER",
+          "qty": 48
+        },
+        {
+          "sku": "SM-MOS",
+          "qty": 24
+        }
+      ],
+      "status": "In transit"
+    },
+    {
+      "id": "PO-0215",
+      "supplier": "Baltic Linen Works",
+      "dayLabel": "Friday, October 9",
+      "dateISO": "2026-10-09",
+      "lines": [
+        {
+          "sku": "LA-CHR",
+          "qty": 24
+        },
+        {
+          "sku": "NP-4C",
+          "qty": 20
+        },
+        {
+          "sku": "LA-RST",
+          "qty": 12
+        },
+        {
+          "sku": "WT-RST",
+          "qty": 12
+        }
+      ],
+      "status": "In transit"
+    }
+  ]
+}

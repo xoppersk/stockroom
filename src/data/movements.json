@@ -1,0 +1,44 @@
+{
+  "movements": [
+    {
+      "id": "MV-5",
+      "timeLabel": "10:30",
+      "text": "Counter sale",
+      "sku": "NP-4N",
+      "deltaLabel": "−2",
+      "kind": "sale"
+    },
+    {
+      "id": "MV-4",
+      "timeLabel": "10:21",
+      "text": "ORD-1051 reserved",
+      "sku": "WT-OAT",
+      "deltaLabel": "−1",
+      "kind": "reserve"
+    },
+    {
+      "id": "MV-3",
+      "timeLabel": "9:58",
+      "text": "Count mismatch flagged by Kofi",
+      "sku": "CT-NAT",
+      "deltaLabel": "?",
+      "kind": "count"
+    },
+    {
+      "id": "MV-2",
+      "timeLabel": "9:41",
+      "text": "ORD-1048 reserved",
+      "sku": "LA-CHR, CT-NAT",
+      "deltaLabel": "−2",
+      "kind": "reserve"
+    },
+    {
+      "id": "MV-1",
+      "timeLabel": "7:30",
+      "text": "Morning count, aisle A · 22 SKUs matched",
+      "sku": null,
+      "deltaLabel": "0",
+      "kind": "count"
+    }
+  ]
+}

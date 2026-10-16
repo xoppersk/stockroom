@@ -1,0 +1,75 @@
+{
+  "name": "Larder & Loom",
+  "shortName": "L&L",
+  "tagline": "Stockroom",
+  "address": "2214 Fitzwater St, Philadelphia, PA",
+  "pickupAddress": "2214 Fitzwater St",
+  "email": "hello@sevynlabs.io",
+  "timezone": "America/New_York",
+  "todayISO": "2026-10-06",
+  "todayLabel": "Tuesday, Oct 6",
+  "dayHeroLabel": "Tuesday, October 6",
+  "cutoffLabel": "2:00 PM",
+  "cutoffMinutes": 840,
+  "pickupHours": "Tue\u2013Sat 10\u20136",
+  "pickupDaysLabel": "Tue \u2013 Sat",
+  "taxRegion": "Pennsylvania",
+  "taxRatePct": 6,
+  "last7Days": {
+    "rangeLabel": "Sep 30 \u2013 Oct 6",
+    "revenueChangePct": 8.4,
+    "ordersVsLastWeek": 12,
+    "revenueByDay": [
+      {
+        "dateISO": "2026-09-30",
+        "dateLabel": "Sep 30",
+        "dayLabel": "30",
+        "orders": 18,
+        "revenueCents": 254000
+      },
+      {
+        "dateISO": "2026-10-01",
+        "dateLabel": "Oct 1",
+        "dayLabel": "1",
+        "orders": 21,
+        "revenueCents": 276000
+      },
+      {
+        "dateISO": "2026-10-02",
+        "dateLabel": "Oct 2",
+        "dayLabel": "2",
+        "orders": 14,
+        "revenueCents": 382000
+      },
+      {
+        "dateISO": "2026-10-03",
+        "dateLabel": "Oct 3",
+        "dayLabel": "3",
+        "orders": 23,
+        "revenueCents": 295000
+      },
+      {
+        "dateISO": "2026-10-04",
+        "dateLabel": "Oct 4",
+        "dayLabel": "4",
+        "orders": 26,
+        "revenueCents": 231000,
+        "note": "Mug out"
+      },
+      {
+        "dateISO": "2026-10-05",
+        "dateLabel": "Oct 5",
+        "dayLabel": "5",
+        "orders": 22,
+        "revenueCents": 269000
+      },
+      {
+        "dateISO": "2026-10-06",
+        "dateLabel": "Oct 6",
+        "dayLabel": "Today",
+        "orders": 22,
+        "revenueCents": 135000
+      }
+    ]
+  }
+}

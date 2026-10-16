@@ -1,0 +1,1737 @@
+{
+  "orders": [
+    {
+      "subtotalCents": 11000,
+      "shippingCents": 1140,
+      "taxCents": 660,
+      "totalCents": 12800,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "stock",
+        "tone": "tape",
+        "title": "Stock hold",
+        "reason": "Canvas market tote: shelf B-14 was counted short. Verify before the order is released.",
+        "detail": "Stockroom expects 5 Canvas market totes on shelf B-14 after reserving this order. Kofi counted 4 at 9:58 AM.",
+        "sku": "CT-NAT",
+        "shelf": "B-14",
+        "systemCount": 5,
+        "countedCount": 4,
+        "countedBy": "Kofi Mensah",
+        "countedAtLabel": "9:58 AM",
+        "flaggedAtLabel": "10:12 AM"
+      },
+      "id": "ORD-1048",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "October 6 at 9:41 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Stock hold",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "LA-CHR",
+          "label": "Linen apron — Charcoal",
+          "qty": 1,
+          "unitPriceCents": 6400,
+          "shelf": "A-03"
+        },
+        {
+          "sku": "CT-NAT",
+          "label": "Canvas market tote",
+          "qty": 1,
+          "unitPriceCents": 4600,
+          "shelf": "B-14"
+        }
+      ],
+      "paymentStatus": "paid",
+      "payment": {
+        "status": "paid",
+        "cardLast4": "4417",
+        "capturedLabel": "9:41 AM",
+        "processorFeeCents": 401,
+        "receivedCents": 12399,
+        "refundableCents": 12800
+      },
+      "shipTo": "Avery Lewis, 2214 Fitzwater Street, Philadelphia, PA 19146",
+      "history": [
+        {
+          "timeLabel": "9:58 AM",
+          "text": "Placed on hold by Kofi Mensah. Shelf B-14 counted at 4 totes; system expected 5."
+        },
+        {
+          "timeLabel": "9:52 AM",
+          "text": "Pick list printed with 6 other orders."
+        },
+        {
+          "timeLabel": "9:41 AM",
+          "text": "Stock reserved: LA-CHR 4 → 3 · CT-NAT 6 → 5"
+        },
+        {
+          "timeLabel": "9:41 AM",
+          "text": "Payment of $128.00 captured. Card ending 4417."
+        },
+        {
+          "timeLabel": "9:40 AM",
+          "text": "Order placed on the online store."
+        }
+      ]
+    },
+    {
+      "subtotalCents": 19000,
+      "shippingCents": 1260,
+      "taxCents": 1140,
+      "totalCents": 21400,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "payment",
+        "tone": "problem",
+        "title": "Payment failed",
+        "reason": "Card declined at capture. No stock was deducted, so the order can still be recovered.",
+        "detail": "We kept the order and set the board aside for 48 hours, but didn’t deduct it from stock. Nothing was charged."
+      },
+      "id": "ORD-1046",
+      "customerSlug": "jordan-bell",
+      "customerName": "Jordan Bell",
+      "placedLabel": "Today, 8:15 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Payment failed",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "OSB-LG",
+          "label": "Oak serving board — Large",
+          "qty": 1,
+          "unitPriceCents": 19000,
+          "shelf": "E-02"
+        }
+      ],
+      "paymentStatus": "failed",
+      "payment": {
+        "status": "failed",
+        "attempts": 1,
+        "maxAttempts": 3,
+        "lastAttemptLabel": "8:15 AM",
+        "cardLast4": "7731",
+        "declineReason": "insufficient funds",
+        "holdExpiresLabel": "Oct 8",
+        "payLinkSentLabel": "8:16 AM",
+        "payLinkOpenedLabel": "8:40 AM"
+      }
+    },
+    {
+      "subtotalCents": 8800,
+      "shippingCents": 1140,
+      "taxCents": 528,
+      "totalCents": 9600,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "address",
+        "tone": "tape",
+        "title": "Address check",
+        "reason": "The carrier couldn’t match the apartment number. Confirm it before printing the label."
+      },
+      "id": "ORD-1043",
+      "customerSlug": "lucia-ferreira",
+      "customerName": "Lucia Ferreira",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Address check",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "SM-WHT",
+          "label": "Stoneware mug — White",
+          "qty": 1,
+          "unitPriceCents": 2800
+        },
+        {
+          "sku": "NP-4N",
+          "label": "Linen napkins, set of 4 — Natural",
+          "qty": 1,
+          "unitPriceCents": 3600
+        },
+        {
+          "sku": "SC-CED",
+          "label": "Scented soy candle — Cedar",
+          "qty": 1,
+          "unitPriceCents": 2400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 7800,
+      "shippingCents": 1140,
+      "taxCents": 468,
+      "totalCents": 8650,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1047",
+      "customerSlug": "morgan-reed",
+      "customerName": "Morgan Reed",
+      "placedLabel": "Today 7:58",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "ready",
+      "stageLabel": "Label created",
+      "shipByLabel": "11:30 AM",
+      "shipByMinutes": 690,
+      "lines": [
+        {
+          "sku": "LA-NAT",
+          "label": "Linen apron — Natural",
+          "qty": 1,
+          "unitPriceCents": 6400
+        },
+        {
+          "sku": "BC-PIL",
+          "label": "Beeswax candles — Pillar",
+          "qty": 1,
+          "unitPriceCents": 1400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 2800,
+      "shippingCents": 1140,
+      "taxCents": 168,
+      "totalCents": 4200,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1045",
+      "customerSlug": "hana-mori",
+      "customerName": "Hana Mori",
+      "placedLabel": "Today 7:12",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "packing",
+      "stageLabel": "Packing",
+      "shipByLabel": "12:00 PM",
+      "shipByMinutes": 720,
+      "lines": [
+        {
+          "sku": "SM-WHT",
+          "label": "Stoneware mug — White",
+          "qty": 1,
+          "unitPriceCents": 2800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 10200,
+      "shippingCents": 1140,
+      "taxCents": 612,
+      "totalCents": 17300,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1044",
+      "customerSlug": "theo-grant",
+      "customerName": "Theo Grant",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "packing",
+      "stageLabel": "Packing",
+      "shipByLabel": "12:00 PM",
+      "shipByMinutes": 720,
+      "lines": [
+        {
+          "sku": "OSB-SM",
+          "label": "Oak serving board — Small",
+          "qty": 1,
+          "unitPriceCents": 3800
+        },
+        {
+          "sku": "NP-4N",
+          "label": "Linen napkins, set of 4 — Natural",
+          "qty": 1,
+          "unitPriceCents": 3600
+        },
+        {
+          "sku": "BC-PIL",
+          "label": "Beeswax candles — Pillar",
+          "qty": 2,
+          "unitPriceCents": 1400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 4600,
+      "shippingCents": 1140,
+      "taxCents": 276,
+      "totalCents": 5240,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1042",
+      "customerSlug": "ruth-adeyemi",
+      "customerName": "Ruth Adeyemi",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "packing",
+      "stageLabel": "Packing",
+      "shipByLabel": "12:00 PM",
+      "shipByMinutes": 720,
+      "lines": [
+        {
+          "sku": "CT-NAT",
+          "label": "Canvas market tote",
+          "qty": 1,
+          "unitPriceCents": 4600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5800,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 5800,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1049",
+      "customerSlug": "dana-whitfield",
+      "customerName": "Dana Whitfield",
+      "placedLabel": "Today 9:58",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "EC-WHT",
+          "label": "Enamel colander — White",
+          "qty": 1,
+          "unitPriceCents": 5800,
+          "shelf": "C-09"
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 12800,
+      "shippingCents": 0,
+      "taxCents": 768,
+      "totalCents": 13568,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1050",
+      "customerSlug": "felix-ortega",
+      "customerName": "Felix Ortega",
+      "placedLabel": "Today 10:06",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "LA-RST",
+          "label": "Linen apron — Rust",
+          "qty": 2,
+          "unitPriceCents": 6400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14800,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 14800,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1051",
+      "customerSlug": "imogen-shaw",
+      "customerName": "Imogen Shaw",
+      "placedLabel": "Today 10:21",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "WT-OAT",
+          "label": "Wool throw — Oat",
+          "qty": 1,
+          "unitPriceCents": 14800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 7200,
+      "shippingCents": 0,
+      "taxCents": 432,
+      "totalCents": 7632,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1052",
+      "customerSlug": null,
+      "customerName": "Counter sale",
+      "placedLabel": "Today 10:30",
+      "placedDay": "today",
+      "channel": "counter",
+      "stage": "to-pick",
+      "stageLabel": "Local pickup",
+      "shipByLabel": "Pickup",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "NP-4N",
+          "label": "Linen napkins, set of 4 — Natural",
+          "qty": 2,
+          "unitPriceCents": 3600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 10000,
+      "shippingCents": 980,
+      "taxCents": 600,
+      "totalCents": 11580,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1053",
+      "customerSlug": "nia-okoye",
+      "customerName": "Nia Okoye",
+      "placedLabel": "Today, 10:44 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "LA-CHR",
+          "label": "Linen apron — Charcoal",
+          "qty": 1,
+          "unitPriceCents": 6400
+        },
+        {
+          "sku": "NP-4N",
+          "label": "Linen napkins, set of 4 — Natural",
+          "qty": 1,
+          "unitPriceCents": 3600
+        }
+      ],
+      "paymentStatus": "paid",
+      "payment": {
+        "status": "paid",
+        "capturedLabel": "10:44 AM"
+      },
+      "shipTo": "Nia Okoye, 418 Christian Street, Apt 2, Philadelphia, PA 19147",
+      "changeUntilLabel": "1:30 PM",
+      "arrivesLabel": "Fri, Oct 9 – Mon, Oct 12"
+    },
+    {
+      "subtotalCents": 9600,
+      "shippingCents": 980,
+      "taxCents": 576,
+      "totalCents": 11156,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "payment",
+        "tone": "problem",
+        "title": "Payment failed",
+        "reason": "Card declined at capture. No stock was deducted, so the order can still be recovered."
+      },
+      "id": "ORD-1041",
+      "customerSlug": "priya-nair",
+      "customerName": "Priya Nair",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Payment failed",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        }
+      ],
+      "paymentStatus": "failed",
+      "payment": {
+        "status": "failed",
+        "attempts": 1,
+        "maxAttempts": 3,
+        "lastAttemptLabel": "Yesterday, 4:12 PM",
+        "cardLast4": "9021",
+        "declineReason": "card expired",
+        "holdExpiresLabel": "Oct 8"
+      }
+    },
+    {
+      "subtotalCents": 8200,
+      "shippingCents": 980,
+      "taxCents": 492,
+      "totalCents": 9672,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "address",
+        "tone": "tape",
+        "title": "Address check",
+        "reason": "The carrier couldn’t match the apartment number. Confirm it before printing the label."
+      },
+      "id": "ORD-1040",
+      "customerSlug": "sam-whitaker",
+      "customerName": "Sam Whitaker",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Address check",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "RP-WHT",
+          "label": "Enamel roasting pan — White",
+          "qty": 1,
+          "unitPriceCents": 6800
+        },
+        {
+          "sku": "BC-PIL",
+          "label": "Beeswax candles — Pillar",
+          "qty": 1,
+          "unitPriceCents": 1400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 16800,
+      "shippingCents": 1260,
+      "taxCents": 1008,
+      "totalCents": 19068,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "stock",
+        "tone": "tape",
+        "title": "Stock hold",
+        "reason": "A variant on this order was counted short at the last shelf count. Verify before the order is released."
+      },
+      "id": "ORD-1038",
+      "customerSlug": "greta-lindqvist",
+      "customerName": "Greta Lindqvist",
+      "placedLabel": "Oct 5",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Stock hold",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        },
+        {
+          "sku": "DP-WHT",
+          "label": "Stoneware dinner plates — White",
+          "qty": 1,
+          "unitPriceCents": 7200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 8000,
+      "shippingCents": 1260,
+      "taxCents": 480,
+      "totalCents": 9740,
+      "refundedCents": 0,
+      "hold": {
+        "kind": "review",
+        "tone": "tape",
+        "title": "Needs review",
+        "reason": "Wholesale terms need confirming before this order ships."
+      },
+      "id": "ORD-1037",
+      "customerSlug": "tom-ellery",
+      "customerName": "Tom Ellery",
+      "placedLabel": "Oct 5",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "held",
+      "stageLabel": "Needs review",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "CC-OAT",
+          "label": "Wool cushion cover — Oat",
+          "qty": 1,
+          "unitPriceCents": 6200
+        },
+        {
+          "sku": "BC-TAP",
+          "label": "Beeswax candles — Taper pair",
+          "qty": 1,
+          "unitPriceCents": 1800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 17400,
+      "shippingCents": 0,
+      "taxCents": 1044,
+      "totalCents": 18444,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1054",
+      "customerSlug": "morgan-reed",
+      "customerName": "Morgan Reed",
+      "placedLabel": "Today 8:47 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "WT-OAT",
+          "label": "Wool throw — Oat",
+          "qty": 1,
+          "unitPriceCents": 14800
+        },
+        {
+          "sku": "GJ-LRG",
+          "label": "Glass storage jars — Large",
+          "qty": 1,
+          "unitPriceCents": 2600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 6400,
+      "shippingCents": 1840,
+      "taxCents": 384,
+      "totalCents": 8624,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1055",
+      "customerSlug": "hana-mori",
+      "customerName": "Hana Mori",
+      "placedLabel": "Today 9:05 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "2:00 PM",
+      "shipByMinutes": 840,
+      "lines": [
+        {
+          "sku": "LA-NAT",
+          "label": "Linen apron — Natural",
+          "qty": 1,
+          "unitPriceCents": 6400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14600,
+      "shippingCents": 1840,
+      "taxCents": 876,
+      "totalCents": 17316,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1056",
+      "customerSlug": "theo-grant",
+      "customerName": "Theo Grant",
+      "placedLabel": "Today 9:19 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "1:00 PM",
+      "shipByMinutes": 780,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        },
+        {
+          "sku": "NP-4C",
+          "label": "Linen napkins, set of 4 — Charcoal",
+          "qty": 1,
+          "unitPriceCents": 3600
+        },
+        {
+          "sku": "BC-PIL",
+          "label": "Beeswax candles — Pillar",
+          "qty": 1,
+          "unitPriceCents": 1400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 16200,
+      "shippingCents": 1840,
+      "taxCents": 972,
+      "totalCents": 19012,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1057",
+      "customerSlug": "ruth-adeyemi",
+      "customerName": "Ruth Adeyemi",
+      "placedLabel": "Today 9:33 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "to-pick",
+      "stageLabel": "To pick",
+      "shipByLabel": "1:00 PM",
+      "shipByMinutes": 780,
+      "lines": [
+        {
+          "sku": "WT-OAT",
+          "label": "Wool throw — Oat",
+          "qty": 1,
+          "unitPriceCents": 14800
+        },
+        {
+          "sku": "BC-PIL",
+          "label": "Beeswax candles — Pillar",
+          "qty": 1,
+          "unitPriceCents": 1400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14400,
+      "shippingCents": 1260,
+      "taxCents": 864,
+      "totalCents": 16524,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1058",
+      "customerSlug": "felix-ortega",
+      "customerName": "Felix Ortega",
+      "placedLabel": "Today 8:22 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "packing",
+      "stageLabel": "Packing",
+      "shipByLabel": "12:00 PM",
+      "shipByMinutes": 720,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        },
+        {
+          "sku": "TR-NAT",
+          "label": "Linen table runner — Natural",
+          "qty": 1,
+          "unitPriceCents": 4800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 11800,
+      "shippingCents": 1840,
+      "taxCents": 708,
+      "totalCents": 14348,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1059",
+      "customerSlug": "dana-whitfield",
+      "customerName": "Dana Whitfield",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "packing",
+      "stageLabel": "Packing",
+      "shipByLabel": "12:00 PM",
+      "shipByMinutes": 720,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        },
+        {
+          "sku": "DC-NAT",
+          "label": "Dish cloths, set of 3 — Natural",
+          "qty": 1,
+          "unitPriceCents": 2200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5600,
+      "shippingCents": 1140,
+      "taxCents": 336,
+      "totalCents": 7076,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1060",
+      "customerSlug": "imogen-shaw",
+      "customerName": "Imogen Shaw",
+      "placedLabel": "Today 7:41 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "ready",
+      "stageLabel": "Label created",
+      "shipByLabel": "11:30 AM",
+      "shipByMinutes": 690,
+      "lines": [
+        {
+          "sku": "SB-WHT",
+          "label": "Stoneware bowls — White",
+          "qty": 1,
+          "unitPriceCents": 5600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 17600,
+      "shippingCents": 980,
+      "taxCents": 1056,
+      "totalCents": 19636,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1061",
+      "customerSlug": "sam-whitaker",
+      "customerName": "Sam Whitaker",
+      "placedLabel": "Today 7:26 AM",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "ready",
+      "stageLabel": "Label created",
+      "shipByLabel": "11:00 AM",
+      "shipByMinutes": 660,
+      "lines": [
+        {
+          "sku": "WT-OAT",
+          "label": "Wool throw — Oat",
+          "qty": 1,
+          "unitPriceCents": 14800
+        },
+        {
+          "sku": "SM-MOS",
+          "label": "Stoneware mug — Moss",
+          "qty": 1,
+          "unitPriceCents": 2800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14400,
+      "shippingCents": 0,
+      "taxCents": 864,
+      "totalCents": 15264,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1062",
+      "customerSlug": "greta-lindqvist",
+      "customerName": "Greta Lindqvist",
+      "placedLabel": "Yesterday",
+      "placedDay": "yesterday",
+      "channel": "online",
+      "stage": "ready",
+      "stageLabel": "Label created",
+      "shipByLabel": "11:30 AM",
+      "shipByMinutes": 690,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        },
+        {
+          "sku": "TR-NAT",
+          "label": "Linen table runner — Natural",
+          "qty": 1,
+          "unitPriceCents": 4800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 19000,
+      "shippingCents": 980,
+      "taxCents": 1140,
+      "totalCents": 21120,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1001",
+      "customerSlug": "morgan-reed",
+      "customerName": "Morgan Reed",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "OSB-LG",
+          "label": "Oak serving board — Large",
+          "qty": 1,
+          "unitPriceCents": 19000
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14800,
+      "shippingCents": 980,
+      "taxCents": 888,
+      "totalCents": 16668,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1002",
+      "customerSlug": "hana-mori",
+      "customerName": "Hana Mori",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "WT-OAT",
+          "label": "Wool throw — Oat",
+          "qty": 1,
+          "unitPriceCents": 14800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 9600,
+      "shippingCents": 980,
+      "taxCents": 576,
+      "totalCents": 11156,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1003",
+      "customerSlug": "theo-grant",
+      "customerName": "Theo Grant",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "TC-MED",
+          "label": "Linen tablecloth — Medium",
+          "qty": 1,
+          "unitPriceCents": 9600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 7200,
+      "shippingCents": 980,
+      "taxCents": 432,
+      "totalCents": 8612,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1004",
+      "customerSlug": "ruth-adeyemi",
+      "customerName": "Ruth Adeyemi",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "DP-WHT",
+          "label": "Stoneware dinner plates — White",
+          "qty": 1,
+          "unitPriceCents": 7200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 6800,
+      "shippingCents": 980,
+      "taxCents": 408,
+      "totalCents": 8188,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1005",
+      "customerSlug": "felix-ortega",
+      "customerName": "Felix Ortega",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "counter",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "RP-WHT",
+          "label": "Enamel roasting pan — White",
+          "qty": 1,
+          "unitPriceCents": 6800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 6400,
+      "shippingCents": 980,
+      "taxCents": 384,
+      "totalCents": 7764,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1006",
+      "customerSlug": "dana-whitfield",
+      "customerName": "Dana Whitfield",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "LA-NAT",
+          "label": "Linen apron — Natural",
+          "qty": 1,
+          "unitPriceCents": 6400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 6200,
+      "shippingCents": 980,
+      "taxCents": 372,
+      "totalCents": 7552,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1007",
+      "customerSlug": "imogen-shaw",
+      "customerName": "Imogen Shaw",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "CC-OAT",
+          "label": "Wool cushion cover — Oat",
+          "qty": 1,
+          "unitPriceCents": 6200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5800,
+      "shippingCents": 980,
+      "taxCents": 348,
+      "totalCents": 7128,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1008",
+      "customerSlug": "tom-ellery",
+      "customerName": "Tom Ellery",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "EC-SAG",
+          "label": "Enamel colander — Sage",
+          "qty": 1,
+          "unitPriceCents": 5800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5600,
+      "shippingCents": 980,
+      "taxCents": 336,
+      "totalCents": 6916,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1009",
+      "customerSlug": "greta-lindqvist",
+      "customerName": "Greta Lindqvist",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "SB-WHT",
+          "label": "Stoneware bowls — White",
+          "qty": 1,
+          "unitPriceCents": 5600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5400,
+      "shippingCents": 980,
+      "taxCents": 324,
+      "totalCents": 6704,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1010",
+      "customerSlug": "lucia-ferreira",
+      "customerName": "Lucia Ferreira",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "counter",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "SP-WHT",
+          "label": "Stoneware pitcher — White",
+          "qty": 1,
+          "unitPriceCents": 5400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 5200,
+      "shippingCents": 980,
+      "taxCents": 312,
+      "totalCents": 6492,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1011",
+      "customerSlug": "sam-whitaker",
+      "customerName": "Sam Whitaker",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "HA-NAT",
+          "label": "Half apron — Natural",
+          "qty": 1,
+          "unitPriceCents": 5200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 4800,
+      "shippingCents": 980,
+      "taxCents": 288,
+      "totalCents": 6068,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1012",
+      "customerSlug": "priya-nair",
+      "customerName": "Priya Nair",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "TR-NAT",
+          "label": "Linen table runner — Natural",
+          "qty": 1,
+          "unitPriceCents": 4800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 4600,
+      "shippingCents": 980,
+      "taxCents": 276,
+      "totalCents": 5856,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1013",
+      "customerSlug": "greta-lindqvist",
+      "customerName": "Greta Lindqvist",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "CT-NAT",
+          "label": "Canvas market tote",
+          "qty": 1,
+          "unitPriceCents": 4600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 4400,
+      "shippingCents": 980,
+      "taxCents": 264,
+      "totalCents": 5644,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1014",
+      "customerSlug": "tom-ellery",
+      "customerName": "Tom Ellery",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "CB-LRG",
+          "label": "Cotton storage baskets — Large",
+          "qty": 1,
+          "unitPriceCents": 4400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 4200,
+      "shippingCents": 980,
+      "taxCents": 252,
+      "totalCents": 5432,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1015",
+      "customerSlug": "jordan-bell",
+      "customerName": "Jordan Bell",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "counter",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "UC-OAK",
+          "label": "Oak utensil crock — Oak",
+          "qty": 1,
+          "unitPriceCents": 4200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 3800,
+      "shippingCents": 980,
+      "taxCents": 228,
+      "totalCents": 5008,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1016",
+      "customerSlug": "kettle-crumb-cafe",
+      "customerName": "Kettle & Crumb Café",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "GC-CLR",
+          "label": "Glass carafe — Clear",
+          "qty": 1,
+          "unitPriceCents": 3800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 3600,
+      "shippingCents": 980,
+      "taxCents": 216,
+      "totalCents": 4796,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1017",
+      "customerSlug": "morgan-reed",
+      "customerName": "Morgan Reed",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "NP-4C",
+          "label": "Linen napkins, set of 4 — Charcoal",
+          "qty": 1,
+          "unitPriceCents": 3600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 3400,
+      "shippingCents": 980,
+      "taxCents": 204,
+      "totalCents": 4584,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1018",
+      "customerSlug": "hana-mori",
+      "customerName": "Hana Mori",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "BD-WHT",
+          "label": "Stoneware butter dish — White",
+          "qty": 1,
+          "unitPriceCents": 3400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 3200,
+      "shippingCents": 980,
+      "taxCents": 192,
+      "totalCents": 4372,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1019",
+      "customerSlug": "theo-grant",
+      "customerName": "Theo Grant",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "OM-NAT",
+          "label": "Quilted oven mitts — Natural",
+          "qty": 1,
+          "unitPriceCents": 3200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 2800,
+      "shippingCents": 980,
+      "taxCents": 168,
+      "totalCents": 3948,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1020",
+      "customerSlug": "ruth-adeyemi",
+      "customerName": "Ruth Adeyemi",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "counter",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "SM-MOS",
+          "label": "Stoneware mug — Moss",
+          "qty": 1,
+          "unitPriceCents": 2800
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 2600,
+      "shippingCents": 980,
+      "taxCents": 156,
+      "totalCents": 3736,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1021",
+      "customerSlug": "felix-ortega",
+      "customerName": "Felix Ortega",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "GJ-LRG",
+          "label": "Glass storage jars — Large",
+          "qty": 1,
+          "unitPriceCents": 2600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 2400,
+      "shippingCents": 980,
+      "taxCents": 144,
+      "totalCents": 3524,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1022",
+      "customerSlug": "dana-whitfield",
+      "customerName": "Dana Whitfield",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "LB-NAT",
+          "label": "Linen bread bag — Natural",
+          "qty": 1,
+          "unitPriceCents": 2400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 2200,
+      "shippingCents": 980,
+      "taxCents": 132,
+      "totalCents": 3312,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1023",
+      "customerSlug": "imogen-shaw",
+      "customerName": "Imogen Shaw",
+      "placedLabel": "Today",
+      "placedDay": "today",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "DC-NAT",
+          "label": "Dish cloths, set of 3 — Natural",
+          "qty": 1,
+          "unitPriceCents": 2200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 43200,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 48600,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1039",
+      "customerSlug": "kettle-crumb-cafe",
+      "customerName": "Kettle & Crumb Café",
+      "placedLabel": "Oct 3",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "shipped",
+      "stageLabel": "Shipped",
+      "shipByLabel": "Shipped",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "NP-4N",
+          "label": "Linen napkins, set of 4 — Natural",
+          "qty": 12,
+          "unitPriceCents": 3600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 8600,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 8600,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-0991",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "Sep 12",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": null,
+          "label": "Beeswax candles, pillar ×3",
+          "qty": 1,
+          "unitPriceCents": 8600
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 14200,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 14200,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-0937",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "Aug 20",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": null,
+          "label": "Linen napkins ×2, Oak serving board — Small",
+          "qty": 1,
+          "unitPriceCents": 14200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 6400,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 6400,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-0874",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "Jul 2",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": null,
+          "label": "Stoneware mug — Terracotta ×2",
+          "qty": 1,
+          "unitPriceCents": 6400
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 10200,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 10200,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-0802",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "May 18",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": null,
+          "label": "Enamel colander — White, Beeswax tapers",
+          "qty": 1,
+          "unitPriceCents": 10200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 9200,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 9200,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-0761",
+      "customerSlug": "avery-lewis",
+      "customerName": "Avery Lewis",
+      "placedLabel": "Mar 14",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": null,
+          "label": "Linen apron — Natural, gift wrap",
+          "qty": 1,
+          "unitPriceCents": 9200
+        }
+      ],
+      "paymentStatus": "paid"
+    },
+    {
+      "subtotalCents": 7200,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 7240,
+      "refundedCents": 3600,
+      "hold": null,
+      "id": "ORD-1031",
+      "customerSlug": "sam-whitaker",
+      "customerName": "Sam Whitaker",
+      "placedLabel": "Oct 4",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "NP-4C",
+          "label": "Linen napkins, set of 4 — Charcoal",
+          "qty": 2,
+          "unitPriceCents": 3600
+        }
+      ],
+      "paymentStatus": "partially-refunded"
+    },
+    {
+      "subtotalCents": 14800,
+      "shippingCents": 0,
+      "taxCents": 0,
+      "totalCents": 14800,
+      "refundedCents": 0,
+      "hold": null,
+      "id": "ORD-1036",
+      "customerSlug": "priya-nair",
+      "customerName": "Priya Nair",
+      "placedLabel": "Oct 2",
+      "placedDay": "earlier",
+      "channel": "online",
+      "stage": "delivered",
+      "stageLabel": "Delivered",
+      "shipByLabel": "Delivered",
+      "shipByMinutes": null,
+      "lines": [
+        {
+          "sku": "WT-RST",
+          "label": "Wool throw — Rust",
+          "qty": 1,
+          "unitPriceCents": 14800
+        }
+      ],
+      "paymentStatus": "paid",
+      "refundRequest": {
+        "amountCents": 14800,
+        "reasonLabel": "Colour not as pictured",
+        "restock": true,
+        "note": "Throw came back sealed. Customer has bought twice before.",
+        "requestedBy": "Rosa Delgado"
+      }
+    }
+  ]
+}

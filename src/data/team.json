@@ -1,0 +1,120 @@
+{
+  "members": [
+    {
+      "id": "sheku",
+      "name": "Sheku Koroma",
+      "initials": "SK",
+      "email": "sheku@sevynlabs.io",
+      "role": "Owner",
+      "lastInLabel": "Now",
+      "isYou": true,
+      "refundLimitCents": null
+    },
+    {
+      "id": "kofi",
+      "name": "Kofi Mensah",
+      "initials": "KM",
+      "email": "kofi@sevynlabs.io",
+      "role": "Fulfillment",
+      "lastInLabel": "9:58 AM",
+      "isYou": false,
+      "refundLimitCents": 0
+    },
+    {
+      "id": "rosa",
+      "name": "Rosa Delgado",
+      "initials": "RD",
+      "email": "rosa@sevynlabs.io",
+      "role": "Customer service",
+      "lastInLabel": "Yesterday",
+      "isYou": false,
+      "refundLimitCents": 10000
+    },
+    {
+      "id": "ben",
+      "name": "Ben Hart",
+      "initials": "BH",
+      "email": "ben@sevynlabs.io",
+      "role": "Bookkeeper",
+      "lastInLabel": "Oct 1",
+      "isYou": false,
+      "refundLimitCents": 0
+    }
+  ],
+  "invite": {
+    "email": "jules@sevynlabs.io",
+    "role": "Fulfillment",
+    "invitedByLabel": "Invited Oct 5 by you",
+    "expiresLabel": "Oct 12",
+    "lastInLabel": "Not joined"
+  },
+  "roles": [
+    "Owner",
+    "Manager",
+    "Fulfillment",
+    "Customer service",
+    "Bookkeeper"
+  ],
+  "permissionMatrix": [
+    {
+      "capability": "Pick, pack and ship orders",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "Yes",
+        "Fulfillment": "Yes",
+        "Customer service": "View",
+        "Bookkeeper": "View"
+      }
+    },
+    {
+      "capability": "Adjust stock and receive deliveries",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "Yes",
+        "Fulfillment": "Yes",
+        "Customer service": "No",
+        "Bookkeeper": "View"
+      }
+    },
+    {
+      "capability": "Refund orders",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "Yes",
+        "Fulfillment": "No",
+        "Customer service": "Up to $100",
+        "Bookkeeper": "No"
+      }
+    },
+    {
+      "capability": "Edit products, prices and discounts",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "Yes",
+        "Fulfillment": "No",
+        "Customer service": "No",
+        "Bookkeeper": "No"
+      }
+    },
+    {
+      "capability": "See revenue, payouts and costs",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "Yes",
+        "Fulfillment": "No",
+        "Customer service": "No",
+        "Bookkeeper": "Yes"
+      }
+    },
+    {
+      "capability": "Change settings and team",
+      "values": {
+        "Owner": "Yes",
+        "Manager": "No",
+        "Fulfillment": "No",
+        "Customer service": "No",
+        "Bookkeeper": "No"
+      }
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "totals": {
+    "total": 1206,
+    "returning": 214,
+    "waitingOnRestock": 9,
+    "wholesale": 4,
+    "openOrders": 25
+  },
+  "customers": [
+    {
+      "slug": "avery-lewis",
+      "name": "Avery Lewis",
+      "initials": "AL",
+      "type": "customer",
+      "email": "avery.lewis@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "March",
+      "sinceFullLabel": "Customer since March 14",
+      "orderCount": 6,
+      "spentCents": 61400,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": "subscribed since March · opened 4 of the last 5",
+      "textSubscribed": false,
+      "address": "2214 Fitzwater Street, Philadelphia, PA 19146",
+      "lastOrder": {
+        "orderId": "ORD-1048",
+        "dateLabel": "today",
+        "statusLabel": "on hold"
+      },
+      "waitingFor": {
+        "sku": "SM-TER",
+        "productName": "Stoneware mug — Terracotta",
+        "note": "48 arriving Thursday"
+      },
+      "notes": [
+        {
+          "dateLabel": "Oct 2",
+          "text": "Email from Avery: asked when the Terracotta mug is back. Added to the restock list for SM-TER; she gets one email when it’s in."
+        },
+        {
+          "dateLabel": "Jul 3",
+          "text": "Note by Sheku: prefers paper packaging, no plastic fill."
+        }
+      ],
+      "orderHistory": [
+        {
+          "orderId": "ORD-1048",
+          "dateLabel": "Oct 6",
+          "itemsLabel": "Linen apron — Charcoal, Canvas market tote",
+          "totalCents": 12800,
+          "statusLabel": "Stock hold"
+        },
+        {
+          "orderId": "ORD-0991",
+          "dateLabel": "Sep 12",
+          "itemsLabel": "Beeswax candles, pillar ×3",
+          "totalCents": 8600,
+          "statusLabel": "Delivered"
+        },
+        {
+          "orderId": "ORD-0937",
+          "dateLabel": "Aug 20",
+          "itemsLabel": "Linen napkins ×2, Oak serving board — Small",
+          "totalCents": 14200,
+          "statusLabel": "Delivered"
+        },
+        {
+          "orderId": "ORD-0874",
+          "dateLabel": "Jul 2",
+          "itemsLabel": "Stoneware mug — Terracotta ×2",
+          "totalCents": 6400,
+          "statusLabel": "Delivered"
+        },
+        {
+          "orderId": "ORD-0802",
+          "dateLabel": "May 18",
+          "itemsLabel": "Enamel colander — White, Beeswax tapers",
+          "totalCents": 10200,
+          "statusLabel": "Delivered"
+        },
+        {
+          "orderId": "ORD-0761",
+          "dateLabel": "Mar 14",
+          "itemsLabel": "Linen apron — Natural, gift wrap",
+          "totalCents": 9200,
+          "statusLabel": "Delivered"
+        }
+      ]
+    },
+    {
+      "slug": "jordan-bell",
+      "name": "Jordan Bell",
+      "initials": "JB",
+      "type": "customer",
+      "email": "jordan.bell@sevynlabs.io",
+      "location": "Pittsburgh, PA",
+      "sinceLabel": "October",
+      "sinceFullLabel": "First order today",
+      "orderCount": 1,
+      "spentCents": 0,
+      "returns": 0,
+      "tags": [
+        "New"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1046",
+        "dateLabel": "today",
+        "statusLabel": "payment failed"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "kettle-crumb-cafe",
+      "name": "Kettle & Crumb Café",
+      "initials": "KC",
+      "type": "wholesale",
+      "email": "orders@kettleandcrumb.com",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "2025",
+      "sinceFullLabel": "Wholesale account",
+      "orderCount": 14,
+      "spentCents": 392000,
+      "returns": 0,
+      "tags": [
+        "Wholesale"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "wholesale": {
+        "discountPct": 25,
+        "termsLabel": "Net 30",
+        "code": "KETTLE25"
+      },
+      "lastOrder": {
+        "orderId": "ORD-1039",
+        "dateLabel": "Oct 3",
+        "statusLabel": "shipped"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "morgan-reed",
+      "name": "Morgan Reed",
+      "initials": "MR",
+      "type": "customer",
+      "email": "morgan.reed@sevynlabs.io",
+      "location": "Camden, NJ",
+      "sinceLabel": "June",
+      "sinceFullLabel": "Customer since June",
+      "orderCount": 3,
+      "spentCents": 28800,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1047",
+        "dateLabel": "today",
+        "statusLabel": "label created"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "theo-grant",
+      "name": "Theo Grant",
+      "initials": "TG",
+      "type": "customer",
+      "email": "theo.grant@sevynlabs.io",
+      "location": "Brooklyn, NY",
+      "sinceLabel": "August",
+      "sinceFullLabel": "Customer since August",
+      "orderCount": 2,
+      "spentCents": 24100,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1044",
+        "dateLabel": "yesterday",
+        "statusLabel": "packing"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "imogen-shaw",
+      "name": "Imogen Shaw",
+      "initials": "IS",
+      "type": "customer",
+      "email": "imogen.shaw@sevynlabs.io",
+      "location": "Baltimore, MD",
+      "sinceLabel": "October",
+      "sinceFullLabel": "First order today",
+      "orderCount": 1,
+      "spentCents": 14800,
+      "returns": 0,
+      "tags": [
+        "Restock alert"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1051",
+        "dateLabel": "today",
+        "statusLabel": "to pick"
+      },
+      "waitingFor": {
+        "sku": "WT-RST",
+        "productName": "Wool throw — Rust",
+        "note": "Waiting on Wool throw — Rust"
+      },
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "hana-mori",
+      "name": "Hana Mori",
+      "initials": "HM",
+      "type": "customer",
+      "email": "hana.mori@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "May",
+      "sinceFullLabel": "Customer since May",
+      "orderCount": 4,
+      "spentCents": 19600,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1045",
+        "dateLabel": "today",
+        "statusLabel": "packing"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "lucia-ferreira",
+      "name": "Lucia Ferreira",
+      "initials": "LF",
+      "type": "customer",
+      "email": "lucia.ferreira@sevynlabs.io",
+      "location": "Newark, DE",
+      "sinceLabel": "October",
+      "sinceFullLabel": "First order yesterday",
+      "orderCount": 1,
+      "spentCents": 9600,
+      "returns": 0,
+      "tags": [
+        "New"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1043",
+        "dateLabel": "yesterday",
+        "statusLabel": "held"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "dana-whitfield",
+      "name": "Dana Whitfield",
+      "initials": "DW",
+      "type": "customer",
+      "email": "dana.whitfield@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "September",
+      "sinceFullLabel": "Customer since September",
+      "orderCount": 2,
+      "spentCents": 12400,
+      "returns": 0,
+      "tags": [],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1049",
+        "dateLabel": "today",
+        "statusLabel": "to pick"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "felix-ortega",
+      "name": "Felix Ortega",
+      "initials": "FO",
+      "type": "customer",
+      "email": "felix.ortega@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "July",
+      "sinceFullLabel": "Customer since July",
+      "orderCount": 3,
+      "spentCents": 23100,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1050",
+        "dateLabel": "today",
+        "statusLabel": "to pick"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "ruth-adeyemi",
+      "name": "Ruth Adeyemi",
+      "initials": "RA",
+      "type": "customer",
+      "email": "ruth.adeyemi@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "August",
+      "sinceFullLabel": "Customer since August",
+      "orderCount": 2,
+      "spentCents": 11800,
+      "returns": 0,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1042",
+        "dateLabel": "yesterday",
+        "statusLabel": "packing"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "nia-okoye",
+      "name": "Nia Okoye",
+      "initials": "NO",
+      "type": "customer",
+      "email": "nia.okoye@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "October",
+      "sinceFullLabel": "First order today",
+      "orderCount": 1,
+      "spentCents": 11580,
+      "returns": 0,
+      "tags": [
+        "New"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": "418 Christian Street, Apt 2, Philadelphia, PA 19147",
+      "lastOrder": {
+        "orderId": "ORD-1053",
+        "dateLabel": "today",
+        "statusLabel": "paid and reserved"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "priya-nair",
+      "name": "Priya Nair",
+      "initials": "PN",
+      "type": "customer",
+      "email": "priya.nair@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "August",
+      "sinceFullLabel": "Customer since August",
+      "orderCount": 3,
+      "spentCents": 21200,
+      "returns": 1,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1041",
+        "dateLabel": "yesterday",
+        "statusLabel": "payment failed"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "sam-whitaker",
+      "name": "Sam Whitaker",
+      "initials": "SW",
+      "type": "customer",
+      "email": "sam.whitaker@sevynlabs.io",
+      "location": "Philadelphia, PA",
+      "sinceLabel": "June",
+      "sinceFullLabel": "Customer since June",
+      "orderCount": 4,
+      "spentCents": 26400,
+      "returns": 1,
+      "tags": [
+        "Returning"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1061",
+        "dateLabel": "today",
+        "statusLabel": "label created"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "greta-lindqvist",
+      "name": "Greta Lindqvist",
+      "initials": "GL",
+      "type": "customer",
+      "email": "greta.lindqvist@sevynlabs.io",
+      "location": "Chicago, IL",
+      "sinceLabel": "September",
+      "sinceFullLabel": "Customer since September",
+      "orderCount": 1,
+      "spentCents": 0,
+      "returns": 0,
+      "tags": [
+        "New"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1062",
+        "dateLabel": "yesterday",
+        "statusLabel": "label created"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    },
+    {
+      "slug": "tom-ellery",
+      "name": "Tom Ellery",
+      "initials": "TE",
+      "type": "customer",
+      "email": "tom.ellery@sevynlabs.io",
+      "location": "Boston, MA",
+      "sinceLabel": "September",
+      "sinceFullLabel": "Customer since September",
+      "orderCount": 1,
+      "spentCents": 0,
+      "returns": 0,
+      "tags": [
+        "New"
+      ],
+      "emailSubscribed": null,
+      "textSubscribed": false,
+      "address": null,
+      "lastOrder": {
+        "orderId": "ORD-1037",
+        "dateLabel": "Oct 5",
+        "statusLabel": "held"
+      },
+      "waitingFor": null,
+      "notes": [],
+      "orderHistory": []
+    }
+  ]
+}

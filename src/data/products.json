@@ -1,0 +1,1534 @@
+{
+  "products": [
+    {
+      "slug": "stoneware-mug",
+      "name": "Stoneware mug",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 2800,
+      "sold30d": 61,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "SM-TER",
+          "label": "Terracotta",
+          "shelf": "C-02",
+          "onShelf": 2,
+          "committed": 2,
+          "reorderPoint": 18,
+          "priceCents": 2800,
+          "costCents": 1150,
+          "incoming": {
+            "qty": 48,
+            "dayLabel": "Thu, Oct 8",
+            "poId": "PO-0214"
+          },
+          "waitlist": 11,
+          "safetyPoint": 6
+        },
+        {
+          "sku": "SM-MOS",
+          "label": "Moss",
+          "shelf": "C-02",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 12,
+          "priceCents": 2800,
+          "costCents": 1150,
+          "incoming": {
+            "qty": 24,
+            "dayLabel": "Thu, Oct 8",
+            "poId": "PO-0214"
+          }
+        },
+        {
+          "sku": "SM-WHT",
+          "label": "White",
+          "shelf": "C-02",
+          "onShelf": 23,
+          "committed": 1,
+          "reorderPoint": 12,
+          "priceCents": 2800,
+          "costCents": 1150
+        }
+      ]
+    },
+    {
+      "slug": "linen-apron",
+      "name": "Linen apron",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 6400,
+      "sold30d": 38,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Baltic Linen Works",
+      "description": "Heavyweight stonewashed linen with a cross-back strap and two deep front pockets. Softens with every wash. Made in Lithuania; sewn in Philadelphia.",
+      "variants": [
+        {
+          "sku": "LA-CHR",
+          "label": "Charcoal",
+          "shelf": "A-03",
+          "onShelf": 4,
+          "committed": 1,
+          "reorderPoint": 12,
+          "priceCents": 6400,
+          "costCents": 2140,
+          "incoming": {
+            "qty": 24,
+            "dayLabel": "Fri, Oct 9",
+            "poId": "PO-0215"
+          },
+          "safetyPoint": 4
+        },
+        {
+          "sku": "LA-NAT",
+          "label": "Natural",
+          "shelf": "A-03",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 6400,
+          "costCents": 2140
+        },
+        {
+          "sku": "LA-RST",
+          "label": "Rust",
+          "shelf": "A-04",
+          "onShelf": 11,
+          "committed": 2,
+          "reorderPoint": 8,
+          "priceCents": 6400,
+          "costCents": 2140,
+          "incoming": {
+            "qty": 12,
+            "dayLabel": "Fri, Oct 9",
+            "poId": "PO-0215"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "canvas-market-tote",
+      "name": "Canvas market tote",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 4600,
+      "sold30d": 29,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "CT-NAT",
+          "label": "Natural",
+          "shelf": "B-14",
+          "onShelf": 6,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 4600,
+          "costCents": 1900,
+          "countPending": true,
+          "safetyPoint": 5
+        }
+      ]
+    },
+    {
+      "slug": "linen-napkins",
+      "name": "Linen napkins, set of 4",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 3600,
+      "sold30d": 15,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Baltic Linen Works",
+      "description": null,
+      "variants": [
+        {
+          "sku": "NP-4N",
+          "label": "Natural",
+          "shelf": "A-07",
+          "onShelf": 12,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 3600,
+          "costCents": 1500
+        },
+        {
+          "sku": "NP-4C",
+          "label": "Charcoal",
+          "shelf": "A-07",
+          "onShelf": 4,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3600,
+          "costCents": 1500,
+          "incoming": {
+            "qty": 20,
+            "dayLabel": "Fri, Oct 9",
+            "poId": "PO-0215"
+          },
+          "safetyPoint": 4
+        }
+      ]
+    },
+    {
+      "slug": "wool-throw",
+      "name": "Wool throw",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 14800,
+      "sold30d": 9,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "WT-OAT",
+          "label": "Oat",
+          "shelf": "D-01",
+          "onShelf": 6,
+          "committed": 1,
+          "reorderPoint": 6,
+          "priceCents": 14800,
+          "costCents": 6900
+        },
+        {
+          "sku": "WT-RST",
+          "label": "Rust",
+          "shelf": "D-01",
+          "onShelf": 4,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 14800,
+          "costCents": 6900,
+          "incoming": {
+            "qty": 12,
+            "dayLabel": "Fri, Oct 9",
+            "poId": "PO-0215"
+          },
+          "safetyPoint": 4
+        }
+      ]
+    },
+    {
+      "slug": "enamel-colander",
+      "name": "Enamel colander",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 5800,
+      "sold30d": 12,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "EC-WHT",
+          "label": "White",
+          "shelf": "C-09",
+          "onShelf": 8,
+          "committed": 1,
+          "reorderPoint": 8,
+          "priceCents": 5800,
+          "costCents": 2150
+        },
+        {
+          "sku": "EC-SAG",
+          "label": "Sage",
+          "shelf": "C-09",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 5800,
+          "costCents": 2150
+        },
+        {
+          "sku": "EC-BLK",
+          "label": "Black",
+          "shelf": "C-10",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 5800,
+          "costCents": 2150
+        }
+      ]
+    },
+    {
+      "slug": "oak-serving-board",
+      "name": "Oak serving board",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 3800,
+      "sold30d": 17,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "OSB-SM",
+          "label": "Small",
+          "shelf": "E-01",
+          "onShelf": 20,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 3800,
+          "costCents": 1700
+        },
+        {
+          "sku": "OSB-LG",
+          "label": "Large",
+          "shelf": "E-02",
+          "onShelf": 34,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 19000,
+          "costCents": 8800
+        }
+      ]
+    },
+    {
+      "slug": "beeswax-candles",
+      "name": "Beeswax candles",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 1400,
+      "sold30d": 27,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "BC-PIL",
+          "label": "Pillar",
+          "shelf": "D-04",
+          "onShelf": 43,
+          "committed": 3,
+          "reorderPoint": 24,
+          "priceCents": 1400,
+          "costCents": 600
+        },
+        {
+          "sku": "BC-TAP",
+          "label": "Taper pair",
+          "shelf": "D-04",
+          "onShelf": 26,
+          "committed": 0,
+          "reorderPoint": 16,
+          "priceCents": 1800,
+          "costCents": 750
+        }
+      ]
+    },
+    {
+      "slug": "linen-tea-towel",
+      "name": "Linen tea towel",
+      "collection": "Kitchen textiles",
+      "status": "draft",
+      "priceCents": 2200,
+      "sold30d": 0,
+      "storefront": "Hidden",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "TT-CHR-ST",
+          "label": "Charcoal · Stripe",
+          "shelf": "A-05",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 2200,
+          "costCents": 900
+        },
+        {
+          "sku": "TT-NAT-ST",
+          "label": "Natural · Stripe",
+          "shelf": "A-05",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 2200,
+          "costCents": 900
+        },
+        {
+          "sku": "TT-RST-PL",
+          "label": "Rust · Plain",
+          "shelf": "A-05",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 2200,
+          "costCents": 900
+        },
+        {
+          "sku": "TT-OAT-PL",
+          "label": "Oat · Plain",
+          "shelf": "A-05",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 2200,
+          "costCents": 900
+        }
+      ]
+    },
+    {
+      "slug": "brass-bottle-opener",
+      "name": "Brass bottle opener",
+      "collection": "Home",
+      "status": "archived",
+      "priceCents": 1900,
+      "sold30d": 0,
+      "storefront": "Hidden",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "BO-BRS",
+          "label": "Brass",
+          "shelf": "E-06",
+          "onShelf": 0,
+          "committed": 0,
+          "reorderPoint": 4,
+          "priceCents": 1900,
+          "costCents": 800
+        }
+      ]
+    },
+    {
+      "slug": "linen-bread-bag",
+      "name": "Linen bread bag",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 2400,
+      "sold30d": 13,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "LB-NAT",
+          "label": "Natural",
+          "shelf": "A-06",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 2400,
+          "costCents": 1008
+        },
+        {
+          "sku": "LB-CHR",
+          "label": "Charcoal",
+          "shelf": "A-06",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 2400,
+          "costCents": 1008
+        }
+      ]
+    },
+    {
+      "slug": "linen-table-runner",
+      "name": "Linen table runner",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 4800,
+      "sold30d": 8,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "TR-NAT",
+          "label": "Natural",
+          "shelf": "A-08",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 4800,
+          "costCents": 2016
+        },
+        {
+          "sku": "TR-RST",
+          "label": "Rust",
+          "shelf": "A-08",
+          "onShelf": 10,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 4800,
+          "costCents": 2016
+        }
+      ]
+    },
+    {
+      "slug": "quilted-oven-mitts",
+      "name": "Quilted oven mitts, pair",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 3200,
+      "sold30d": 11,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "OM-NAT",
+          "label": "Natural",
+          "shelf": "A-09",
+          "onShelf": 15,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3200,
+          "costCents": 1344
+        },
+        {
+          "sku": "OM-CHR",
+          "label": "Charcoal",
+          "shelf": "A-09",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3200,
+          "costCents": 1344
+        }
+      ]
+    },
+    {
+      "slug": "linen-tablecloth",
+      "name": "Linen tablecloth",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 9600,
+      "sold30d": 5,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "TC-SML",
+          "label": "Small",
+          "shelf": "A-10",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 9600,
+          "costCents": 4032
+        },
+        {
+          "sku": "TC-MED",
+          "label": "Medium",
+          "shelf": "A-10",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 9600,
+          "costCents": 4032
+        },
+        {
+          "sku": "TC-LRG",
+          "label": "Large",
+          "shelf": "A-10",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 9600,
+          "costCents": 4032
+        }
+      ]
+    },
+    {
+      "slug": "waffle-hand-towel",
+      "name": "Waffle hand towel",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 1800,
+      "sold30d": 14,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "HT-WHT",
+          "label": "White",
+          "shelf": "A-11",
+          "onShelf": 5,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 1800,
+          "costCents": 756
+        },
+        {
+          "sku": "HT-NAT",
+          "label": "Natural",
+          "shelf": "A-11",
+          "onShelf": 7,
+          "committed": 1,
+          "reorderPoint": 8,
+          "priceCents": 1800,
+          "costCents": 756
+        },
+        {
+          "sku": "HT-CHR",
+          "label": "Charcoal",
+          "shelf": "A-11",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 1800,
+          "costCents": 756
+        }
+      ]
+    },
+    {
+      "slug": "half-apron",
+      "name": "Half apron",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 5200,
+      "sold30d": 7,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "HA-NAT",
+          "label": "Natural",
+          "shelf": "A-12",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 5200,
+          "costCents": 2184
+        },
+        {
+          "sku": "HA-CHR",
+          "label": "Charcoal",
+          "shelf": "A-12",
+          "onShelf": 8,
+          "committed": 1,
+          "reorderPoint": 6,
+          "priceCents": 5200,
+          "costCents": 2184
+        }
+      ]
+    },
+    {
+      "slug": "dish-cloths",
+      "name": "Dish cloths, set of 3",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 2200,
+      "sold30d": 12,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "DC-NAT",
+          "label": "Natural",
+          "shelf": "A-13",
+          "onShelf": 16,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2200,
+          "costCents": 924
+        },
+        {
+          "sku": "DC-CHR",
+          "label": "Charcoal",
+          "shelf": "A-13",
+          "onShelf": 14,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 2200,
+          "costCents": 924
+        }
+      ]
+    },
+    {
+      "slug": "linen-placemats",
+      "name": "Linen placemats, set of 4",
+      "collection": "Kitchen textiles",
+      "status": "active",
+      "priceCents": 3400,
+      "sold30d": 6,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "PM-NAT",
+          "label": "Natural",
+          "shelf": "A-14",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3400,
+          "costCents": 1428
+        },
+        {
+          "sku": "PM-RST",
+          "label": "Rust",
+          "shelf": "A-14",
+          "onShelf": 11,
+          "committed": 1,
+          "reorderPoint": 8,
+          "priceCents": 3400,
+          "costCents": 1428
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-dinner-plates",
+      "name": "Stoneware dinner plates, set of 4",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 7200,
+      "sold30d": 10,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "DP-WHT",
+          "label": "White",
+          "shelf": "C-03",
+          "onShelf": 7,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        },
+        {
+          "sku": "DP-MOS",
+          "label": "Moss",
+          "shelf": "C-03",
+          "onShelf": 9,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        },
+        {
+          "sku": "DP-TER",
+          "label": "Terracotta",
+          "shelf": "C-03",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        },
+        {
+          "sku": "DP-BLK",
+          "label": "Black",
+          "shelf": "C-04",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        },
+        {
+          "sku": "DP-SAG",
+          "label": "Sage",
+          "shelf": "C-04",
+          "onShelf": 15,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        },
+        {
+          "sku": "DP-OAT",
+          "label": "Oat",
+          "shelf": "C-04",
+          "onShelf": 13,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 7200,
+          "costCents": 3024
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-bowls",
+      "name": "Stoneware bowls, set of 4",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 5600,
+      "sold30d": 9,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "SB-WHT",
+          "label": "White",
+          "shelf": "C-05",
+          "onShelf": 40,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 5600,
+          "costCents": 2352
+        },
+        {
+          "sku": "SB-MOS",
+          "label": "Moss",
+          "shelf": "C-05",
+          "onShelf": 13,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 5600,
+          "costCents": 2352
+        },
+        {
+          "sku": "SB-TER",
+          "label": "Terracotta",
+          "shelf": "C-05",
+          "onShelf": 42,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 5600,
+          "costCents": 2352
+        },
+        {
+          "sku": "SB-BLK",
+          "label": "Black",
+          "shelf": "C-06",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 5600,
+          "costCents": 2352
+        }
+      ]
+    },
+    {
+      "slug": "oak-utensil-crock",
+      "name": "Oak utensil crock",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 4200,
+      "sold30d": 6,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "UC-OAK",
+          "label": "Oak",
+          "shelf": "E-03",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 4200,
+          "costCents": 1764
+        },
+        {
+          "sku": "UC-WAL",
+          "label": "Walnut",
+          "shelf": "E-03",
+          "onShelf": 10,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 4200,
+          "costCents": 1764
+        }
+      ]
+    },
+    {
+      "slug": "glass-carafe",
+      "name": "Glass carafe",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 3800,
+      "sold30d": 7,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "GC-CLR",
+          "label": "Clear",
+          "shelf": "C-07",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 9,
+          "priceCents": 3800,
+          "costCents": 1596
+        },
+        {
+          "sku": "GC-AMB",
+          "label": "Amber",
+          "shelf": "C-07",
+          "onShelf": 8,
+          "committed": 1,
+          "reorderPoint": 9,
+          "priceCents": 3800,
+          "costCents": 1596
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-butter-dish",
+      "name": "Stoneware butter dish",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 3400,
+      "sold30d": 5,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "BD-WHT",
+          "label": "White",
+          "shelf": "C-08",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3400,
+          "costCents": 1428
+        },
+        {
+          "sku": "BD-MOS",
+          "label": "Moss",
+          "shelf": "C-08",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3400,
+          "costCents": 1428
+        }
+      ]
+    },
+    {
+      "slug": "ceramic-oil-cruet",
+      "name": "Ceramic oil cruet",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 3600,
+      "sold30d": 4,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "OC-WHT",
+          "label": "White",
+          "shelf": "C-11",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3600,
+          "costCents": 1512
+        },
+        {
+          "sku": "OC-BLK",
+          "label": "Black",
+          "shelf": "C-11",
+          "onShelf": 11,
+          "committed": 1,
+          "reorderPoint": 8,
+          "priceCents": 3600,
+          "costCents": 1512
+        }
+      ]
+    },
+    {
+      "slug": "oak-salad-servers",
+      "name": "Oak salad servers",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 3000,
+      "sold30d": 5,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "SS-OAK",
+          "label": "Oak",
+          "shelf": "E-04",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3000,
+          "costCents": 1260
+        },
+        {
+          "sku": "SS-WAL",
+          "label": "Walnut",
+          "shelf": "E-04",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 3000,
+          "costCents": 1260
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-espresso-cups",
+      "name": "Stoneware espresso cups, set of 2",
+      "collection": "Tableware",
+      "status": "draft",
+      "priceCents": 3200,
+      "sold30d": 0,
+      "storefront": "Hidden",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "SE-WHT",
+          "label": "White",
+          "shelf": "C-12",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 3200,
+          "costCents": 1344
+        },
+        {
+          "sku": "SE-TER",
+          "label": "Terracotta",
+          "shelf": "C-12",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 3200,
+          "costCents": 1344
+        }
+      ]
+    },
+    {
+      "slug": "enamel-roasting-pan",
+      "name": "Enamel roasting pan",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 6800,
+      "sold30d": 4,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "RP-WHT",
+          "label": "White",
+          "shelf": "C-13",
+          "onShelf": 10,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 6800,
+          "costCents": 2856
+        },
+        {
+          "sku": "RP-BLK",
+          "label": "Black",
+          "shelf": "C-13",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 6800,
+          "costCents": 2856
+        },
+        {
+          "sku": "RP-RED",
+          "label": "Red",
+          "shelf": "C-13",
+          "onShelf": 9,
+          "committed": 1,
+          "reorderPoint": 6,
+          "priceCents": 6800,
+          "costCents": 2856
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-pitcher",
+      "name": "Stoneware pitcher",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 5400,
+      "sold30d": 5,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "SP-WHT",
+          "label": "White",
+          "shelf": "C-14",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 5400,
+          "costCents": 2268
+        },
+        {
+          "sku": "SP-MOS",
+          "label": "Moss",
+          "shelf": "C-14",
+          "onShelf": 10,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 5400,
+          "costCents": 2268
+        }
+      ]
+    },
+    {
+      "slug": "glass-storage-jars",
+      "name": "Glass storage jars",
+      "collection": "Tableware",
+      "status": "active",
+      "priceCents": 2600,
+      "sold30d": 8,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "GJ-SML",
+          "label": "Small",
+          "shelf": "C-15",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 12,
+          "priceCents": 2600,
+          "costCents": 1092
+        },
+        {
+          "sku": "GJ-MED",
+          "label": "Medium",
+          "shelf": "C-15",
+          "onShelf": 16,
+          "committed": 1,
+          "reorderPoint": 12,
+          "priceCents": 2600,
+          "costCents": 1092
+        },
+        {
+          "sku": "GJ-LRG",
+          "label": "Large",
+          "shelf": "C-15",
+          "onShelf": 42,
+          "committed": 0,
+          "reorderPoint": 12,
+          "priceCents": 2600,
+          "costCents": 1092
+        },
+        {
+          "sku": "GJ-XLG",
+          "label": "Extra large",
+          "shelf": "C-15",
+          "onShelf": 41,
+          "committed": 0,
+          "reorderPoint": 12,
+          "priceCents": 2600,
+          "costCents": 1092
+        }
+      ]
+    },
+    {
+      "slug": "scented-soy-candle",
+      "name": "Scented soy candle",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 2400,
+      "sold30d": 16,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "SC-CED",
+          "label": "Cedar",
+          "shelf": "D-05",
+          "onShelf": 19,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2400,
+          "costCents": 1008
+        },
+        {
+          "sku": "SC-FIG",
+          "label": "Fig",
+          "shelf": "D-05",
+          "onShelf": 14,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 2400,
+          "costCents": 1008
+        },
+        {
+          "sku": "SC-SAG",
+          "label": "Sage",
+          "shelf": "D-05",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2400,
+          "costCents": 1008
+        },
+        {
+          "sku": "SC-AMB",
+          "label": "Amber",
+          "shelf": "D-05",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2400,
+          "costCents": 1008
+        }
+      ]
+    },
+    {
+      "slug": "cotton-storage-baskets",
+      "name": "Cotton storage baskets",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 4400,
+      "sold30d": 7,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "CB-SML",
+          "label": "Small",
+          "shelf": "D-06",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 4400,
+          "costCents": 1848,
+          "safetyPoint": 6
+        },
+        {
+          "sku": "CB-MED",
+          "label": "Medium",
+          "shelf": "D-06",
+          "onShelf": 8,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 4400,
+          "costCents": 1848
+        },
+        {
+          "sku": "CB-LRG",
+          "label": "Large",
+          "shelf": "D-06",
+          "onShelf": 14,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 4400,
+          "costCents": 1848
+        },
+        {
+          "sku": "CB-XLG",
+          "label": "Extra large",
+          "shelf": "D-06",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 4400,
+          "costCents": 1848
+        }
+      ]
+    },
+    {
+      "slug": "wool-cushion-cover",
+      "name": "Wool cushion cover",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 6200,
+      "sold30d": 6,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "CC-OAT",
+          "label": "Oat",
+          "shelf": "D-07",
+          "onShelf": 6,
+          "committed": 0,
+          "reorderPoint": 9,
+          "priceCents": 6200,
+          "costCents": 2604
+        },
+        {
+          "sku": "CC-RST",
+          "label": "Rust",
+          "shelf": "D-07",
+          "onShelf": 8,
+          "committed": 1,
+          "reorderPoint": 9,
+          "priceCents": 6200,
+          "costCents": 2604
+        },
+        {
+          "sku": "CC-CHR",
+          "label": "Charcoal",
+          "shelf": "D-07",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 9,
+          "priceCents": 6200,
+          "costCents": 2604
+        },
+        {
+          "sku": "CC-MOS",
+          "label": "Moss",
+          "shelf": "D-07",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 9,
+          "priceCents": 6200,
+          "costCents": 2604
+        }
+      ]
+    },
+    {
+      "slug": "oak-coat-hooks",
+      "name": "Oak coat hooks, rail of 4",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 5800,
+      "sold30d": 4,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "CH-OAK",
+          "label": "Oak",
+          "shelf": "E-05",
+          "onShelf": 10,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 5800,
+          "costCents": 2436
+        },
+        {
+          "sku": "CH-WAL",
+          "label": "Walnut",
+          "shelf": "E-05",
+          "onShelf": 9,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 5800,
+          "costCents": 2436
+        }
+      ]
+    },
+    {
+      "slug": "linen-curtain-panel",
+      "name": "Linen curtain panel",
+      "collection": "Home",
+      "status": "draft",
+      "priceCents": 8400,
+      "sold30d": 0,
+      "storefront": "Hidden",
+      "backorder": false,
+      "supplier": "Baltic Linen Works",
+      "description": null,
+      "variants": [
+        {
+          "sku": "CP-NAT",
+          "label": "Natural",
+          "shelf": "D-08",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 8400,
+          "costCents": 3528
+        },
+        {
+          "sku": "CP-WHT",
+          "label": "White",
+          "shelf": "D-08",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 8400,
+          "costCents": 3528
+        },
+        {
+          "sku": "CP-CHR",
+          "label": "Charcoal",
+          "shelf": "D-08",
+          "onShelf": 8,
+          "committed": 0,
+          "reorderPoint": 6,
+          "priceCents": 8400,
+          "costCents": 3528
+        }
+      ]
+    },
+    {
+      "slug": "jute-door-mat",
+      "name": "Jute door mat",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 3600,
+      "sold30d": 5,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "DM-NAT",
+          "label": "Natural",
+          "shelf": "D-09",
+          "onShelf": 14,
+          "committed": 1,
+          "reorderPoint": 8,
+          "priceCents": 3600,
+          "costCents": 1512
+        }
+      ]
+    },
+    {
+      "slug": "cedar-drawer-liners",
+      "name": "Cedar drawer liners, pack of 6",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 2000,
+      "sold30d": 9,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "CD-CED",
+          "label": "Cedar",
+          "shelf": "D-10",
+          "onShelf": 43,
+          "committed": 1,
+          "reorderPoint": 10,
+          "priceCents": 2000,
+          "costCents": 840
+        },
+        {
+          "sku": "CD-LAV",
+          "label": "Lavender",
+          "shelf": "D-10",
+          "onShelf": 40,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2000,
+          "costCents": 840
+        },
+        {
+          "sku": "CD-UNS",
+          "label": "Unscented",
+          "shelf": "D-10",
+          "onShelf": 12,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 2000,
+          "costCents": 840
+        }
+      ]
+    },
+    {
+      "slug": "stoneware-soap-dish",
+      "name": "Stoneware soap dish",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 2200,
+      "sold30d": 6,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": "Ashby Pottery",
+      "description": null,
+      "variants": [
+        {
+          "sku": "SD-WHT",
+          "label": "White",
+          "shelf": "D-11",
+          "onShelf": 13,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 2200,
+          "costCents": 924
+        },
+        {
+          "sku": "SD-MOS",
+          "label": "Moss",
+          "shelf": "D-11",
+          "onShelf": 11,
+          "committed": 0,
+          "reorderPoint": 8,
+          "priceCents": 2200,
+          "costCents": 924
+        }
+      ]
+    },
+    {
+      "slug": "wool-dryer-balls",
+      "name": "Wool dryer balls, set of 3",
+      "collection": "Home",
+      "status": "active",
+      "priceCents": 1800,
+      "sold30d": 10,
+      "storefront": "Visible",
+      "backorder": false,
+      "supplier": null,
+      "description": null,
+      "variants": [
+        {
+          "sku": "DB-NAT",
+          "label": "Natural",
+          "shelf": "D-12",
+          "onShelf": 41,
+          "committed": 0,
+          "reorderPoint": 10,
+          "priceCents": 1800,
+          "costCents": 756
+        }
+      ]
+    }
+  ]
+}

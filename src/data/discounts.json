@@ -1,0 +1,86 @@
+{
+  "totals": {
+    "givenCents30d": 112600,
+    "ordersCents30d": 984000,
+    "avgPct": 11.4
+  },
+  "discounts": [
+    {
+      "code": "WELCOME15",
+      "kind": "percent",
+      "pct": 15,
+      "whatLabel": "15% off a first order",
+      "whoLabel": "New customers · one use each · shown in the sign-up email",
+      "whenLabel": "Always on",
+      "status": "running",
+      "uses": 212,
+      "useLimit": null,
+      "givenCents30d": 48600,
+      "minOrderCents": 0
+    },
+    {
+      "code": "LOCAL10",
+      "kind": "percent",
+      "pct": 10,
+      "whatLabel": "10% off counter pickup",
+      "whoLabel": "Pickup orders only · applied at the counter",
+      "whenLabel": "Always on",
+      "status": "running",
+      "uses": 64,
+      "useLimit": null,
+      "givenCents30d": 13800,
+      "minOrderCents": 0
+    },
+    {
+      "code": "KETTLE25",
+      "kind": "percent",
+      "pct": 25,
+      "whatLabel": "25% wholesale price",
+      "whoLabel": "Kettle & Crumb Café only · minimum 12 units",
+      "whenLabel": "Until Dec 31",
+      "status": "running",
+      "uses": 14,
+      "useLimit": null,
+      "givenCents30d": 50200,
+      "minOrderCents": 0,
+      "wholesale": true
+    },
+    {
+      "code": "FREESHIP75",
+      "kind": "free-shipping",
+      "pct": null,
+      "whatLabel": "Free shipping over $75",
+      "whoLabel": "Everyone · continental US · Ground only",
+      "whenLabel": "Oct 15 – Nov 1",
+      "startsLabel": "Oct 15",
+      "endsLabel": "Nov 1",
+      "startsInLabel": "Starts in 9 days",
+      "status": "scheduled",
+      "uses": 0,
+      "useLimit": null,
+      "givenCents30d": 0,
+      "minOrderCents": 7500,
+      "usesPerCustomer": 1,
+      "estimate": {
+        "qualifyingOrders": 41,
+        "avgLabelCents": 1120,
+        "coverCents": 46000
+      },
+      "bannerLabel": "Free shipping on orders over $75 · until Nov 1"
+    },
+    {
+      "code": "SPRING20",
+      "kind": "percent",
+      "pct": 20,
+      "whatLabel": "20% off everything",
+      "whoLabel": "Everyone",
+      "whenLabel": "Apr 1 – Apr 14",
+      "status": "ended",
+      "endedReasonLabel": "Ended at its 128-use limit",
+      "uses": 128,
+      "useLimit": 128,
+      "givenCents30d": 0,
+      "minOrderCents": 0
+    }
+  ]
+}
