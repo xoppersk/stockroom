@@ -1,0 +1,838 @@
+/* Console admin (A-01…A-04) — settings shell, team, audit, login.
+   Owned by W-ADMIN. Shared classes live in components.css (.panel, .ph,
+   .btn, .stamp, .sn, .fr, .in, .chk, .mr, .pm, .ev, .day, .ch, .amt, .pf,
+   .field-note …); everything below is the part the screens draw that the
+   shared sheet does not cover, extracted from screens/Settings.html,
+   Team.html, AuditHistory.html and Login.html. */
+
+/* ---------- Settings shell layout (Settings / Team / Audit) ---------- */
+
+.adm-settings {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.adm-settings-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.adm-settings-main--tight {
+  gap: 18px;
+}
+
+@media (max-width: 760px) {
+  .adm-settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Fields stack at small widths: label above control, so fixed-width
+   control groups (pickup hours, cut-off selects, carrier check rows,
+   payout figure) get the full row width instead of the ~60px column
+   left beside the 200px label. Desktop .fr layout is untouched. */
+@media (max-width: 700px) {
+  .adm-settings .fr {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .adm-settings .fr > label,
+  .adm-settings .fr > .lb {
+    padding-top: 0;
+  }
+}
+
+/* ---------- Page header ---------- */
+
+.adm-pagehead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.adm-pagehead h1 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 1;
+  font-stretch: 75%;
+}
+
+.adm-headcol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adm-headcol--gap8 {
+  gap: 8px;
+}
+
+.adm-sub {
+  font-size: 13px;
+  color: var(--slate);
+}
+
+.adm-headactions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Sticky variant used by A-02 so the unsaved count + Discard / Save stay
+   reachable across the Store / Fulfillment / Payments / Alerts sections. */
+.adm-pagehead--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--ground);
+  padding: 10px 0 12px;
+  margin-top: -10px;
+}
+
+.adm-unsaved {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+  font-size: 13px;
+  color: var(--tape-ink);
+  font-weight: 600;
+}
+
+.adm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tape);
+  flex: none;
+}
+
+/* ---------- Settings sections (A-02) ---------- */
+
+.adm-section {
+  scroll-margin-top: 96px;
+}
+
+/* Horizontal control group inside a Field's control column
+   (pickup hours, cut-off). */
+.adm-control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.adm-control-to {
+  color: var(--muted);
+}
+
+/* Unsaved ring for controls the shared .fr.unsaved .in rule cannot reach
+   (the packing-slip textarea, individual pickup time inputs). §13 ring. */
+.adm-input--unsaved {
+  border-color: var(--tape) !important;
+  box-shadow: var(--focus-tape);
+}
+
+.adm-textarea {
+  max-width: 520px;
+  resize: vertical;
+}
+
+/* Payout block */
+.adm-payout-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.adm-payout-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adm-payout-figure {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  font-stretch: 75%;
+}
+
+.adm-payout-to {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.adm-stripe-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.adm-stripe-link {
+  font-size: 12px;
+}
+
+/* Sales-tax mini table (role="table") */
+.adm-tax-wrap {
+  overflow-x: auto;
+}
+
+.adm-tax {
+  min-width: 360px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-l);
+}
+
+.adm-tax-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px;
+  gap: 10px;
+  padding: 9px 12px;
+}
+
+.adm-tax-row--head {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--panel-hover);
+  border-bottom: 1px solid var(--rule);
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+}
+
+.adm-tax-row + .adm-tax-row {
+  border-top: 1px solid var(--rule);
+}
+
+.adm-tax-row--head + .adm-tax-row {
+  border-top: 0;
+}
+
+.adm-tax-muted {
+  color: var(--muted);
+}
+
+/* Alerts table (role="table") */
+.adm-alerts {
+  overflow-x: auto;
+}
+
+.adm-alerts-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px 150px;
+  gap: 14px;
+  padding: 11px 20px;
+  border-top: 1px solid var(--rule);
+  min-width: 560px;
+}
+
+.adm-alerts-row--head {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: 0;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Close the store (destructive zone) */
+.adm-danger {
+  box-shadow:
+    0 0 0 1px var(--problem-line),
+    0 1px 2px rgba(28, 25, 23, 0.04);
+}
+
+.adm-danger h2 {
+  color: var(--problem);
+}
+
+.adm-danger-body {
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.adm-danger-text {
+  max-width: 560px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* ---------- Team (A-01) ---------- */
+
+.adm-table-scroll {
+  overflow-x: auto;
+}
+
+/* .mr grid itself is shared (components.css); these are the Team screen's
+   header / invite-row variants. */
+.adm-mr-head {
+  border-top: 0;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.adm-mr-invite {
+  background: var(--panel-hover);
+}
+
+.adm-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.adm-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-m);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.adm-avatar--a {
+  background: #44403c;
+}
+.adm-avatar--b {
+  background: #3a3530;
+}
+.adm-avatar--c {
+  background: #57534e;
+}
+
+.adm-invite-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  border-radius: var(--radius-m);
+  border: 1.5px dashed var(--control);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+.adm-person-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.adm-person-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.adm-person-name--invite {
+  color: var(--ink-2);
+}
+
+.adm-you {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.adm-person-email {
+  font-family: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.adm-person-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.adm-lastin {
+  color: var(--slate);
+}
+
+.adm-rowaction {
+  text-align: right;
+}
+
+.adm-rowaction a {
+  font-size: 12px;
+}
+
+.adm-role-select {
+  height: 30px;
+  padding: 0 6px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  background: var(--panel);
+  color: var(--ink);
+  max-width: 100%;
+}
+
+.adm-role-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* Local dirty bar for the People panel — appears only after a role change
+   (the Team screen itself draws no unsaved header). */
+.adm-team-dirtybar {
+  padding: 13px 20px;
+  border-top: 1px solid var(--rule);
+  background: var(--panel-hover);
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+/* Invite form (opened by the "Invite someone" tape button) */
+.adm-invite-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 16px 20px;
+}
+
+.adm-invite-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adm-invite-field label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ---------- Audit history (A-03) ---------- */
+
+.adm-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.adm-filters-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* .ev grid itself is shared; this is the column-header row variant. */
+.adm-ev-head {
+  border-top: 0;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  min-width: 760px;
+}
+
+.adm-ev-scroll .day,
+.adm-ev-scroll .ev {
+  min-width: 760px;
+  box-sizing: border-box;
+}
+
+.adm-pf-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.adm-pf-row a,
+.adm-pf-row button {
+  font-weight: 600;
+}
+
+.adm-empty-note {
+  padding: 16px 20px;
+  border-top: 1px solid var(--rule);
+  color: var(--slate);
+  font-size: 13px;
+}
+
+/* ---------- Login (A-04) ---------- */
+
+.adm-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.adm-login-aside {
+  flex: 1 1 520px;
+  background: var(--bar);
+  color: #fff;
+  padding: 36px 48px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.adm-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adm-login-tile {
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--tape);
+  display: grid;
+  place-items: center;
+  color: var(--on-tape);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  font-stretch: 75%;
+}
+
+.adm-login-wordmark {
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1;
+  font-stretch: 75%;
+  letter-spacing: 0.02em;
+}
+
+.adm-login-hero-block {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.adm-login-hero {
+  font-weight: 800;
+  font-size: clamp(72px, 16vw, 132px);
+  line-height: 0.84;
+  font-stretch: 62%;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+}
+
+.adm-login-hero-dot {
+  color: var(--tape);
+}
+
+.adm-login-lede {
+  margin: 0;
+  max-width: 26em;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--bar-text);
+}
+
+.adm-login-stripe {
+  height: 10px;
+  border-radius: 1px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--tape) 0 14px,
+    var(--bar) 14px 28px
+  );
+}
+
+.adm-login-main {
+  flex: 1 1 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 48px 32px;
+  box-sizing: border-box;
+}
+
+.adm-login-form {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 32px;
+  border-radius: var(--radius-l);
+  background: var(--panel);
+  box-shadow: var(--shadow-ring);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adm-login-form-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adm-login-form-head h1 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 40px;
+  line-height: 1;
+  font-stretch: 75%;
+  text-transform: uppercase;
+}
+
+.adm-login-form-sub {
+  color: var(--slate);
+  font-size: 14px;
+}
+
+.adm-login-alert {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 14px;
+  background: #fef2f2;
+  box-shadow: inset 0 0 0 1.5px var(--problem);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.adm-login-alert b {
+  color: var(--problem);
+}
+
+.adm-login-alert svg {
+  margin-top: 2px;
+}
+
+.adm-login-lb {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.adm-login-lb a {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.adm-login-input {
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.adm-login-input:focus {
+  outline: 0;
+  border-color: var(--ink);
+  box-shadow: var(--focus-tape);
+}
+
+.adm-login-input--error {
+  border: 2px solid var(--problem);
+}
+
+.adm-login-keep {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.adm-login-keep input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+  margin: 0;
+  flex: none;
+}
+
+.adm-login-submit {
+  height: 48px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--tape);
+  color: var(--on-tape);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.adm-login-submit:hover {
+  background: #c26a05;
+}
+
+.adm-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.adm-login-divider::before,
+.adm-login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.adm-login-alt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.adm-login-alt:hover {
+  border-color: var(--ink);
+}
+
+.adm-login-status {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+
+.adm-login-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+
+.adm-login-foot {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--slate);
+}
+
+.adm-login-foot nav {
+  display: flex;
+  gap: 14px;
+}
+
+.adm-login-foot a {
+  color: var(--slate);
+}
+
+@media (max-width: 700px) {
+  .adm-login-aside {
+    padding: 28px 24px 32px;
+  }
+  .adm-login-main {
+    padding: 32px 16px;
+  }
+  .adm-login-form {
+    padding: 24px 20px;
+  }
+}
+
+/* ---------- SR-10: settings leave guard (X-06 pattern) ----------
+   Mirrors the order-detail dialog geometry (tape bar, panel, body
+   padding) — console-core.css is not loaded in the settings area, so
+   the pattern is re-expressed here with adm- classes. */
+.adm-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(27, 25, 23, 0.44);
+}
+.adm-dialog {
+  width: min(520px, 100%);
+  background: var(--panel);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-ring);
+  overflow: hidden;
+}
+.adm-dialog-tapebar {
+  height: 4px;
+  background: var(--tape);
+}
+.adm-dialog-body {
+  padding: 28px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.adm-dialog-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.adm-dialog-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.adm-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

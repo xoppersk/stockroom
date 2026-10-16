@@ -1,0 +1,1900 @@
+/* Console CORE pages (C-01…C-06 + X-01/X-02/X-04/X-05/X-06/X-08) — W-CORE.
+   Page-specific classes extracted verbatim from the approved screens
+   (Main / Orders / OrderDetail / Products / ProductEditor / ProductWizard /
+   Sys*). Shared component classes (.panel/.ph/.stamp/.btn/.tape/.cnt/.k/
+   .meter/.ll…) live in components.css; layout (.sr-page/.sr-cols/…) in
+   console.css. Everything here is prefixed cc- so it can never collide
+   with another worker's area (the screens reuse short names differently).
+   Values are the screens' own — tokens only, no new colours/radii. */
+
+
+/* SR-13: C-01's screen (Main.html) draws the content columns as
+   minmax(0, 1fr) 400px. The shared .sr-cols flex puts the rail near
+   its 320px basis, so ledger notes and watch names wrapped. Dashboard
+   only (main + X-01 + X-08 share the page): grid with the drawn 400px
+   rail at desktop widths; the flex stacking below stays untouched. */
+@media (min-width: 1101px) {
+  .sr-cols.cc-cols-dash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+  }
+  .sr-cols.cc-cols-dash > .sr-col-main,
+  .sr-cols.cc-cols-dash > .sr-col-side {
+    min-width: 0;
+  }
+}
+
+.cc-band {
+  background: var(--panel);
+  border-bottom: 1px solid var(--frame);
+  padding: 22px 28px 20px;
+}
+.cc-band-tabs {
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-band-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cc-band-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.cc-h1 {
+  margin: 0;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+.cc-h1-mono {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.cc-big {
+  margin: 0;
+  font-size: 50px;
+  line-height: 0.94;
+  font-weight: 800;
+  font-stretch: 70%;
+  text-transform: uppercase;
+  letter-spacing: 0.003em;
+}
+.cc-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 38em;
+}
+.cc-sub {
+  font-size: 13px;
+  color: var(--slate);
+}
+.cc-crumb {
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.cc-crumb a {
+  color: var(--slate);
+}
+.cc-backlink {
+  font-size: 12px;
+  color: var(--slate);
+  text-decoration: none;
+}
+.cc-btnrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.cc-ico {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-l);
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: #f2f1ee;
+  color: var(--ink);
+}
+.cc-dark-note {
+  color: var(--slate);
+  font-size: 12px;
+}
+
+/* ---------- C-01 dashboard: shift strip ---------- */
+.cc-shift {
+  background: var(--panel);
+  border-bottom: 1px solid var(--frame);
+  padding: 22px 28px 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 40px;
+  align-items: center;
+}
+.cc-shift-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.cc-cutoff {
+  text-align: right;
+  padding-right: 18px;
+  border-right: 1px solid var(--rule);
+}
+.cc-cutoff-label {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-cutoff-value {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  font-stretch: 75%;
+  color: var(--tape-ink);
+}
+.cc-shift-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* PipelineBar (segmented shift progress) */
+.cc-pipe {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  gap: 2px;
+}
+.cc-pipe > i {
+  display: block;
+}
+.cc-pipe-legend {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-pipe-legend b {
+  font-size: 22px;
+  font-weight: 800;
+  font-stretch: 75%;
+  color: var(--ink);
+}
+.cc-pipe-legend .cc-pipe-ok {
+  color: var(--paid);
+}
+.cc-pipe-legend span {
+  white-space: nowrap;
+}
+
+/* ---------- panels: local fallbacks matching components.css values ------- */
+.cc-panel {
+  background: var(--panel);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-ring);
+  min-width: 0;
+}
+.cc-ph {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.cc-ph h2 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.1;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.cc-ph-note {
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.cc-ph-mono {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.cc-count-chip {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: var(--radius-m);
+  background: var(--tape);
+  color: var(--on-tape);
+  font-size: 15px;
+  vertical-align: 2px;
+}
+.cc-panel-foot {
+  padding: 13px 20px;
+  border-top: 1px solid var(--rule);
+  background: var(--panel-hover);
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  font-size: 13px;
+  color: var(--slate);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cc-panel-foot a {
+  font-weight: 600;
+}
+
+/* ---------- C-01 exceptions (ExceptionRow layout) ---------- */
+.cc-ex {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  padding: 16px 20px;
+  border-top: 1px solid var(--rule);
+}
+.cc-ex:first-of-type {
+  border-top: 0;
+}
+.cc-ex-id {
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+.cc-ex-stamp {
+  margin-top: 8px;
+}
+.cc-ex-fact {
+  font-size: 15px;
+  font-weight: 600;
+}
+.cc-ex p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cc-ex-meta {
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--muted);
+}
+.cc-ex-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cc-ex-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.cc-ex-highlight {
+  background: #fffcf5;
+  box-shadow: inset 0 0 0 2px #f3d9a8;
+}
+/* count-compare box inside ORD-1048 exception (Main.html) */
+.cc-countbox {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  box-shadow: 0 0 0 1px var(--tape-tint-line);
+}
+.cc-countbox .cc-cb-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: block;
+}
+.cc-countbox .cc-cb-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  font-stretch: 75%;
+  display: block;
+}
+.cc-countbox .cc-cb-value-tape {
+  color: var(--tape-ink);
+}
+.cc-countbox .cc-cb-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+  padding-left: 14px;
+  border-left: 1px solid var(--rule);
+  line-height: 1.45;
+}
+
+/* ---------- C-01 fulfillment queue table ---------- */
+.cc-scroll {
+  overflow-x: auto;
+}
+.cc-q {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 46px 80px 124px 74px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 20px;
+  border-top: 1px solid #eeede9;
+  font-size: 13px;
+  min-width: 640px;
+}
+.cc-q-head {
+  border-top: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.cc-right {
+  text-align: right;
+}
+
+/* ---------- C-01 ledger panel ---------- */
+.cc-kgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.cc-k {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--rule);
+}
+.cc-k-first {
+  border-top: 0;
+}
+.cc-k-right {
+  border-right: 1px solid var(--rule);
+}
+.cc-k-label {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-k-value {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+.cc-k-value-tape {
+  color: var(--tape-ink);
+}
+.cc-k-note {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-k-note-good {
+  font-size: 12px;
+  color: var(--paid);
+  font-weight: 600;
+}
+.cc-chart {
+  padding: 16px 20px 18px;
+  border-top: 1px solid var(--rule);
+}
+.cc-chart-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--slate);
+  margin-bottom: 12px;
+}
+.cc-chart-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  height: 120px;
+}
+.cc-chart-bars > i {
+  display: block;
+  background: var(--ink-2);
+  position: relative;
+}
+.cc-chart-bars > i.cc-bar-peak {
+  background: var(--ink);
+}
+.cc-chart-bars > i.cc-bar-today {
+  background: repeating-linear-gradient(135deg, var(--tape) 0 4px, #e9a24a 4px 8px);
+}
+.cc-bar-dip {
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 10.5px;
+  font-style: normal;
+  color: var(--problem);
+}
+.cc-chart-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 10.5px;
+  color: var(--muted);
+  text-align: center;
+}
+.cc-chart-days .cc-today {
+  color: var(--tape-ink);
+  font-weight: 600;
+}
+
+/* ---------- C-01 inventory watch / StockLevel rows ---------- */
+.cc-inv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px 62px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 20px;
+  border-top: 1px solid #eeede9;
+  font-size: 13px;
+}
+.cc-inv:first-of-type {
+  border-top: 0;
+}
+.cc-inv-name {
+  font-weight: 600;
+  display: block;
+}
+.cc-inv-sku {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.cc-meter {
+  height: 6px;
+  border-radius: 1px;
+  background: #eeede9;
+  position: relative;
+  display: block;
+}
+.cc-meter > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 6px;
+  display: block;
+}
+.cc-inv-foot {
+  padding: 11px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- X-08 offline (SysReconnect) ---------- */
+.cc-rw {
+  display: grid;
+  grid-template-columns: 132px 96px minmax(0, 1fr) 150px;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+}
+.cc-rw:first-of-type {
+  border-top: 0;
+}
+.cc-rw-action {
+  text-align: right;
+}
+.cc-offline-note {
+  display: flex;
+  gap: 10px;
+  padding: 13px 20px;
+  border-top: 1px solid var(--rule);
+  background: var(--panel-hover);
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  font-size: 12px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.cc-queue-list {
+  padding: 6px 20px 10px;
+}
+.cc-queue-empty {
+  padding: 14px 20px 16px;
+  font-size: 13px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.cc-dim {
+  opacity: 0.92;
+}
+
+/* ---------- X-01 loading skeleton (SysLoading) ---------- */
+.cc-sk-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 110px;
+  gap: 18px;
+  align-items: start;
+  padding: 18px 20px;
+  border-top: 1px solid var(--rule);
+}
+.cc-sk-row:first-of-type {
+  border-top: 0;
+}
+.cc-sk-block {
+  display: block;
+  border-radius: var(--radius-s);
+  background: var(--skeleton);
+}
+.cc-sk-block-soft {
+  background: #eeede9;
+}
+.cc-sk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cc-sk-stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.cc-loading-note {
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  padding: 0 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.cc-status-line {
+  margin: 10px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--slate);
+}
+
+.cc-orders-band-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 40px;
+  align-items: center;
+}
+.cc-prod-band-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 28px;
+}
+
+/* ---------- view tabs / filters (Orders C-02, Products C-04) ---------- */
+.cc-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+.cc-flt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--slate);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.cc-flt:hover {
+  color: var(--ink);
+}
+.cc-flt[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+.cc-cnt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-m);
+  background: #34302b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cc-cnt-tape {
+  background: var(--tape);
+  color: var(--on-tape);
+}
+.cc-cnt-ink {
+  background: var(--ink);
+  color: #fff;
+}
+.cc-cnt-soft {
+  background: var(--rule);
+  color: var(--ink);
+}
+.cc-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.cc-filterbar-between {
+  justify-content: space-between;
+}
+.cc-search {
+  width: 280px;
+  max-width: 100%;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 13px;
+}
+.cc-sel {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 13px;
+  color: var(--ink);
+}
+.cc-filter-label {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-listwrap {
+  padding: 22px 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- C-02 orders: selection bar + table ---------- */
+.cc-selbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 20px;
+  background: var(--bar);
+  color: #fff;
+  border-radius: var(--radius-l);
+}
+.cc-selbar-text {
+  flex: 1;
+  font-weight: 600;
+  min-width: 200px;
+}
+.cc-selbar .cc-btn-dark {
+  height: 30px;
+  background: transparent;
+  color: #fff;
+  border-color: var(--slate);
+}
+.cc-or {
+  display: grid;
+  grid-template-columns: 28px 104px 92px minmax(0, 1fr) 52px 86px 130px 130px 84px;
+  gap: 14px;
+  align-items: center;
+  padding: 11px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  min-width: 1000px;
+}
+.cc-or-head {
+  border-top: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 12px;
+  padding-bottom: 10px;
+  min-width: 1000px;
+}
+.cc-or:hover {
+  background: var(--panel-hover);
+}
+.cc-or-selected {
+  background: #fffcf5;
+}
+.cc-or input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+}
+.cc-or-id {
+  font-weight: 600;
+  text-decoration: none;
+}
+.cc-or-placed {
+  color: var(--slate);
+}
+.cc-or-skus {
+  font-size: 11px;
+  color: var(--muted);
+}
+.cc-or-total {
+  font-weight: 600;
+}
+
+/* ---------- C-03 order detail ---------- */
+.cc-task-band {
+  background: var(--panel);
+  border-bottom: 1px solid var(--frame);
+  padding: 18px 28px 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cc-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.cc-hold-panel {
+  background: #fffcf5;
+  box-shadow: inset 0 0 0 2px #f3d9a8, 0 0 0 1px var(--tape-tint-line);
+  border-radius: var(--radius-l);
+  min-width: 0;
+}
+.cc-hold-body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-hold-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+.cc-hold-copy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cc-count-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--panel);
+  box-shadow: 0 0 0 1px var(--tape-tint-line);
+  border-radius: var(--radius-m);
+}
+.cc-field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-field-stack > label {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-count-input {
+  width: 80px;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-m);
+  font-size: 24px;
+  font-weight: 800;
+  font-stretch: 75%;
+  text-align: right;
+  color: var(--tape-ink);
+  background: var(--panel);
+}
+.cc-count-select {
+  height: 40px;
+  padding: 0 8px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 13px;
+  width: 100%;
+}
+.cc-count-effect {
+  flex: 1 1 220px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cc-released-note {
+  padding: 14px 16px;
+  background: var(--panel);
+  box-shadow: 0 0 0 1px var(--rule);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+/* line items */
+.cc-li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 70px 60px 80px 120px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  min-width: 600px;
+}
+.cc-li-head {
+  border-top: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
+.cc-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-m);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cc-item-name {
+  font-weight: 600;
+  display: block;
+}
+.cc-item-sku {
+  font-size: 11px;
+  color: var(--muted);
+  display: block;
+  margin-top: 3px;
+}
+.cc-totals {
+  padding: 14px 20px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: flex-end;
+}
+.cc-totals-box {
+  width: 280px;
+  max-width: 100%;
+}
+.cc-kv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.cc-kv-label {
+  color: var(--slate);
+}
+.cc-kv-total {
+  border-top: 1px solid var(--ink);
+  margin-top: 8px;
+  padding-top: 12px;
+  align-items: baseline;
+}
+.cc-kv-total .cc-kv-label {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+.cc-total-figure {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  font-stretch: 75%;
+}
+/* history timeline */
+.cc-history {
+  padding: 6px 20px 12px;
+}
+.cc-ev {
+  display: grid;
+  grid-template-columns: 72px 14px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.cc-ev time {
+  color: var(--slate);
+}
+.cc-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-s);
+  box-sizing: border-box;
+}
+.cc-dot-tape {
+  border-color: var(--tape);
+}
+.cc-dot-paid {
+  border-color: var(--paid);
+  background: var(--paid);
+}
+.cc-note-form {
+  padding: 13px 20px;
+  border-top: 1px solid var(--rule);
+  background: var(--panel-hover);
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  display: flex;
+  gap: 8px;
+}
+.cc-note-input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  background: var(--panel);
+}
+/* fulfillment steps (side) */
+.cc-steps {
+  margin: 0;
+  padding: 16px 20px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  font-size: 12px;
+}
+.cc-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-step-bar {
+  height: 6px;
+  border-radius: 1px;
+  display: block;
+}
+/* SR-06: these fills belong to the order-detail step BARS only
+   (.cc-step-bar). The wizard's step <li>s reuse the state class names —
+   filled, they became giant blocks. The wizard colours its steps via
+   the li border-bottom rules below. */
+.cc-step-bar.cc-step-done {
+  background: var(--paid);
+}
+.cc-step-bar.cc-step-now {
+  background: var(--tape);
+}
+.cc-step-bar.cc-step-next {
+  background: repeating-linear-gradient(135deg, var(--rule) 0 5px, #f2f1ee 5px 10px);
+}
+.cc-side-block {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cc-side-block + .cc-side-block {
+  border-top: 1px solid var(--rule);
+}
+.cc-paygrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.cc-paygrid .cc-k {
+  border-top: 0;
+}
+.cc-paygrid .cc-k-b {
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- X-04 failed payment (SysFailedPayment) ---------- */
+.cc-fail-band {
+  background: var(--panel);
+  border-bottom: 1px solid var(--frame);
+  padding: 22px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-fail-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: end;
+}
+.cc-fail-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.cc-fail-time {
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-tl {
+  display: grid;
+  grid-template-columns: 64px 14px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid #eeede9;
+  font-size: 13px;
+}
+.cc-tl:first-of-type {
+  border-top: 0;
+}
+.cc-tl-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 3px currentColor;
+  background: currentColor;
+  display: block;
+}
+.cc-tl-dot-hollow {
+  background: var(--panel);
+}
+.cc-ledger-block {
+  padding: 6px 20px 18px;
+}
+.cc-ledger-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1.5px solid var(--ink);
+  margin-top: 8px;
+  padding-top: 14px;
+}
+.cc-ledger-total span {
+  font-weight: 700;
+  font-size: 14px;
+}
+.cc-ledger-total b {
+  font-size: 34px;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+/* ---------- refund form + X-06 permission dialog ---------- */
+.cc-refund-form {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-input {
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 14px;
+  color: var(--ink);
+  width: 100%;
+}
+.cc-input-tape {
+  border-color: var(--tape);
+  box-shadow: var(--focus-tape);
+}
+.cc-field-note-tape {
+  font-size: 12px;
+  color: var(--tape-ink);
+}
+.cc-dialog-wrap {
+  padding: 28px 28px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 760px) 360px;
+  gap: 22px;
+  align-items: start;
+}
+.cc-dialog {
+  overflow: hidden;
+}
+.cc-dialog-tapebar {
+  height: 4px;
+  background: var(--tape);
+}
+.cc-dialog-body {
+  padding: 28px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cc-dialog-facts {
+  background: var(--panel-hover);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  border-radius: var(--radius-m);
+  padding: 4px 16px;
+}
+.cc-dialog-note {
+  height: 68px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+  resize: vertical;
+  width: 100%;
+  font-family: inherit;
+}
+.cc-role-panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cc-role-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cc-role-head b {
+  font-size: 14px;
+}
+.cc-role-meta {
+  display: flex;
+  gap: 8px;
+  color: var(--slate);
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- X-02 / X-05 empty states ---------- */
+.cc-empty-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 22px;
+  align-items: stretch;
+}
+.cc-state-panel {
+  padding: 44px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.cc-state-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.cc-state-stamp {
+  align-self: flex-start;
+}
+.cc-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
+.cc-state-foot-note {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--muted);
+}
+.cc-check-meter {
+  padding: 16px 20px 4px;
+}
+.cc-check-track {
+  display: block;
+  height: 6px;
+  border-radius: 1px;
+  background: #eeede9;
+  position: relative;
+  overflow: hidden;
+}
+.cc-check-track > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--paid);
+  display: block;
+}
+.cc-check-list {
+  padding: 4px 20px 14px;
+}
+.cc-setup-list {
+  margin: 0;
+  padding: 6px 20px 12px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.cc-setup-list li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 0;
+  border-top: 1px solid #eeede9;
+}
+.cc-setup-list li:first-child {
+  border-top: 0;
+}
+.cc-setup-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  flex: none;
+}
+.cc-setup-num-done {
+  background: var(--paid);
+  color: #fff;
+}
+.cc-setup-num-now {
+  background: var(--tape);
+  color: var(--on-tape);
+}
+.cc-setup-num-todo {
+  box-shadow: inset 0 0 0 1.5px #c9c6bf;
+  color: var(--muted);
+}
+.cc-setup-label {
+  flex: 1;
+}
+.cc-setup-done-label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.cc-empty-table-head {
+  display: grid;
+  grid-template-columns: 110px 130px minmax(0, 1fr) 120px 110px;
+  gap: 14px;
+  padding: 12px 20px;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 640px;
+}
+.cc-empty-table-body {
+  padding: 26px 20px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 13px;
+  background: #fafaf8;
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  min-width: 640px;
+  box-sizing: border-box;
+}
+
+/* ---------- C-04 products ---------- */
+.cc-prod-stats {
+  display: flex;
+  align-items: center;
+}
+.cc-prod-stat {
+  padding: 0 22px;
+  border-right: 1px solid var(--rule);
+}
+.cc-prod-stat:last-child {
+  border-right: 0;
+}
+.cc-prod-stat .cc-stat-v {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  font-stretch: 75%;
+}
+.cc-prod-stat .cc-stat-l {
+  font-size: 12px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.cc-pr {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 96px 200px 86px 74px 96px;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--ink);
+  min-width: 900px;
+}
+.cc-pr-head {
+  border-top: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 12px;
+}
+a.cc-pr:hover {
+  background: var(--panel-hover);
+}
+.cc-pr-name {
+  font-weight: 600;
+  display: block;
+}
+.cc-pr-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-top: 3px;
+}
+.cc-sksegs {
+  display: flex;
+  gap: 3px;
+}
+.cc-sksegs > i {
+  flex: 1;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--paid);
+  display: block;
+}
+.cc-sksegs > i.cc-seg-low {
+  background: var(--tape);
+}
+.cc-sksegs > i.cc-seg-out {
+  background: var(--rule);
+  outline: 1.5px solid var(--problem);
+  outline-offset: -1.5px;
+}
+.cc-stock-text {
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+.cc-stock-bad {
+  color: var(--problem);
+  font-weight: 700;
+}
+.cc-stock-warn {
+  color: var(--tape-ink);
+  font-weight: 700;
+}
+.cc-sold-figure {
+  font-size: 20px;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+.cc-seg-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--slate);
+}
+
+/* ---------- C-05 product editor ---------- */
+.cc-unsaved {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+  font-size: 13px;
+  color: var(--tape-ink);
+  font-weight: 600;
+}
+.cc-unsaved > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tape);
+  display: block;
+}
+.cc-pb {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc-f {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.cc-f > label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.cc-in {
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  font-size: 14px;
+  color: var(--ink);
+  width: 100%;
+}
+.cc-in-unsaved {
+  border-color: var(--tape);
+  box-shadow: var(--focus-tape);
+}
+.cc-textarea {
+  height: auto;
+  padding: 10px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+}
+.cc-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.cc-photos {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.cc-photo {
+  width: 132px;
+  height: 132px;
+  border-radius: var(--radius-m);
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+  box-sizing: border-box;
+  font-size: 11px;
+}
+.cc-photo-add {
+  width: 132px;
+  height: 132px;
+  border-radius: var(--radius-m);
+  box-sizing: border-box;
+  border: 1.5px dashed var(--control);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: 12px;
+  color: var(--slate);
+  cursor: pointer;
+}
+.cc-vr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 96px 96px 110px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  min-width: 560px;
+}
+.cc-vr-head {
+  border-top: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0;
+}
+.cc-vr-variant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cc-vr-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-s);
+  display: block;
+  flex: none;
+}
+.cc-vr-onhand {
+  font-size: 22px;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+.cc-vr-onhand-warn {
+  color: var(--tape-ink);
+}
+.cc-vr-input {
+  height: 30px;
+  text-align: right;
+}
+.cc-onhand-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--slate);
+}
+.cc-ck {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.cc-ck input {
+  margin: 2px 0 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+  flex: none;
+}
+.cc-backorder-note {
+  font-size: 12px;
+  color: var(--slate);
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.cc-runout {
+  padding: 13px 20px;
+  border-top: 1px solid #f3d9a8;
+  background: #fffcf5;
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--slate);
+}
+.cc-runout b {
+  font-size: 22px;
+  font-weight: 800;
+  font-stretch: 75%;
+  color: var(--tape-ink);
+}
+
+/* ---------- C-06 product wizard ---------- */
+.cc-wiz-head {
+  background: var(--ink);
+  color: #fff;
+  padding: 0 28px;
+  display: none; /* the shell AppBar replaces the wizard's slim bar */
+}
+.cc-steps-nav {
+  background: var(--panel);
+  border-bottom: 1px solid var(--frame);
+  padding: 0 28px;
+}
+.cc-steps-nav ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.cc-steps-nav li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0 12px;
+  border-bottom: 3px solid var(--rule);
+  min-width: 0;
+}
+.cc-steps-nav li.cc-step-done {
+  border-bottom-color: var(--paid);
+}
+.cc-steps-nav li.cc-step-now {
+  border-bottom-color: var(--tape);
+}
+.cc-step-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cc-step-done .cc-step-kicker {
+  color: var(--paid);
+}
+.cc-step-now .cc-step-kicker {
+  color: var(--tape-ink);
+}
+.cc-step-name {
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-stretch: 75%;
+  /* SR-06: ProductWizard.html does not nowrap its step names; the
+     nowrap+ellipsis clipped "Details" at narrow column widths. */
+}
+.cc-step-todo {
+  color: var(--muted);
+}
+.cc-opt-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+.cc-opt-row > label {
+  font-weight: 600;
+}
+.cc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  box-shadow: 0 0 0 1px var(--ink);
+  border-radius: var(--radius-m);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--panel);
+}
+.cc-chip button {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate);
+  cursor: pointer;
+  padding: 0;
+}
+.cc-chip-input {
+  width: 160px;
+  height: 30px;
+}
+.cc-wiz-vr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 100px 100px;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  min-width: 560px;
+}
+.cc-wiz-vr-head {
+  border-top: 0;
+  white-space: nowrap;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cc-wiz-vr-missing {
+  background: #fffcf5;
+}
+.cc-wiz-missing {
+  margin: 0;
+  padding: 13px 20px;
+  border-top: 1px solid #f3d9a8;
+  background: #fffcf5;
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  font-size: 13px;
+  color: var(--tape-ink);
+  font-weight: 600;
+}
+.cc-wiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 6px;
+}
+.cc-check-segs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 16px 20px 4px;
+}
+.cc-check-segs > i {
+  height: 6px;
+  border-radius: 1px;
+  background: var(--rule);
+  display: block;
+}
+.cc-check-segs > i.cc-seg-done {
+  background: var(--paid);
+}
+.cc-check-segs > i.cc-seg-now {
+  background: var(--tape);
+}
+.cc-publish-list {
+  margin: 0;
+  padding: 4px 20px 10px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.cc-publish-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.cc-publish-list li:last-child {
+  border-bottom: 0;
+}
+
+/* ledger lines (LedgerLine DOM fallback, matches components.css .ll) */
+.cc-ll {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 0;
+  font-size: 13px;
+}
+.cc-ll > i {
+  flex: 1;
+  border-bottom: 1.5px dotted #c9c6bf;
+  transform: translateY(-3px);
+}
+.cc-ll b {
+  font-family: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600;
+}
+
+/* generic stacks */
+.cc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.cc-stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.cc-visually-hidden {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- responsive: no page-level horizontal scroll at 375px ------- */
+@media (max-width: 900px) {
+  .cc-shift {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px 14px;
+  }
+  .cc-band,
+  .cc-fail-band,
+  .cc-steps-nav {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .cc-task-band {
+    padding: 16px 14px 18px;
+  }
+  .cc-listwrap {
+    padding: 16px 14px 32px;
+  }
+  .cc-fail-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .cc-dialog-wrap {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px 14px 32px;
+  }
+  .cc-empty-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cc-state-panel {
+    padding: 28px 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .cc-big {
+    font-size: 38px;
+  }
+  .cc-h1 {
+    font-size: 32px;
+  }
+  .cc-ex {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .cc-rw {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .cc-rw-action {
+    text-align: left;
+  }
+  .cc-sk-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .cc-grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cc-opt-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cc-prod-stats {
+    flex-wrap: wrap;
+  }
+  .cc-prod-stat {
+    padding: 6px 14px 6px 0;
+    border-right: 0;
+  }
+  .cc-steps-nav .cc-step-name {
+    font-size: 15px;
+    white-space: normal;
+  }
+  .cc-orders-band-grid,
+  .cc-prod-band-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .cc-shift-actions {
+    flex-wrap: wrap;
+  }
+  .cc-cutoff {
+    text-align: left;
+    border-right: 0;
+    padding-right: 0;
+  }
+}

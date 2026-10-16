@@ -1,0 +1,82 @@
+/* Stockroom base styles. Tokens live in tokens.css (copied exactly from the
+   design package). Everything here is element-level + the shared type
+   utilities the screens use (.mono, .cond, tabular figures). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-archivo), "Archivo", "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--ground);
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* Condensed Archivo (width axis). Use font-stretch values per the type scale:
+   70% state titles / store display, 75% day titles / panel heads, 80% figures,
+   85% stamps, 100% body. */
+.cond {
+  font-stretch: 75%;
+}
+
+a {
+  color: var(--ink);
+}
+a:hover {
+  color: #000;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* §11: focus is always visible — 2px ink ring (§13 focus-tape ring applies to
+   changed/focused fields via .field styles in components.css). */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
