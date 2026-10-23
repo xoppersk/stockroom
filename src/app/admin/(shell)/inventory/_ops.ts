@@ -1,17 +1,23 @@
-/* Operations view adapter (W-OPS territory only).
+/* Operations view adapter (W-CATALOG territory).
  *
- * Real contracts (lib/types.ts, lib/api.ts, lib/store.tsx):
- *  - Live SKUs = listSkus(useShopState().products) — the store's Product[]
- *    is the ledger, so O-01 / O-02 / X-03 agree after adjustStock() or
- *    receiveDelivery().
- *  - Purchase orders are static fixtures; "received" lives in the store
- *    (state.receivedPoIds).
- *  - Audit entries are AuditEntry[] in the store; adjustStock() prepends an
- *    entry whose text names the SKU and whose oldValue/newValue carry the
- *    on-shelf change.
- * This module only reshapes those into what the Operations screens draw. */
+ * Real contracts (lib/types.ts view models via @/lib/shop/admin,
+ * derivations via @/lib/derive):
+ *  - SKUs arrive mapped from the DB: shelf + cost_price come from the
+ *    00012 columns the mapper exposes (null until 00012 is applied —
+ *    rendered as "—" / unknown, never invented); onShelf is the real
+ *    inventory_levels quantity; reorderPoint is the real
+ *    low_stock_threshold.
+ *  - Incoming stock derives from OPEN purchase orders (00012 tables);
+ *    when the mapper already sets Sku.incoming, that wins.
+ *  - countNote derives from real recount adjustments only — when the
+ *    mapper surfaces a countNote / lastRecount pair for a SKU with a
+ *    count pending. No canon/fallback data lives here any more: the
+ *    FALLBACK_* rows and SKU_EXTRAS blocks of the fixture build are
+ *    gone by design (coordinator ruling 1/13).
+ * This module only reshapes mapped view models into what the
+ * Operations screens draw. */
 
-import { getProduct } from "@/lib/api";
+import { availableOf } from "@/lib/derive";
 import type {
   AuditEntry,
   PurchaseOrder,
@@ -19,10 +25,14 @@ import type {
   StockMovement,
 } from "@/lib/types";
 
+export { availableOf };
+
 export interface OpsSku {
   sku: string;
+  /** Variant uuid when the mapper surfaces it (actions need it). */
+  variantId?: string;
   name: string; // "Stoneware mug — Terracotta"
-  displayName?: string; // screen-drawn override for the O-01 name cell
+  displayName?: string;
   variant: string; // "Terracotta"
   productName: string; // "Stoneware mug"
   productSlug: string;
@@ -37,13 +47,10 @@ export interface OpsSku {
   incomingPo?: string; // "PO-0214"
   supplier?: string;
   countPending?: boolean;
-  countNote?: string; // "counted 4, expected 6"
+  countNote?: string; // "counted 4, expected 6" — real recounts only
   unitCostCents?: number;
-  committedOrder?: string; // "ORD-1049"
-  previewNote?: string; // O-02 ledger-preview sentence drawn on the screen
-  lastCountedLabel?: string; // "Oct 1"
   waitlist?: number;
-  poSuggest?: number;
+  backorder?: boolean;
 }
 
 export interface OpsPurchaseOrder {
@@ -52,6 +59,7 @@ export interface OpsPurchaseOrder {
   etaLabel: string; // "Thursday, October 8"
   units: number;
   linesLabel: string; // "SM-TER ×48 · SM-MOS ×24"
+  status: string;
 }
 
 export interface OpsMovement {
@@ -69,10 +77,6 @@ export interface OpsAuditRow {
   tone?: "ink" | "paid";
 }
 
-export function availableOf(s: OpsSku): number {
-  return s.onShelf - s.committed;
-}
-
 export type SkuStatus = "out" | "count" | "low" | "healthy";
 
 export function statusOf(s: OpsSku): SkuStatus {
@@ -82,27 +86,77 @@ export function statusOf(s: OpsSku): SkuStatus {
   return "healthy";
 }
 
-export function toOpsSku(s: Sku): OpsSku {
-  return withExtras({
+/** Optional real fields the mapper may surface beyond the base Sku
+ *  shape (see W-CATALOG log, contract gap 3). All optional — absent
+ *  means "not known", never a fixture substitute. */
+type SkuExtras = {
+  id?: string;
+  variantId?: string;
+  uuid?: string;
+  supplier?: string | null;
+  countNote?: string | null;
+  lastRecount?: { counted: number; expected: number } | null;
+  lastCountedLabel?: string | null;
+};
+
+export function toOpsSku(s: Sku, purchaseOrders: PurchaseOrder[] = []): OpsSku {
+  const x = s as Sku & SkuExtras;
+  const variantId = x.variantId ?? x.id ?? x.uuid;
+
+  /* Incoming: the mapper's own incoming (derived from POs upstream)
+     wins; otherwise derive from OPEN purchase orders in the list. */
+  let incomingQty = s.incoming?.qty;
+  let incomingDay = s.incoming?.dayLabel.split(",")[0];
+  let incomingDateLabel = s.incoming?.dayLabel;
+  let incomingPo = s.incoming?.poId;
+  if (incomingQty == null) {
+    for (const po of purchaseOrders) {
+      if (po.status !== "open") continue;
+      const line = po.lines.find((l) => l.sku === s.sku);
+      if (!line) continue;
+      incomingQty = line.qty;
+      incomingDateLabel = po.dayLabel;
+      incomingDay = po.dayLabel.split(",")[0];
+      incomingPo = po.id;
+      break;
+    }
+  }
+
+  /* Count note: only while a count is pending, and only from a real
+     recount the mapper surfaced — a direct countNote string, or the
+     counted/expected pair of the last recount adjustment. */
+  let countNote: string | undefined;
+  if (s.countPending) {
+    if (typeof x.countNote === "string" && x.countNote.length > 0) {
+      countNote = x.countNote;
+    } else if (x.lastRecount) {
+      countNote = `counted ${x.lastRecount.counted}, expected ${x.lastRecount.expected}`;
+    }
+  }
+
+  return {
     sku: s.sku,
+    variantId,
     name: `${s.productName} — ${s.label}`,
     variant: s.label,
     productName: s.productName,
     productSlug: s.productSlug,
     productStatus: s.productStatus,
-    shelf: s.shelf,
+    shelf: s.shelf || undefined,
     onShelf: s.onShelf,
     committed: s.committed,
     reorderPoint: s.reorderPoint,
-    incomingQty: s.incoming?.qty,
-    incomingDay: s.incoming?.dayLabel.split(",")[0],
-    incomingDateLabel: s.incoming?.dayLabel,
-    incomingPo: s.incoming?.poId,
-    supplier: getProduct(s.productSlug)?.supplier ?? undefined,
+    incomingQty,
+    incomingDay,
+    incomingDateLabel,
+    incomingPo,
+    supplier: x.supplier ?? undefined,
     countPending: s.countPending,
+    countNote,
     unitCostCents: s.costCents ?? undefined,
     waitlist: s.waitlist,
-  });
+    backorder: s.backorder,
+  };
 }
 
 export function toOpsPos(pos: PurchaseOrder[]): OpsPurchaseOrder[] {
@@ -112,6 +166,7 @@ export function toOpsPos(pos: PurchaseOrder[]): OpsPurchaseOrder[] {
     etaLabel: p.dayLabel,
     units: p.lines.reduce((a, l) => a + l.qty, 0),
     linesLabel: p.lines.map((l) => `${l.sku} ×${l.qty}`).join(" · "),
+    status: p.status,
   }));
 }
 
@@ -142,7 +197,7 @@ export function shortDate(iso: string): string {
   return `${MONTHS[m - 1]} ${d}`;
 }
 
-/** Store audit entries that mention this SKU, newest first. */
+/** Real audit entries that mention this SKU, newest first. */
 export function auditRowsForSku(
   audit: AuditEntry[],
   sku: string,
@@ -167,66 +222,43 @@ export function auditRowsForSku(
               : delta < 0
                 ? `−${Math.abs(delta)}`
                 : "0",
-        tone: delta === 0 ? "paid" : undefined,
+        tone: delta === 0 ? ("paid" as const) : undefined,
       };
     });
 }
 
-/* Canonical fallbacks — the exact rows the approved screens draw, used only
-   if a fixture read ever comes back empty for that panel. */
-export const FALLBACK_MOVEMENTS: OpsMovement[] = [
-  { time: "10:30", label: "Counter sale", skuLabel: "NP-4N", deltaLabel: "−2" },
-  { time: "10:21", label: "ORD-1051 reserved", skuLabel: "WT-OAT", deltaLabel: "−1" },
-  { time: "9:58", label: "Count mismatch flagged by Kofi", skuLabel: "CT-NAT", deltaLabel: "?", tone: "tape" },
-  { time: "9:41", label: "ORD-1048 reserved", skuLabel: "LA-CHR, CT-NAT", deltaLabel: "−2" },
-  { time: "7:30", label: "Morning count, aisle A · 22 SKUs matched", deltaLabel: "0", tone: "paid" },
-];
+/** Last counted label for a SKU from real audit rows (a recount entry
+ *  naming the SKU), or undefined when no recount is on record. */
+export function lastCountedLabelForSku(
+  audit: AuditEntry[],
+  sku: string,
+): string | undefined {
+  const hit = audit.find(
+    (e) => e.kind === "stock" && e.text.includes(sku) && /count/i.test(e.text),
+  );
+  return hit ? shortDate(hit.dateISO) : undefined;
+}
 
-export const FALLBACK_POS: OpsPurchaseOrder[] = [
-  {
-    id: "PO-0214",
-    supplier: "Ashby Pottery",
-    etaLabel: "Thursday, October 8",
-    units: 72,
-    linesLabel: "SM-TER ×48 · SM-MOS ×24",
-  },
-  {
-    id: "PO-0215",
-    supplier: "Baltic Linen Works",
-    etaLabel: "Friday, October 9",
-    units: 68,
-    linesLabel: "LA-CHR ×24 · NP-4C ×20 · LA-RST ×12 · WT-RST ×12",
-  },
-];
-
-/** Per-SKU canonical extras the screens draw but the stock fixture doesn't
- *  carry (HANDOVER §9 + StockAdjustment.html). */
-export const SKU_EXTRAS: Record<string, Partial<OpsSku>> = {
-  "EC-WHT": {
-    committedOrder: "ORD-1049",
-    previewNote:
-      "ORD-1049 keeps its colander. The storefront still shows it in stock.",
-    lastCountedLabel: "Oct 1",
-    poSuggest: 12,
-  },
-  /* SR-15: Inventory.html draws this row's name as just "Canvas market
-     tote" (no "— Natural") — the one row where the screen shortens. */
-  "CT-NAT": { countNote: "counted 4, expected 6", displayName: "Canvas market tote" },
-};
-
-export function withExtras(s: OpsSku): OpsSku {
-  const x = SKU_EXTRAS[s.sku];
-  if (!x) return s;
-  return {
-    ...s,
-    committedOrder: s.committedOrder ?? x.committedOrder,
-    previewNote: s.previewNote ?? x.previewNote,
-    lastCountedLabel: s.lastCountedLabel ?? x.lastCountedLabel,
-    poSuggest: s.poSuggest ?? x.poSuggest,
-    displayName: s.displayName ?? x.displayName,
-    /* SR-01: the count note is drawn only while the count is pending.
-       Recording the count clears countPending in the store, and the
-       note clears with it — the settled shelf figure is the news. */
-    countNote: s.countPending ? (s.countNote ?? x.countNote) : undefined,
-  };
+/** Recent-changes rows from TODAY's real movements for one SKU.
+ *  Why this exists (W-CATALOG log gap 3): the mapped AuditEntry text
+ *  for an inventory adjustment is "inventory.adjust · inventory_levels
+ *  · <variant uuid>" — it names the variant UUID, not the SKU — so
+ *  auditRowsForSku rarely matches real rows. todaysMovements() is the
+ *  contract feed that DOES carry the SKU (from inventory_adjustments),
+ *  so today's changes are derived from it; audit matches (when the
+ *  text does name the SKU) are appended after. */
+export function movementRowsForSku(
+  movements: StockMovement[],
+  sku: string,
+  limit = 4,
+): OpsAuditRow[] {
+  return movements
+    .filter((m) => m.sku === sku)
+    .slice(0, limit)
+    .map((m) => ({
+      when: m.timeLabel,
+      label: m.text,
+      deltaLabel: m.deltaLabel,
+      tone: m.deltaLabel === "0" ? ("paid" as const) : undefined,
+    }));
 }
