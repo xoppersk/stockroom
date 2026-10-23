@@ -1,22 +1,26 @@
 import { Suspense } from "react";
-import { listAudit } from "@/lib/api";
-import { normalizeAudit } from "../admin-data";
+import { getConsoleActor, listConsoleAudit } from "@/lib/shop/admin";
+import { buildAuditView } from "../admin-data";
 import AuditClient from "./AuditClient";
 
 /* A-03 · /admin/settings/audit — signed, append-only history
-   (AuditHistory.html). Data: @/lib/api listAudit(), with live entries
-   from the client store's auditLog prepended on the client. */
+   (AuditHistory.html). Data: listConsoleAudit() over audit_log
+   (admin-read RLS — non-admin staff honestly get the empty set and
+   the page's restricted state). */
 export default async function AuditPage() {
-  let raw: unknown = null;
-  try {
-    raw = await listAudit();
-  } catch {
-    raw = null;
-  }
-  const { entries, total, shown } = normalizeAudit(raw);
+  const [list, actor] = await Promise.all([
+    listConsoleAudit(),
+    getConsoleActor(),
+  ]);
+  const { entries, total, shown } = buildAuditView(list);
   return (
     <Suspense fallback={null}>
-      <AuditClient entries={entries} total={total} shown={shown} />
+      <AuditClient
+        entries={entries}
+        total={total}
+        shown={shown}
+        actorIsAdmin={actor.role === "admin"}
+      />
     </Suspense>
   );
 }
