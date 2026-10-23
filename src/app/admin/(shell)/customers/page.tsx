@@ -18,3 +18,4 @@ export default async function CustomersPage() {
   ]);
   const totals = consoleCustomersTotals(customers, orders);
   return <CustomersClient customers={customers} totals={totals} />;
+}
