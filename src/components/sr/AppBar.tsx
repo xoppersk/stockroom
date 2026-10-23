@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SHOP_NAME, SHOP_SHORT } from "@/lib/config";
-import { inventorySummary, listSkus, ordersSummary } from "@/lib/api";
-import { useShopState } from "@/lib/store";
 
 export type AppBarCurrent =
   | "dashboard"
@@ -16,14 +14,38 @@ export type AppBarCurrent =
   | "discounts"
   | "settings";
 
+type AppBarProps = {
+  current: string;
+  hideCounts?: boolean;
+  /** Real held-order count (layout → getConsoleCounts). Optional so the
+   *  dev/components showcase can render the bar without a session. */
+  heldCount?: number;
+  /** Real SKUs-below-reorder count (layout → getConsoleCounts). */
+  lowStockCount?: number;
+  /** Real actor (layout → getConsoleActor) for the avatar. */
+  actorName?: string;
+  actorInitials?: string;
+};
+
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("");
+}
+
 /** §6/§7 AppBar — client component with LIVE counts (§10: the Orders count
  *  drops when a hold clears). Held orders → Orders tab (tape-filled square);
- *  SKUs below reorder → Inventory tab. Counts derive from the same api
- *  derivations the pages use (ordersSummary / inventorySummary), read from
- *  the live store state so a cleared hold drops the tab count at once.
- *  Navigation uses next/link (SR-01): the one client store must survive
- *  moving around the console — plain anchors full-reloaded the app and
- *  reset every surface to fixture state.
+ *  SKUs below reorder → Inventory tab.
+ *  W-ORDERS rewire: counts and the actor arrive as PROPS from the (shell)
+ *  layout, which fetches them server-side via the console data layer
+ *  (getConsoleCounts / getConsoleActor — staff-RLS session reads). The
+ *  fixture store and the fixture-API derivations are gone from this
+ *  component. When counts are not supplied (dev showcase), no count
+ *  chips render.
+ *  Navigation uses next/link (SR-01).
  *  SR-07: the drawn global search ("Order, SKU or customer") sits between
  *  the tabs and the account controls; ⌘K / Ctrl+K (or "/" outside a
  *  field) focuses it, and submitting searches Orders via ?q= (the URL
@@ -35,16 +57,24 @@ export type AppBarCurrent =
  *  active-styled with aria-current="page", between the nav and the search
  *  field. It renders only when current === "settings"; Main.html and the
  *  other 26 screens draw no such tab (verified against the screens). */
-export function AppBar({ current, hideCounts = false }: { current: string; hideCounts?: boolean }) {
-  const state = useShopState();
+export function AppBar({
+  current,
+  hideCounts = false,
+  heldCount,
+  lowStockCount,
+  actorName,
+  actorInitials,
+}: AppBarProps) {
   const router = useRouter();
   const params = useSearchParams();
-  const held = ordersSummary(state.orders).heldCount;
-  const below = inventorySummary(listSkus(state.products)).belowReorder;
+  const held = heldCount;
+  const below = lowStockCount;
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState(() => params.get("q") ?? "");
   useEffect(() => {
+    // Sync the search box with the URL's ?q= state (external system).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(params.get("q") ?? "");
   }, [params]);
 
@@ -77,6 +107,8 @@ export function AppBar({ current, hideCounts = false }: { current: string; hideC
     { key: "customers", label: "Customers", href: "/admin/customers" },
     { key: "discounts", label: "Discounts", href: "/admin/discounts" },
   ];
+
+  const initials = actorInitials ?? (actorName ? initialsOf(actorName) : "SK");
 
   return (
     <header className="bar">
@@ -146,9 +178,14 @@ export function AppBar({ current, hideCounts = false }: { current: string; hideC
       </form>
       {/* The avatar is the settings link on every screen (aria-label in
           the screens: "Sheku Koroma, owner — settings"); on the settings
-          screens the drawn Settings tab above is present as well. */}
-      <Link href="/admin/settings" className="avatar" aria-label="Your account — Sheku Koroma">
-        SK
+          screens the drawn Settings tab above is present as well. Now
+          driven by the REAL signed-in actor from the layout. */}
+      <Link
+        href="/admin/settings"
+        className="avatar"
+        aria-label={actorName ? `Your account — ${actorName}` : "Your account — settings"}
+      >
+        {initials}
       </Link>
     </header>
   );
