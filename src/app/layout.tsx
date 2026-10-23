@@ -3,7 +3,6 @@ import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "../styles/tokens.css";
 import "../styles/base.css";
 import "../styles/components.css";
-import { ShopProvider } from "@/lib/store";
 
 /* Archivo WITH the width axis (HANDOVER §3/§12): wdth 62..125, wght 400..800.
    next/font/google: omitting `weight` loads the full variable range;
@@ -32,9 +31,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
-      <body>
-        <ShopProvider>{children}</ShopProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
