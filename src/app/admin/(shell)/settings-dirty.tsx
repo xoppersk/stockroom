@@ -40,7 +40,10 @@ type SettingsDirtyContextValue = {
   dirtyIds: string[];
   dirtyCount: number;
   discard: () => void;
-  save: () => void;
+  /** Promotes draft → saved. When an onSave callback is present it may
+   *  veto the promotion by returning/resolving false (a rejected
+   *  server write keeps the fields dirty). Resolves true on success. */
+  save: () => Promise<boolean>;
 };
 
 const SettingsDirtyContext =
@@ -56,8 +59,10 @@ export function SettingsDirtyProvider({
   initialSaved: SettingsValues;
   /** Optional starting draft (defaults to the saved values). */
   initialDraft?: SettingsValues;
-  /** Called with the saved values when the user saves. */
-  onSave?: (values: SettingsValues) => void;
+  /** Called with the draft values when the user saves. Return false
+   *  (or a promise of false) to keep the draft dirty — e.g. when the
+   *  server write is rejected. */
+  onSave?: (values: SettingsValues) => boolean | void | Promise<boolean | void>;
   children: ReactNode;
 }) {
   const [savedValues, setSavedValues] = useState<SettingsValues>(initialSaved);
@@ -98,9 +103,12 @@ export function SettingsDirtyProvider({
     setValues(savedValues);
   }, [savedValues]);
 
-  const save = useCallback(() => {
+  const save = useCallback(async (): Promise<boolean> => {
+    const result = onSaveRef.current?.(values);
+    const ok = result instanceof Promise ? await result : result;
+    if (ok === false) return false;
     setSavedValues(values);
-    onSaveRef.current?.(values);
+    return true;
   }, [values]);
 
   /* Warn before leaving the page while changes are unsaved (§10).
@@ -203,11 +211,11 @@ export function SettingsDirtyProvider({
                 <button
                   type="button"
                   className="btn tape"
-                  onClick={() => {
+                  onClick={async () => {
                     const href = pendingHref;
-                    save();
+                    const ok = await save();
                     setPendingHref(null);
-                    router.push(href);
+                    if (ok) router.push(href);
                   }}
                 >
                   Save changes
