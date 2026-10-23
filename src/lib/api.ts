@@ -1,6 +1,12 @@
-/* Pure read API over the typed fixtures (HANDOVER §3/§9).
-   Every number a screen shows is derived here from src/data/*.json —
-   nothing is restated. Mutations live in lib/store.tsx. */
+/* Fixture read API (legacy) — re-export shim.
+ *
+ * The pure derivations that used to live here moved to src/lib/derive.ts
+ * (fixture-free; ruling 2). This module re-exports them bound to the
+ * fixture store so legacy consumers keep working unchanged, and keeps
+ * the fixture data exports. New admin-console code must import
+ * derivations from "@/lib/derive" and data from "@/lib/shop/admin" —
+ * never from here (this module imports src/data/*.json at module level).
+ */
 import shopJson from "@/data/shop.json";
 import teamJson from "@/data/team.json";
 import productsJson from "@/data/products.json";
@@ -12,10 +18,29 @@ import auditJson from "@/data/audit.json";
 import movementsJson from "@/data/movements.json";
 import settingsJson from "@/data/settings.json";
 import type {
-  AuditList, Customer, CustomersTotals, DashboardData, DashboardException, Discount,
-  DiscountTotals, InventorySummary, Order, OrdersSummary, PermissionRow, Product,
-  PurchaseOrder, RevenueDay, Shop, ShopSettings, Sku, StockMovement, TeamInvite, TeamMember,
+  AuditList, Customer, CustomersTotals, DashboardData, Discount,
+  DiscountTotals, Order, PermissionRow, Product, PurchaseOrder, Shop,
+  ShopSettings, Sku, StockMovement, TeamInvite, TeamMember,
 } from "./types";
+import {
+  averageOrderCents as averageOrderCentsPure,
+  dashboardFromData,
+  inventorySummary as inventorySummaryPure,
+  listSkus as listSkusPure,
+  restockProductCount as restockProductCountPure,
+} from "./derive";
+
+export {
+  availableOf,
+  deriveDiscountStatus,
+  deriveRefundStatus,
+  heldOrders,
+  isBelowReorder,
+  isOpenOrder,
+  liveSkus,
+  ordersSummary,
+} from "./derive";
+export type { DashboardContext } from "./derive";
 
 export const shop = shopJson as unknown as Shop;
 export const products = productsJson.products as unknown as Product[];
@@ -23,23 +48,6 @@ export const orders = ordersJson.orders as unknown as Order[];
 export const customers = customersJson.customers as unknown as Customer[];
 export const discounts = discountsJson.discounts as unknown as Discount[];
 export const purchaseOrders = purchaseOrdersJson.purchaseOrders as unknown as PurchaseOrder[];
-
-/* ---------------- stock helpers ---------------- */
-
-/** Available = on shelf − committed to paid orders (§10). */
-export function availableOf(v: { onShelf: number; committed: number }): number {
-  return v.onShelf - v.committed;
-}
-
-export function isBelowReorder(v: { onShelf: number; committed: number; reorderPoint: number }): boolean {
-  return availableOf(v) < v.reorderPoint;
-}
-
-/** SKUs in stock scope: archived products (the discontinued opener) are not
-    counted in the inventory tallies, matching the drawn "At zero 1". */
-function liveSkus(skus: Sku[]): Sku[] {
-  return skus.filter((s) => s.productStatus !== "archived");
-}
 
 /* ---------------- shop / team ---------------- */
 
@@ -55,7 +63,7 @@ export function getPermissionMatrix(): PermissionRow[] {
   return (teamJson as unknown as { permissionMatrix: PermissionRow[] }).permissionMatrix;
 }
 
-/* ---------------- catalogue & inventory ---------------- */
+/* ---------------- catalogue & inventory (fixture-bound) ---------------- */
 
 export function listProducts(): Product[] {
   return products;
@@ -66,43 +74,26 @@ export function getProduct(slug: string): Product | undefined {
 }
 
 export function listSkus(list: Product[] = products): Sku[] {
-  return list.flatMap((p) =>
-    p.variants.map((v) => ({
-      ...v,
-      productSlug: p.slug,
-      productName: p.name,
-      collection: p.collection,
-      productStatus: p.status,
-      backorder: p.backorder,
-    })),
-  );
+  return listSkusPure(list);
 }
 
+/** Legacy argument order (code, list?) — derive.getSku is (list, code). */
 export function getSku(code: string, list: Product[] = products): Sku | undefined {
-  return listSkus(list).find((s) => s.sku === code);
+  return listSkusPure(list).find((s) => s.sku === code);
 }
 
-export function inventorySummary(skus: Sku[] = listSkus()): InventorySummary {
-  const live = liveSkus(skus);
-  return {
-    belowReorder: live.filter(isBelowReorder).length,
-    atZero: live.filter((s) => availableOf(s) === 0).length,
-    countPending: live.filter((s) => s.countPending).length,
-    totalSkus: skus.length,
-    onHand: skus.reduce((sum, s) => sum + s.onShelf, 0),
-    committed: skus.reduce((sum, s) => sum + s.committed, 0),
-    arrivingThisWeek: purchaseOrders.reduce(
+export function inventorySummary(skus: Sku[] = listSkus()) {
+  return inventorySummaryPure(
+    skus,
+    purchaseOrders.reduce(
       (sum, po) => sum + po.lines.reduce((s, l) => s + l.qty, 0),
       0,
     ),
-  };
+  );
 }
 
-/** Products (not SKUs) with at least one variant below its reorder point. */
 export function restockProductCount(list: Product[] = products): number {
-  return list.filter(
-    (p) => p.status !== "archived" && p.variants.some(isBelowReorder),
-  ).length;
+  return restockProductCountPure(list);
 }
 
 export function listPurchaseOrders(): PurchaseOrder[] {
@@ -113,13 +104,7 @@ export function todaysMovements(): StockMovement[] {
   return movementsJson.movements as unknown as StockMovement[];
 }
 
-/* ---------------- orders ---------------- */
-
-const OPEN_STAGES = ["held", "to-pick", "packing", "ready"] as const;
-
-export function isOpenOrder(o: Order): boolean {
-  return (OPEN_STAGES as readonly string[]).includes(o.stage);
-}
+/* ---------------- orders (fixture-bound) ---------------- */
 
 export function listOrders(): Order[] {
   return orders;
@@ -129,112 +114,43 @@ export function getOrder(id: string): Order | undefined {
   return orders.find((o) => o.id === id);
 }
 
-export function ordersSummary(list: Order[] = orders): OrdersSummary {
-  const open = list.filter(isOpenOrder);
-  const fulfill = open.filter((o) => !o.hold);
-  return {
-    openCount: open.length,
-    openTotalCents: open.reduce((s, o) => s + o.totalCents, 0),
-    heldCount: open.filter((o) => o.hold).length,
-    toFulfillCount: fulfill.length,
-    pickCount: fulfill.filter((o) => o.stage === "to-pick").length,
-    packCount: fulfill.filter((o) => o.stage === "packing").length,
-    readyCount: fulfill.filter((o) => o.stage === "ready").length,
-    shippedTodayCount: list.filter((o) => o.stage === "shipped" && o.placedDay === "today").length,
-    refundsCount: list.filter(
-      (o) => o.paymentStatus === "partially-refunded" || o.paymentStatus === "refund-requested" || !!o.refundRequest,
-    ).length,
-  };
-}
+/* ---------------- dashboard (fixture-bound) ---------------- */
 
-export function heldOrders(list: Order[] = orders): Order[] {
-  return list.filter((o) => isOpenOrder(o) && o.hold);
-}
-
-/* ---------------- dashboard ---------------- */
-
-const TONE_RANK: Record<string, number> = { problem: 0, tape: 1, ink: 2, slate: 3, paid: 4, muted: 5 };
-
-export function dashboardData(list: Order[] = orders, skus: Sku[] = listSkus()): DashboardData {
-  const summary = ordersSummary(list);
-  const inv = inventorySummary(skus);
-
-  const exceptions: DashboardException[] = heldOrders(list).map((o) => ({
-    id: `EX-${o.id}`,
-    kind: "order" as const,
-    tone: o.hold!.tone,
-    orderId: o.id,
-    sku: o.hold!.sku ?? o.lines[0]?.sku ?? null,
-    stampLabel: o.hold!.title,
-    title: `${o.customerName} · ${o.lines.reduce((s, l) => s + l.qty, 0)} item${o.lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"} · $${(o.totalCents / 100).toFixed(2)}`,
-    reason: o.hold!.reason,
-    codesLabel: o.lines.map((l) => `${l.sku} ×${l.qty}`).join(" · "),
-    actorLabel: o.hold!.countedBy ? `${o.hold!.countedBy} · ${o.hold!.flaggedAtLabel ?? o.hold!.countedAtLabel}` : null,
-  }));
-
-  /* The sold-out variant exception (SM-TER), drawn as its own row on C-01. */
-  for (const s of liveSkus(skus).filter((x) => availableOf(x) === 0)) {
-    exceptions.push({
-      id: `EX-${s.sku}`,
-      kind: "stock",
-      tone: "problem",
-      orderId: null,
-      sku: s.sku,
-      stampLabel: "Out of stock",
-      title: `${s.productName} — ${s.label}`,
-      reason: `${availableOf(s)} on hand against a reorder point of ${s.reorderPoint}. The storefront shows it as sold out; ${s.committed} paid orders are reserved from the last delivery.`,
-      codesLabel: `last sold Oct 4 · ${getProduct(s.productSlug)?.sold30d ?? 0} sold in 30 days · ${s.incoming?.qty ?? 0} arriving Thursday`,
-      actorLabel: null,
-    });
-  }
-  /* Exceptions lead, sorted problem-first, then tape-ink (§5.3). */
-  exceptions.sort((a, b) => (TONE_RANK[a.tone] ?? 9) - (TONE_RANK[b.tone] ?? 9));
-
-  const queue = list
-    .filter((o) => isOpenOrder(o) && !o.hold)
-    .sort((a, b) => (a.shipByMinutes ?? 9999) - (b.shipByMinutes ?? 9999));
-
-  const days: RevenueDay[] = shop.last7Days.revenueByDay;
-  const belowSafety = liveSkus(skus).filter(
-    (s) => s.safetyPoint != null && availableOf(s) <= s.safetyPoint,
-  ).length;
-
-  return {
-    todayLabel: shop.todayLabel,
-    dayHeroLabel: shop.dayHeroLabel,
-    cutoffLabel: shop.cutoffLabel,
-    pipeline: {
-      shipped: summary.shippedTodayCount,
-      ready: summary.readyCount,
-      packing: summary.packCount,
-      toPick: summary.pickCount,
-    },
-    toGoToday: summary.toFulfillCount,
-    exceptions,
-    moreHeldCount: Math.max(0, exceptions.length - 4),
-    fulfillmentQueue: queue,
-    fulfillmentTotal: summary.toFulfillCount,
-    ledger7: {
+export function dashboardData(
+  list: Order[] = orders,
+  skus: Sku[] = listSkus(),
+): DashboardData {
+  return dashboardFromData({
+    orders: list,
+    skus,
+    days: shop.last7Days.revenueByDay,
+    shop: {
+      days: shop.last7Days.revenueByDay,
+      todayLabel: shop.todayLabel,
+      dayHeroLabel: shop.dayHeroLabel,
+      cutoffLabel: shop.cutoffLabel,
       rangeLabel: shop.last7Days.rangeLabel,
-      revenueCents: days.reduce((s, d) => s + d.revenueCents, 0),
-      revenueChangePct: shop.last7Days.revenueChangePct,
-      orders: days.reduce((s, d) => s + d.orders, 0),
-      ordersVsLastWeek: shop.last7Days.ordersVsLastWeek,
-      heldOrders: summary.heldCount,
-      lowStockSkus: inv.belowReorder,
-      belowSafety,
-      atZero: inv.atZero,
-      revenueByDay: days,
-      peakCents: Math.max(...days.map((d) => d.revenueCents)),
+      arrivingQty: purchaseOrders.reduce(
+        (sum, po) => sum + po.lines.reduce((s, l) => s + l.qty, 0),
+        0,
+      ),
+      watchSkus: ["SM-TER", "LA-CHR", "CT-NAT", "OSB-LG"],
+      sold30dBySlug: Object.fromEntries(products.map((p) => [p.slug, p.sold30d])),
+      // The fixture series is a single drawn week; the drawn change
+      // figures are reproduced by construction so legacy consumers see
+      // identical numbers: prev = current adjusted by the drawn pct.
+      prevRevenueCents: Math.round(
+        shop.last7Days.revenueByDay.reduce((s, d) => s + d.revenueCents, 0) /
+          (1 + shop.last7Days.revenueChangePct / 100),
+      ),
+      prevOrders:
+        shop.last7Days.revenueByDay.reduce((s, d) => s + d.orders, 0) -
+        shop.last7Days.ordersVsLastWeek,
     },
-    /* The watch panel's drawn set, in drawn order. */
-    inventoryWatch: ["SM-TER", "LA-CHR", "CT-NAT", "OSB-LG"]
-      .map((code) => skus.find((s) => s.sku === code))
-      .filter((s): s is Sku => !!s),
-  };
+  });
 }
 
-/* ---------------- customers ---------------- */
+/* ---------------- customers & discounts (fixture-bound) ---------------- */
 
 export function listCustomers(): Customer[] {
   return customers;
@@ -248,12 +164,9 @@ export function customersTotals(): CustomersTotals {
   return (customersJson as unknown as { totals: CustomersTotals }).totals;
 }
 
-/** Average order value in cents, rounded — $614 / 6 = $102.33 for Avery. */
 export function averageOrderCents(c: Customer): number {
-  return c.orderCount === 0 ? 0 : Math.round(c.spentCents / c.orderCount);
+  return averageOrderCentsPure(c);
 }
-
-/* ---------------- discounts ---------------- */
 
 export function listDiscounts(): Discount[] {
   return discounts;
