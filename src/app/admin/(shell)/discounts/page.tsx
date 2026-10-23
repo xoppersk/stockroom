@@ -1,12 +1,17 @@
 /* O-05 — /admin/discounts (screens/Discounts.html).
- * Totals come from discountsTotals(): $1,126 off $9,840 of orders in the
- * last 30 days, an average of 11.4%. Rows come from listDiscounts(). */
+ * Async server component: rows from listConsoleDiscounts() (uses and
+ * given-30d derived from discount_redemptions by the mapper), totals
+ * from getConsoleDiscountsTotals(). A paused discount keeps the
+ * 'ended' row slot but its stamp reads "Paused" (ruling 10). */
 
 import Link from "next/link";
 import { Button } from "@/components/sr/Button";
 import { CodeTag } from "@/components/sr/CodeTag";
 import { Stamp } from "@/components/sr/Stamp";
-import { discountsTotals, listDiscounts } from "@/lib/api";
+import {
+  getConsoleDiscountsTotals,
+  listConsoleDiscounts,
+} from "@/lib/shop/admin";
 import type { Discount } from "@/lib/types";
 import { money0 } from "@/lib/format";
 
@@ -21,14 +26,21 @@ interface RowVm {
   startsInLabel?: string;
   givenCents: number;
   status: Discount["status"];
+  paused: boolean;
+}
+
+function isPaused(d: Discount): boolean {
+  const extra = d as Discount & { paused?: boolean };
+  return extra.paused === true || d.endedReasonLabel === "Paused";
 }
 
 function rowOf(d: Discount): RowVm {
+  const paused = isPaused(d);
   return {
     code: d.code,
     title: d.whatLabel,
     detail:
-      d.status === "ended" && d.endedReasonLabel
+      d.status === "ended" && d.endedReasonLabel && !paused
         ? d.endedReasonLabel
         : d.whoLabel,
     whenLabel: d.whenLabel,
@@ -44,12 +56,16 @@ function rowOf(d: Discount): RowVm {
     startsInLabel: d.startsInLabel,
     givenCents: d.givenCents30d,
     status: d.status,
+    paused,
   };
 }
 
-export default function DiscountsPage() {
-  const discounts = listDiscounts().map(rowOf);
-  const totals = discountsTotals();
+export default async function DiscountsPage() {
+  const [list, totals] = await Promise.all([
+    listConsoleDiscounts(),
+    getConsoleDiscountsTotals(),
+  ]);
+  const discounts = list.map(rowOf);
   const running = discounts.filter((d) => d.status === "running").length;
   const scheduled = discounts.filter((d) => d.status === "scheduled").length;
 
@@ -62,8 +78,14 @@ export default function DiscountsPage() {
             <span className="ops-sub">
               {running} running and {scheduled} scheduled. In the last 30 days
               discounts took {money0(totals.givenCents30d)} off{" "}
-              {money0(totals.ordersCents30d)} of orders, an average of{" "}
-              {totals.avgPct}%.
+              {totals.ordersCents30d > 0 ? (
+                <>
+                  {money0(totals.ordersCents30d)} of orders, an average of{" "}
+                  {totals.avgPct}%.
+                </>
+              ) : (
+                <>orders.</>
+              )}
             </span>
           </div>
           <div className="ops-stats" aria-hidden="true">
@@ -85,7 +107,7 @@ export default function DiscountsPage() {
             </div>
           </div>
           <div>
-            <Button variant="tape" href="/admin/discounts/FREESHIP75">
+            <Button variant="tape" href="/admin/discounts/new">
               Create discount
             </Button>
           </div>
@@ -152,7 +174,9 @@ export default function DiscountsPage() {
                       )}
                     </span>
                     <span role="cell">
-                      {d.status === "running" ? (
+                      {d.paused ? (
+                        <Stamp tone="muted">Paused</Stamp>
+                      ) : d.status === "running" ? (
                         <Stamp tone="paid">Running</Stamp>
                       ) : d.status === "scheduled" ? (
                         <Stamp tone="tape">Scheduled</Stamp>
@@ -164,6 +188,11 @@ export default function DiscountsPage() {
                 ))}
               </div>
             </div>
+            {discounts.length === 0 && (
+              <div style={{ padding: "18px 20px" }}>
+                <span>No discount codes yet. Create the first one above.</span>
+              </div>
+            )}
           </section>
           <p className="ops-rule-note">
             Only one code applies per order. Wholesale prices never combine
