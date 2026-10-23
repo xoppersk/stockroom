@@ -3,37 +3,33 @@
    who / range), the "{total} entries · {shown} shown" count is
    derived from the filtered list, entries are grouped under day
    headers, and Export CSV downloads the filtered entries as a real
-   CSV. Live entries recorded in the client store's audit slice are
-   prepended under Today. Entries can't be edited or deleted. */
+   CSV. Entries come from audit_log via the server page (admin-read
+   RLS); a non-admin actor gets the empty set and the restricted
+   state below. Ranges compute from the REAL today (ruling 8).
+   Entries can't be edited or deleted. */
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/sr/Button";
 import { AuditDayHeader, AuditEntryRow } from "@/components/sr/AuditEntryRow";
-import { useShopState } from "@/lib/store";
-import {
-  normalizeLiveAuditEntry,
-  type AuditEntry,
-  type AuditSegment,
-} from "../admin-data";
+import type { AuditEntry, AuditSegment } from "../admin-data";
 
-const WHO_OPTIONS = [
-  "Anyone",
-  "Sheku Koroma",
-  "Kofi Mensah",
-  "Rosa Delgado",
-  "Ben Hart",
-  "System",
-];
 const KIND_OPTIONS = ["All kinds", "Stock", "Money", "Prices and cost", "Access"];
 const RANGE_OPTIONS = ["Last 7 days", "Last 30 days", "This quarter"];
 
-/* Range lower bounds against the shop's today (Tue, Oct 6, 2026). */
-const RANGE_FROM: Record<string, string> = {
-  "Last 7 days": "2026-09-30",
-  "Last 30 days": "2026-09-06",
-  "This quarter": "2026-10-01",
-};
+/* Range lower bounds against the real today. */
+function rangeFrom(range: string): string {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (range === "Last 30 days") d.setDate(d.getDate() - 29);
+  else if (range === "This quarter")
+    d.setTime(new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1).getTime());
+  else d.setDate(d.getDate() - 6);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 function renderSegment(segment: AuditSegment, index: number) {
   switch (segment.t) {
@@ -70,19 +66,22 @@ export default function AuditClient({
   entries,
   total,
   shown,
+  actorIsAdmin,
 }: {
   entries: AuditEntry[];
   total: number;
-  /** Page size from listAudit() — 9 as drawn; "Load 20 more" raises it. */
+  /** Page size from listConsoleAudit(); "Load 20 more" raises it. */
   shown: number;
+  actorIsAdmin: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const shop = useShopState() as unknown as {
-    audit?: unknown[];
-    auditLog?: unknown[];
-  };
+
+  const whoOptions = useMemo(
+    () => ["Anyone", ...Array.from(new Set(entries.map((e) => e.who)))],
+    [entries],
+  );
 
   const qParam = params.get("q") ?? "";
   const kind = params.get("kind") ?? "All kinds";
@@ -102,31 +101,10 @@ export default function AuditClient({
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
-  const liveEntries = useMemo(() => {
-    /* The store's audit slice starts as a copy of listAudit() and gains
-       AU-LOCAL entries as the session records changes — anything whose
-       id is not in the fixture list is live and gets prepended. */
-    const log = Array.isArray(shop?.audit)
-      ? shop.audit
-      : Array.isArray(shop?.auditLog)
-        ? shop.auditLog
-        : [];
-    const fixtureIds = new Set(entries.map((e) => e.id));
-    return log
-      .map((entry, i) => normalizeLiveAuditEntry(entry, i))
-      .filter((entry) => !fixtureIds.has(entry.id));
-  }, [shop?.audit, shop?.auditLog, entries]);
-
-  const allEntries = useMemo(
-    () => [...liveEntries, ...entries],
-    [liveEntries, entries],
-  );
-  const totalCount = total + liveEntries.length;
-
   const filtered = useMemo(() => {
     const needle = qParam.trim().toLowerCase();
-    const from = RANGE_FROM[range] ?? "2026-09-30";
-    return allEntries.filter((entry) => {
+    const from = rangeFrom(range);
+    return entries.filter((entry) => {
       if (needle && !`${entry.who} ${entry.plain}`.toLowerCase().includes(needle)) {
         return false;
       }
@@ -135,10 +113,9 @@ export default function AuditClient({
       if (entry.dateISO < from) return false;
       return true;
     });
-  }, [allEntries, qParam, kind, who, range]);
+  }, [entries, qParam, kind, who, range]);
 
-  /* Visible window: the drawn 9 by default (the screen's entries, in
-     screen order, per normalizeAudit); "Load 20 more" widens it.
+  /* Visible window: `shown` by default; "Load 20 more" widens it.
      Changing any filter resets the window. */
   const [limit, setLimit] = useState(shown);
   useEffect(() => {
@@ -186,6 +163,8 @@ export default function AuditClient({
     a.remove();
     URL.revokeObjectURL(url);
   };
+
+  const restricted = entries.length === 0 && !actorIsAdmin;
 
   return (
     <div className="adm-settings-main adm-settings-main--tight">
@@ -239,7 +218,7 @@ export default function AuditClient({
           value={who}
           onChange={(e) => setParam("who", e.target.value, "Anyone")}
         >
-          {WHO_OPTIONS.map((option) => (
+          {whoOptions.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
@@ -257,7 +236,7 @@ export default function AuditClient({
           ))}
         </select>
         <span className="adm-filters-count" role="status">
-          {totalCount} entries · {visible.length} shown
+          {total} entries · {visible.length} shown
         </span>
       </div>
 
@@ -293,7 +272,13 @@ export default function AuditClient({
               </div>
             ))}
             {visible.length === 0 ? (
-              <div className="adm-empty-note">No entries match those filters.</div>
+              <div className="adm-empty-note">
+                {restricted
+                  ? "Audit history is only visible to the Owner — your role can work in the console, but these entries are restricted."
+                  : entries.length === 0
+                    ? "No audit entries yet."
+                    : "No entries match those filters."}
+              </div>
             ) : null}
           </div>
         </div>
