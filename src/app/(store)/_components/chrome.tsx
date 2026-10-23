@@ -29,10 +29,10 @@ function CartIcon() {
   return (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8z" /><path d="M5.5 5.5V4.5a2.5 2.5 0 0 1 5 0v1" /></svg>);
 }
 
-export function StoreHeader() {
+export function StoreHeader({ accountNav }: { accountNav?: React.ReactNode }) {
   const pathname = usePathname();
   const { count } = useShopCart();
-  const onCollection = pathname?.startsWith("/collections/kitchen-textiles");
+  const onCollection = pathname?.startsWith("/collections/");
   return (
     <>
       <div className="announce">
@@ -42,14 +42,17 @@ export function StoreHeader() {
         <div className="swrap sheader-in">
           <Wordmark />
           <nav aria-label="Shop" className="shopnav">
-            <Link href="/collections/kitchen-textiles" className="nl" aria-current={onCollection ? "page" : undefined}>Kitchen textiles</Link>
-            <Link href="/collections/tableware" className="nl">Tableware</Link>
-            <Link href="/collections/home" className="nl">Home</Link>
+            <Link href="/collections/kitchen-dining" className="nl" aria-current={onCollection ? "page" : undefined}>Kitchen &amp; Dining</Link>
+            <Link href="/collections/home-textiles" className="nl">Home Textiles</Link>
+            <Link href="/collections/lighting" className="nl">Lighting</Link>
+            <Link href="/collections/decor" className="nl">Decor</Link>
             <Link href="/#workshop" className="nl">The workshop</Link>
           </nav>
           <div className="head-actions">
             <a href="#" className="nl"><SearchIcon />Search</a>
-            <a href="#" className="nl"><AccountIcon />Account</a>
+            {accountNav ?? (
+              <Link href="/account/login" className="nl"><AccountIcon />Sign in</Link>
+            )}
             <Link href="/cart" className="nl" aria-label={`Cart (${count})`}><CartIcon />Cart <span className="cnt" aria-hidden="true">{count}</span></Link>
           </div>
         </div>
@@ -71,7 +74,7 @@ export function StoreSlimHeader({ right }: { right: React.ReactNode }) {
 }
 
 export function KeepShoppingLink() {
-  return (<Link href="/collections/kitchen-textiles" className="nl"><ArrowLeft />Keep shopping</Link>);
+  return (<Link href="/collections/kitchen-dining" className="nl"><ArrowLeft />Keep shopping</Link>);
 }
 
 /** StoreFooter — "full" (home/collection/product): wordmark, address + pickup
