@@ -111,7 +111,7 @@ export default function ProductClient({
         <div className="swrap prod-wrap">
           <div className="panel" style={{ padding: 24 }}>
             <h1 style={{ marginTop: 0 }}>This product isn’t on sale</h1>
-            <p style={{ fontSize: 15, lineHeight: 1.6 }}>“{slug.replace(/-/g, " ")}” isn’t in the live catalogue — it may have been unpublished or the link is old.</p>
+            <p style={{ fontSize: 15, lineHeight: 1.6 }}>“{slug.replace(/-/g, " ")}" isn’t in the live catalogue — it may have been unpublished or the link is old.</p>
             <Link href="/" className="sbtn ol">Back to the shop</Link>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function ProductClient({
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
               <button type="submit" className="sbtn" disabled={blocked || busy} aria-disabled={blocked || busy || undefined} title={soldOut ? "Sold out" : undefined}>
-                {soldOut ? `Sold out in ${variant?.title}` : busy ? "Adding…” : <>Add to cart · <span className="mono" style={{ fontSize: 15 }}>{money(price * qty, { decimals: false })}</span></>}
+                {soldOut ? `Sold out in ${variant?.title}` : busy ? "Adding…" : <>Add to cart · <span className="mono" style={{ fontSize: 15 }}>{money(price * qty, { decimals: false })}</span></>}
               </button>
             </form>
             {added && <p role="status" style={{ margin: 0, fontSize: 14 }}>Added to your cart.</p>}
