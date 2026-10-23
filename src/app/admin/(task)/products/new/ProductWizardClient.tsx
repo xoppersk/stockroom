@@ -284,7 +284,6 @@ export default function ProductWizardClient({ collections }: { collections: stri
                         <button type="button" aria-label={`Remove ${p}`} onClick={() => setPatterns(patterns.filter((x) => x !== p))}>×</button>
                       </span>
                     ))}
-                    ))}
                     <input
                       id="o2"
                       className="cc-in cc-chip-input"
