@@ -1,51 +1,155 @@
 "use client";
-/* A-04 sign-in form, drawn in its ERROR state exactly as Login.html:
-   the role="alert" banner, the password field with aria-invalid and a
-   problem border, and the email pre-filled. Demo behaviour: submitting
-   keeps the drawn error state (there is no staff backend in this
-   phase). The "Email me a sign-in link" option answers with the same
-   sentence whether or not the email has an account — no
-   account-existence leak. */
+/* A-04 staff sign-in — REAL Supabase Auth (replaces the fixture form that
+   shipped pre-filled credentials in a permanently drawn error state).
+ *
+ * Flow: signInWithPassword, then rpc('current_role') — the SECURITY
+ * DEFINER lookup over public.user_roles. A null role means the account
+ * exists but has no staff access: we sign it straight back out and say so.
+ * The (shell) layout re-checks the same gate server-side on every console
+ * page, so this form is never the only line of defence.
+ *
+ * The "Email me a sign-in link" option uses signInWithOtp with
+ * shouldCreateUser:false and answers with the same sentence whether or
+ * not the email has an account — no account-existence leak. Magic links
+ * land back here with a code, which the mount effect exchanges before
+ * running the same role check. */
 
-import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
-export default function LoginForm() {
+import { createClient } from "@/lib/supabase/client";
+import { establishSessionFromUrl } from "@/lib/supabase/url-session";
+
+const NO_ACCESS = "This account has no staff access.";
+
+function AlertIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="#B91C1C"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 1.8 14.6 13.5H1.4z" />
+      <path d="M8 6.2v3.6M8 11.6v.4" />
+    </svg>
+  );
+}
+
+export default function LoginForm({ denied = false }: { denied?: boolean }) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(denied ? NO_ACCESS : null);
+  const [pending, setPending] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
+  const [linkPending, setLinkPending] = useState(false);
+  const exchangeRan = useRef(false);
+
+  /** After any successful sign-in: role-check, then enter or eject. */
+  async function enterConsoleIfStaff(): Promise<boolean> {
+    const supabase = createClient();
+    const { data: role, error: roleError } = await supabase.rpc("current_role");
+    if (!roleError && typeof role === "string" && role.length > 0) {
+      router.replace("/admin");
+      router.refresh();
+      return true;
+    }
+    await supabase.auth.signOut();
+    setError(NO_ACCESS);
+    return false;
+  }
+
+  // Magic-link / confirmation landings arrive with ?code= — exchange it,
+  // then run the same role gate as a password sign-in.
+  useEffect(() => {
+    if (exchangeRan.current) return;
+    exchangeRan.current = true;
+    const supabase = createClient();
+    void establishSessionFromUrl(supabase).then(async (outcome) => {
+      if (outcome.kind === "session") {
+        await enterConsoleIfStaff();
+      } else if (outcome.kind === "error") {
+        setError(
+          "That sign-in link didn't work — it may have expired or already been used. Sign in with your password instead.",
+        );
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    setLinkSent(false);
+
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setError(
+        signInError.message === "Invalid login credentials"
+          ? "That email and password don't match. Check for typos, or reset your password."
+          : signInError.message,
+      );
+      setPending(false);
+      return;
+    }
+
+    await enterConsoleIfStaff();
+    setPending(false);
+  }
+
+  async function onMagicLink() {
+    if (email.trim() === "") {
+      setError("Enter your email above first — the sign-in link is sent to that address.");
+      return;
+    }
+    setLinkPending(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/admin/login`,
+      },
+    });
+
+    if (otpError) {
+      setError(otpError.message);
+      setLinkPending(false);
+      return;
+    }
+
+    setLinkSent(true);
+    setLinkPending(false);
+  }
 
   return (
-    <form
-      className="adm-login-form"
-      aria-labelledby="si"
-      onSubmit={(e) => {
-        /* Demo: the form stays in its drawn error state. */
-        e.preventDefault();
-      }}
-    >
+    <form className="adm-login-form" aria-labelledby="si" onSubmit={onSubmit}>
       <div className="adm-login-form-head">
         <h1 id="si">Sign in</h1>
         <span className="adm-login-form-sub">To your store’s Stockroom.</span>
       </div>
 
-      <div role="alert" className="adm-login-alert">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="#B91C1C"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M8 1.8 14.6 13.5H1.4z" />
-          <path d="M8 6.2v3.6M8 11.6v.4" />
-        </svg>
-        <span>
-          <b>That email and password don’t match.</b> Check for typos, or reset
-          your password. After 5 tries we pause sign-in for 15 minutes.
-        </span>
-      </div>
+      {error ? (
+        <div role="alert" className="adm-login-alert">
+          <AlertIcon />
+          <span>{error}</span>
+        </div>
+      ) : null}
 
       <div>
         <label htmlFor="em" className="adm-login-lb">
@@ -55,34 +159,32 @@ export default function LoginForm() {
           id="em"
           className="adm-login-input"
           type="email"
-          defaultValue="kofi@sevynlabs.io"
           autoComplete="username"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
       <div>
         <div className="adm-login-lb">
           <label htmlFor="pw">Password</label>
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            Forgot it?
-          </a>
+          <Link href="/account/reset-password">Forgot it?</Link>
         </div>
         <input
           id="pw"
-          className="adm-login-input adm-login-input--error"
+          className={`adm-login-input${error ? " adm-login-input--error" : ""}`}
           type="password"
-          defaultValue="••••••••••"
           autoComplete="current-password"
-          aria-invalid="true"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          aria-invalid={error ? true : undefined}
         />
       </div>
 
-      <label className="adm-login-keep">
-        <input type="checkbox" /> Keep me signed in on this device for 14 days
-      </label>
-
-      <button type="submit" className="adm-login-submit">
-        Sign in
+      <button type="submit" className="adm-login-submit" disabled={pending}>
+        {pending ? "Signing in…" : "Sign in"}
       </button>
 
       <div className="adm-login-divider" aria-hidden="true">
@@ -92,7 +194,8 @@ export default function LoginForm() {
       <button
         type="button"
         className="adm-login-alt"
-        onClick={() => setLinkSent(true)}
+        onClick={onMagicLink}
+        disabled={linkPending}
       >
         <svg
           width="15"
@@ -108,7 +211,7 @@ export default function LoginForm() {
           <rect x="1.5" y="3.5" width="13" height="9" rx="1" />
           <path d="m2 4.2 6 4.6 6-4.6" />
         </svg>
-        Email me a sign-in link
+        {linkPending ? "Sending…" : "Email me a sign-in link"}
       </button>
 
       {linkSent ? (
