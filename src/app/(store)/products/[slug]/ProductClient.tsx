@@ -111,7 +111,7 @@ export default function ProductClient({
         <div className="swrap prod-wrap">
           <div className="panel" style={{ padding: 24 }}>
             <h1 style={{ marginTop: 0 }}>This product isn’t on sale</h1>
-            <p style={{ fontSize: 15, lineHeight: 1.6 }}>“{slug.replace(/-/g, " ")}" isn’t in the live catalogue — it may have been unpublished or the link is old.</p>
+            <p style={{ fontSize: 15, lineHeight: 1.6 }}>“{slug.replace(/-/g, " ")}” isn’t in the live catalogue — it may have been unpublished or the link is old.</p>
             <Link href="/" className="sbtn ol">Back to the shop</Link>
           </div>
         </div>
