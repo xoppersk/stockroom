@@ -1,283 +1,235 @@
-/* Canon tests: every §9 number must derive from the fixtures, and the
-   store's ledger mutations must behave per §10. */
+/* Ledger tests, rewritten for the console DB rewire.
+ *
+ * The old suite asserted canon numbers drawn from the v2 FIXTURES
+ * (96 SKUs / 25 open orders / $18,420 week …). Those counts were
+ * properties of the drawn dataset, not of the code. This suite asserts
+ * the same DERIVATIONS and INVARIANTS over a small hand-built view
+ * dataset whose expectations are computed by hand in the comments;
+ * DB-row → view mapping is covered by src/lib/shop/admin.test.ts, and
+ * the store-mutation behaviours that used to live in lib/store.tsx are
+ * mapped in the W-DATA log's test-mapping table (ported / PGlite /
+ * demo-theatre) — no assertion was silently dropped.
+ */
 import { describe, expect, it } from "vitest";
 import {
-  availableOf, averageOrderCents, customersTotals, dashboardData, discountsTotals,
-  getCustomer, getDiscount, getOrder, getSku, getTeam, inventorySummary, listAudit,
-  listOrders, listPurchaseOrders, listSkus, ordersSummary, restockProductCount,
-} from "./api";
-import { createShopStore } from "./store";
-import { shopNow } from "./clock";
+  availableOf,
+  averageOrderCents,
+  customersTotalsFrom,
+  dashboardFromData,
+  deriveDiscountStatus,
+  deriveRefundStatus,
+  discountsTotalsFrom,
+  getSku,
+  heldOrders,
+  inventorySummary,
+  isBelowReorder,
+  isOpenOrder,
+  listSkus,
+  ordersSummary,
+  restockProductCount,
+} from "./derive";
+import type { Customer, Discount, Order, Product, RevenueDay } from "./types";
 
-describe("inventory canon (§9)", () => {
-  it("derives 96 SKUs, 18 below reorder, 1 at zero, 1 count pending, 1,284 on hand", () => {
-    const s = inventorySummary();
-    expect(s.totalSkus).toBe(96);
-    expect(s.belowReorder).toBe(18);
-    expect(s.atZero).toBe(1);
-    expect(s.countPending).toBe(1);
-    expect(s.onHand).toBe(1284);
-    expect(s.committed).toBe(31);
-    expect(s.arrivingThisWeek).toBe(140);
-    expect(restockProductCount()).toBe(11);
-  });
+/* ---------------- hand-built view dataset ----------------
+ * SKUs: A-1 avail 3 (below reorder 5) · A-2 avail 0 · B-1 avail 7 ·
+ *       Z-9 archived avail 0 (excluded from live tallies)
+ * Orders: O-1 open to-pick $100 · O-2 open held $50 · O-3 open packing
+ *         $30 · O-4 shipped today $80 · O-5 delivered $60 ·
+ *         O-6 open ready $20, partially refunded
+ * Open = O-1,O-2,O-3,O-6 → 4 open, $200 total, 1 held, 3 to fulfill
+ * (1 pick / 1 pack / 1 ready). */
 
-  it("available = on shelf − committed for every SKU, never negative", () => {
-    for (const sku of listSkus()) {
-      expect(availableOf(sku)).toBe(sku.onShelf - sku.committed);
-      expect(availableOf(sku)).toBeGreaterThanOrEqual(0);
+const PRODUCTS: Product[] = [
+  {
+    slug: "alpha", name: "Alpha", collection: "C1", status: "active",
+    priceCents: 1000, sold30d: 9, storefront: "Visible", backorder: false,
+    supplier: null, description: null,
+    variants: [
+      { sku: "A-1", label: "One", shelf: "S-1", onShelf: 8, committed: 5, reorderPoint: 5, priceCents: 1000, costCents: 400 },
+      { sku: "A-2", label: "Two", shelf: "S-1", onShelf: 4, committed: 4, reorderPoint: 6, priceCents: 1000, costCents: 400, safetyPoint: 2 },
+    ],
+  },
+  {
+    slug: "beta", name: "Beta", collection: "C1", status: "active",
+    priceCents: 2000, sold30d: 3, storefront: "Visible", backorder: false,
+    supplier: null, description: null,
+    variants: [
+      { sku: "B-1", label: "One", shelf: "S-2", onShelf: 9, committed: 2, reorderPoint: 3, priceCents: 2000, costCents: null },
+    ],
+  },
+  {
+    slug: "zed", name: "Zed", collection: "C2", status: "archived",
+    priceCents: 500, sold30d: 0, storefront: "Hidden", backorder: false,
+    supplier: null, description: null,
+    variants: [
+      { sku: "Z-9", label: "Old", shelf: "", onShelf: 0, committed: 0, reorderPoint: 5, priceCents: 500, costCents: null },
+    ],
+  },
+];
+
+function order(p: Partial<Order> & { id: string }): Order {
+  return {
+    uuid: `uuid-${p.id}`, customerSlug: null, customerName: "Test",
+    placedLabel: "Oct 6", placedDay: "today", channel: "online",
+    stage: "to-pick", stageLabel: "To pick", shipByLabel: "2:00 PM",
+    shipByMinutes: 840, lines: [{ sku: "A-1", label: "Alpha — One", qty: 1, unitPriceCents: 1000 }],
+    subtotalCents: 1000, shippingCents: 0, taxCents: 0, totalCents: 1000,
+    paymentStatus: "paid", hold: null, refundedCents: 0, ...p,
+  };
+}
+const ORDERS: Order[] = [
+  order({ id: "O-1", totalCents: 10000, subtotalCents: 10000, shipByMinutes: 900 }),
+  order({
+    id: "O-2", totalCents: 5000, subtotalCents: 5000, stage: "held", stageLabel: "Stock hold",
+    hold: { kind: "stock", tone: "tape", title: "Stock hold", reason: "Short.", sku: "A-2" },
+  }),
+  order({ id: "O-3", totalCents: 3000, subtotalCents: 3000, stage: "packing", stageLabel: "Packing", shipByMinutes: 300 }),
+  order({ id: "O-4", totalCents: 8000, subtotalCents: 8000, stage: "shipped", stageLabel: "Shipped" }),
+  order({ id: "O-5", totalCents: 6000, subtotalCents: 6000, stage: "delivered", stageLabel: "Delivered", placedDay: "earlier" }),
+  order({ id: "O-6", totalCents: 2000, subtotalCents: 2000, stage: "ready", stageLabel: "Ready", paymentStatus: "partially-refunded", refundedCents: 500, shipByMinutes: 600 }),
+];
+
+describe("inventory derivations", () => {
+  it("available = onShelf − committed, and below-reorder uses available", () => {
+    const skus = listSkus(PRODUCTS);
+    for (const s of skus) {
+      expect(availableOf(s)).toBe(s.onShelf - s.committed);
+      expect(availableOf(s)).toBeGreaterThanOrEqual(0);
     }
+    expect(isBelowReorder(skus.find((s) => s.sku === "A-1")!)).toBe(true); // 3 < 5
+    expect(isBelowReorder(skus.find((s) => s.sku === "B-1")!)).toBe(false); // 7 ≥ 3
   });
 
-  it("SM-TER is the zero: available 0, committed 2, 48 arriving Thu on PO-0214, waitlist 11", () => {
-    const ter = getSku("SM-TER")!;
-    expect(availableOf(ter)).toBe(0);
-    expect(ter.committed).toBe(2);
-    expect(ter.onShelf).toBe(2);
-    expect(ter.incoming).toMatchObject({ qty: 48, poId: "PO-0214" });
-    expect(ter.waitlist).toBe(11);
-    expect(getSku("SM-MOS")).toMatchObject({ onShelf: 11 });
-    expect(getSku("SM-WHT")).toMatchObject({ onShelf: 23, committed: 1 });
+  it("summary tallies exclude archived SKUs from live counts only", () => {
+    const s = inventorySummary(listSkus(PRODUCTS), 25);
+    expect(s.totalSkus).toBe(4);
+    expect(s.belowReorder).toBe(2); // A-1, A-2 — not Z-9
+    expect(s.atZero).toBe(1); // A-2 — not Z-9
+    expect(s.onHand).toBe(21); // 8+4+9+0, all SKUs
+    expect(s.committed).toBe(11); // 5+4+2+0
+    expect(s.arrivingThisWeek).toBe(25); // the parameter, verbatim
+    expect(restockProductCount(PRODUCTS)).toBe(1); // Alpha only
   });
 
-  it("LA-CHR has 3 available and 24 arriving Fri on PO-0215; CT-NAT count is pending", () => {
-    const chr = getSku("LA-CHR")!;
-    expect(availableOf(chr)).toBe(3);
-    expect(chr.incoming).toMatchObject({ qty: 24, poId: "PO-0215" });
-    const ct = getSku("CT-NAT")!;
-    expect(availableOf(ct)).toBe(5);
-    expect(ct.countPending).toBe(true);
-  });
-
-  it("purchase orders carry the drawn units: PO-0214 72, PO-0215 68", () => {
-    const pos = listPurchaseOrders();
-    const total = (id: string) => pos.find((p) => p.id === id)!.lines.reduce((s, l) => s + l.qty, 0);
-    expect(total("PO-0214")).toBe(72);
-    expect(total("PO-0215")).toBe(68);
+  it("getSku(list, code) finds by code across products", () => {
+    expect(getSku(PRODUCTS, "B-1")?.productSlug).toBe("beta");
+    expect(getSku(PRODUCTS, "NOPE")).toBeUndefined();
+    expect(listSkus(PRODUCTS)).toHaveLength(4);
   });
 });
 
-describe("orders canon (§9)", () => {
-  it("derives 25 open worth $3,184.50, 7 held, 18 to fulfill (9 pick / 5 pack / 4 ready), 23 shipped today", () => {
-    const s = ordersSummary();
-    expect(s.openCount).toBe(25);
-    expect(s.openTotalCents).toBe(318450);
-    expect(s.heldCount).toBe(7);
-    expect(s.toFulfillCount).toBe(18);
-    expect(s.pickCount).toBe(9);
-    expect(s.packCount).toBe(5);
-    expect(s.readyCount).toBe(4);
-    expect(s.shippedTodayCount).toBe(23);
-    expect(s.refundsCount).toBe(2);
+describe("order derivations", () => {
+  it("open set is exactly held + fulfill; stages partition the summary", () => {
+    const s = ordersSummary(ORDERS);
+    expect(s.openCount).toBe(4);
+    expect(s.openTotalCents).toBe(20000);
+    expect(s.heldCount).toBe(1);
+    expect(s.toFulfillCount).toBe(3);
+    expect(s.openCount).toBe(s.heldCount + s.toFulfillCount);
+    expect(s.pickCount).toBe(1);
+    expect(s.packCount).toBe(1);
+    expect(s.readyCount).toBe(1);
+    expect(s.shippedTodayCount).toBe(1); // O-4 shipped + placed today
+    expect(s.refundsCount).toBe(1); // O-6 partially refunded
+    expect(heldOrders(ORDERS).map((o) => o.id)).toEqual(["O-2"]);
+    expect(ORDERS.filter(isOpenOrder).map((o) => o.id)).toEqual(["O-1", "O-2", "O-3", "O-6"]);
   });
 
-  it("key orders carry exact line math", () => {
-    const check = (id: string, total: number) => {
-      const o = getOrder(id)!;
-      expect(o.subtotalCents + o.shippingCents + o.taxCents).toBe(total);
-      expect(o.totalCents).toBe(total);
-      expect(o.lines.reduce((s, l) => s + l.qty * l.unitPriceCents, 0)).toBe(o.subtotalCents);
-    };
-    check("ORD-1048", 12800); // $64 + $46 + $11.40 + $6.60
-    check("ORD-1046", 21400); // $190 + $12.60 + $11.40
-    check("ORD-1053", 11580); // $64 + $36 + $9.80 + $6.00
-    check("ORD-1050", 13568);
-    check("ORD-1052", 7632);
-  });
-
-  it("ORD-1046 is a recoverable declined payment: attempt 1 of 3, nothing deducted", () => {
-    const o = getOrder("ORD-1046")!;
-    expect(o.paymentStatus).toBe("failed");
-    expect(o.payment).toMatchObject({ attempts: 1, maxAttempts: 3, lastAttemptLabel: "8:15 AM" });
-    expect(o.hold?.kind).toBe("payment");
-    /* The set-aside board was NOT deducted from stock. */
-    expect(getSku("OSB-LG")).toMatchObject({ onShelf: 34, committed: 0 });
-  });
-
-  it("ORD-1048 is held on the B-14 tote count: system 5, counted 4", () => {
-    const o = getOrder("ORD-1048")!;
-    expect(o.hold).toMatchObject({ kind: "stock", sku: "CT-NAT", shelf: "B-14", systemCount: 5, countedCount: 4 });
-  });
-
-  it("every order total is positive and open orders are exactly the held + fulfill sets", () => {
-    for (const o of listOrders()) expect(o.totalCents).toBeGreaterThan(0);
+  it("refund status derives from money alone", () => {
+    expect(deriveRefundStatus(0, 5000)).toBeNull();
+    expect(deriveRefundStatus(1, 5000)).toBe("partially-refunded");
+    expect(deriveRefundStatus(4999, 5000)).toBe("partially-refunded");
+    expect(deriveRefundStatus(5000, 5000)).toBe("refunded");
+    expect(deriveRefundStatus(6000, 5000)).toBe("refunded");
   });
 });
 
-describe("dashboard + ledger (§9, C-01)", () => {
-  it("last 7 days: 146 orders, $18,420 net revenue, dip day labelled 'Mug out', peak $3,820", () => {
-    const d = dashboardData();
-    expect(d.ledger7.orders).toBe(146);
-    expect(d.ledger7.revenueCents).toBe(1842000);
-    expect(d.ledger7.revenueChangePct).toBe(8.4);
-    expect(d.ledger7.heldOrders).toBe(7);
-    expect(d.ledger7.lowStockSkus).toBe(18);
-    expect(d.ledger7.belowSafety).toBe(6);
-    expect(d.ledger7.atZero).toBe(1);
-    expect(d.ledger7.peakCents).toBe(382000);
-    /* Screen truth (Main.html aria-label): peak is Oct 2 ($3,820); the
-       "Mug out" dip is Oct 4 ($2,310). Today ($1,350 so far) is partial. */
-    const peakDay = d.ledger7.revenueByDay.reduce((a, b) => (b.revenueCents > a.revenueCents ? b : a));
-    expect(peakDay.dateISO).toBe("2026-10-02");
-    const dip = d.ledger7.revenueByDay.find((x) => x.note === "Mug out");
-    expect(dip?.dateISO).toBe("2026-10-04");
-    expect(dip?.revenueCents).toBe(231000);
-    expect(d.ledger7.revenueByDay).toHaveLength(7);
+describe("dashboard derivation", () => {
+  const days: RevenueDay[] = [
+    { dateISO: "2026-09-30", dateLabel: "Sep 30", dayLabel: "30", orders: 10, revenueCents: 100000 },
+    { dateISO: "2026-10-01", dateLabel: "Oct 1", dayLabel: "1", orders: 10, revenueCents: 100000 },
+    { dateISO: "2026-10-02", dateLabel: "Oct 2", dayLabel: "2", orders: 10, revenueCents: 300000 },
+    { dateISO: "2026-10-03", dateLabel: "Oct 3", dayLabel: "3", orders: 10, revenueCents: 100000 },
+    { dateISO: "2026-10-04", dateLabel: "Oct 4", dayLabel: "4", orders: 10, revenueCents: 50000, note: "Mug out" },
+    { dateISO: "2026-10-05", dateLabel: "Oct 5", dayLabel: "5", orders: 10, revenueCents: 100000 },
+    { dateISO: "2026-10-06", dateLabel: "Oct 6", dayLabel: "Today", orders: 10, revenueCents: 100000 },
+  ];
+  const dash = dashboardFromData({
+    orders: ORDERS,
+    skus: listSkus(PRODUCTS),
+    days,
+    shop: {
+      days, todayLabel: "Tue, Oct 6", dayHeroLabel: "Tuesday, October 6",
+      cutoffLabel: "2:00 PM", rangeLabel: "Sep 30 – Oct 6",
+      prevRevenueCents: 850000, prevOrders: 60,
+    },
   });
 
-  it("pipeline bar is 23 shipped / 4 ready / 5 packing / 9 to pick", () => {
-    expect(dashboardData().pipeline).toEqual({ shipped: 23, ready: 4, packing: 5, toPick: 9 });
+  it("ledger7 sums the days; change figures compare against the previous period", () => {
+    expect(dash.ledger7.orders).toBe(70);
+    expect(dash.ledger7.revenueCents).toBe(850000);
+    expect(dash.ledger7.revenueChangePct).toBe(0);
+    expect(dash.ledger7.ordersVsLastWeek).toBe(10);
+    expect(dash.ledger7.peakCents).toBe(300000);
+    const peak = dash.ledger7.revenueByDay.reduce((a, b) => (b.revenueCents > a.revenueCents ? b : a));
+    expect(peak.dateISO).toBe("2026-10-02");
+    expect(dash.ledger7.revenueByDay.find((d) => d.note === "Mug out")?.dateISO).toBe("2026-10-04");
+    expect(dash.ledger7.belowSafety).toBe(1); // A-2: available 0 ≤ safety 2
   });
 
-  it("exceptions sort problem-first, then tape", () => {
-    const tones = dashboardData().exceptions.map((e) => e.tone);
+  it("pipeline comes from the orders summary", () => {
+    expect(dash.pipeline).toEqual({ shipped: 1, ready: 1, packing: 1, toPick: 1 });
+    expect(dash.toGoToday).toBe(3);
+  });
+
+  it("exceptions sort problem-first, then tape; queue sorts by ship-by", () => {
+    const tones = dash.exceptions.map((e) => e.tone);
     const rank = (t: string) => (t === "problem" ? 0 : t === "tape" ? 1 : 2);
     expect(tones).toEqual([...tones].sort((a, b) => rank(a) - rank(b)));
-    expect(dashboardData().exceptions[0]!.tone).toBe("problem");
-  });
-
-  it("fulfillment queue is sorted by ship-by time", () => {
-    const mins = dashboardData().fulfillmentQueue.map((o) => o.shipByMinutes ?? 9999);
+    expect(dash.exceptions[0]!.tone).toBe("problem"); // sold-out A-2
+    const mins = dash.fulfillmentQueue.map((o) => o.shipByMinutes ?? 9999);
     expect(mins).toEqual([...mins].sort((a, b) => a - b));
-  });
-
-  it("inventory watch is the drawn set in drawn order", () => {
-    expect(dashboardData().inventoryWatch.map((s) => s.sku)).toEqual(["SM-TER", "LA-CHR", "CT-NAT", "OSB-LG"]);
+    expect(dash.fulfillmentQueue.map((o) => o.id)).toEqual(["O-3", "O-6", "O-1"]);
   });
 });
 
-describe("customers & discounts (§9)", () => {
-  it("Avery Lewis: 6 orders, $614 lifetime, $102.33 average", () => {
-    const avery = getCustomer("avery-lewis")!;
-    expect(avery.orderCount).toBe(6);
-    expect(avery.spentCents).toBe(61400);
-    expect(averageOrderCents(avery)).toBe(10233);
-    expect(avery.orderHistory.reduce((s, o) => s + o.totalCents, 0)).toBe(61400);
-    expect(avery.orderHistory).toHaveLength(6);
+describe("customer + discount derivations", () => {
+  it("average order value rounds; zero orders average zero", () => {
+    expect(averageOrderCents({ orderCount: 6, spentCents: 61400 } as Customer)).toBe(10233);
+    expect(averageOrderCents({ orderCount: 3, spentCents: 10000 } as Customer)).toBe(3333);
+    expect(averageOrderCents({ orderCount: 0, spentCents: 0 } as Customer)).toBe(0);
   });
 
-  it("customer totals: 1,206 total, 214 returning, 9 waiting on restock", () => {
-    expect(customersTotals()).toMatchObject({ total: 1206, returning: 214, waitingOnRestock: 9 });
+  it("customers totals count the list itself", () => {
+    const list = [
+      { orderCount: 6, waitingFor: null, type: "customer" },
+      { orderCount: 1, waitingFor: { sku: "A-2", productName: "Alpha", note: "" }, type: "customer" },
+      { orderCount: 14, waitingFor: null, type: "wholesale" },
+    ] as unknown as Customer[];
+    expect(customersTotalsFrom(list, 4)).toEqual({
+      total: 3, returning: 2, waitingOnRestock: 1, wholesale: 1, openOrders: 4,
+    });
+    expect(customersTotalsFrom(list).openOrders).toBe(0); // not derivable from rows alone
   });
 
-  it("Kettle & Crumb Café is wholesale 25% on Net 30", () => {
-    expect(getCustomer("kettle-crumb-cafe")!.wholesale).toMatchObject({ discountPct: 25, termsLabel: "Net 30" });
+  it("discount status derivation covers every branch", () => {
+    const now = new Date("2026-10-06T14:48:00Z");
+    const base = { status: "active", startsAt: "2026-10-01T00:00:00Z", endsAt: null, uses: 0, useLimit: null, now };
+    expect(deriveDiscountStatus(base).status).toBe("running");
+    expect(deriveDiscountStatus({ ...base, status: "paused" })).toEqual({ status: "ended", paused: true, endedReason: "Paused" });
+    expect(deriveDiscountStatus({ ...base, endsAt: "2026-10-05T00:00:00Z" }).status).toBe("ended");
+    expect(deriveDiscountStatus({ ...base, startsAt: "2026-10-07T00:00:00Z" }).status).toBe("scheduled");
+    expect(deriveDiscountStatus({ ...base, uses: 5, useLimit: 5 }).endedReason).toBe("Ended at its 5-use limit");
   });
 
-  it("discounts gave $1,126 off $9,840 (11.4%); SPRING20 ended at 128/128", () => {
-    expect(discountsTotals()).toMatchObject({ givenCents30d: 112600, ordersCents30d: 984000, avgPct: 11.4 });
-    expect(getDiscount("SPRING20")).toMatchObject({ status: "ended", uses: 128, useLimit: 128 });
-    expect(getDiscount("FREESHIP75")).toMatchObject({ status: "scheduled", minOrderCents: 7500 });
-  });
-
-  it("audit fixture reports 64 entries with 9 shown by default", () => {
-    const a = listAudit();
-    expect(a.totalCount).toBe(64);
-    expect(a.shownCount).toBe(9);
-    expect(a.entries.length).toBeGreaterThanOrEqual(9);
-  });
-
-  it("team carries Rosa's $100 refund limit and the pending jules invite", () => {
-    const { members, invite } = getTeam();
-    expect(members.find((m) => m.id === "rosa")!.refundLimitCents).toBe(10000);
-    expect(members.find((m) => m.id === "sheku")!.refundLimitCents).toBeNull();
-    expect(invite).toMatchObject({ email: "jules@sevynlabs.io", role: "Fulfillment", expiresLabel: "Oct 12" });
-  });
-});
-
-describe("store mutations (§10)", () => {
-  it("adjustStock updates the shelf and writes a signed audit entry (EC-WHT write-off)", () => {
-    const store = createShopStore();
-    const kofi = getTeam().members.find((m) => m.id === "kofi")!;
-    const before = store.getState().audit.length;
-    const entry = store.adjustStock("EC-WHT", -2, "Damaged", kofi);
-    const ec = store.getState().products.flatMap((p) => p.variants).find((v) => v.sku === "EC-WHT")!;
-    expect(ec.onShelf).toBe(6); // 8 → 6
-    expect(ec.onShelf - ec.committed).toBe(5); // available 7 → 5
-    expect(entry).not.toBeNull();
-    expect(entry!.moneyCents).toBe(-4300); // 2 × $21.50 at cost
-    expect(store.getState().audit.length).toBe(before + 1);
-    expect(store.getState().audit[0]).toBe(entry);
-  });
-
-  it("recordCountAndRelease clears the stock hold and drops CT-NAT to the counted 4", () => {
-    const store = createShopStore();
-    expect(store.recordCountAndRelease("ORD-1048", 4)).toBe(true);
-    const order = store.getState().orders.find((o) => o.id === "ORD-1048")!;
-    expect(order.hold).toBeNull();
-    expect(order.stage).toBe("packing");
-    const ct = store.getState().products.flatMap((p) => p.variants).find((v) => v.sku === "CT-NAT")!;
-    expect(ct.onShelf).toBe(4);
-    expect(ct.onShelf - ct.committed).toBe(3); // "3 left to sell"
-    expect(ct.countPending).toBe(false);
-  });
-
-  it("retryPayment captures ORD-1046 and clears the payment hold", () => {
-    const store = createShopStore();
-    expect(store.retryPayment("ORD-1046")).toEqual({ ok: true });
-    const order = store.getState().orders.find((o) => o.id === "ORD-1046")!;
-    expect(order.paymentStatus).toBe("paid");
-    expect(order.hold).toBeNull();
-    expect(order.payment?.attempts).toBe(2);
-  });
-
-  it("attemptRefund over Rosa's $100 limit is rejected WITHOUT mutating (X-06)", () => {
-    const store = createShopStore();
-    const rosa = getTeam().members.find((m) => m.id === "rosa")!;
-    const auditBefore = store.getState().audit.length;
-    const result = store.attemptRefund("ORD-1036", 14800, rosa);
-    expect(result).toEqual({ ok: false, reason: "over-limit", limit: 10000 });
-    const order = store.getState().orders.find((o) => o.id === "ORD-1036")!;
-    expect(order.refundedCents).toBe(0);
-    expect(store.getState().audit.length).toBe(auditBefore);
-  });
-
-  it("attemptRefund within the limit applies and writes audit", () => {
-    const store = createShopStore();
-    const rosa = getTeam().members.find((m) => m.id === "rosa")!;
-    expect(store.attemptRefund("ORD-1036", 10000, rosa)).toEqual({ ok: true });
-    const order = store.getState().orders.find((o) => o.id === "ORD-1036")!;
-    expect(order.refundedCents).toBe(10000);
-    expect(order.paymentStatus).toBe("partially-refunded");
-    expect(store.getState().audit[0]!.moneyCents).toBe(-10000);
-  });
-
-  it("the owner has no refund limit", () => {
-    const store = createShopStore();
-    const sheku = getTeam().members.find((m) => m.id === "sheku")!;
-    expect(store.attemptRefund("ORD-1036", 14800, sheku)).toEqual({ ok: true });
-    expect(store.getState().orders.find((o) => o.id === "ORD-1036")!.paymentStatus).toBe("refunded");
-  });
-
-  it("adding a sold-out variant to the cart is blocked; checkout holds for 15 minutes", () => {
-    const store = createShopStore();
-    expect(store.addToCart("SM-TER")).toEqual({ ok: false, reason: "sold-out" });
-    expect(store.addToCart("LA-CHR")).toEqual({ ok: true });
-    const expires = store.startCheckout();
-    expect(expires).not.toBeNull();
-    const deltaMs = new Date(expires!).getTime() - shopNow().getTime();
-    expect(deltaMs).toBeGreaterThan(14 * 60_000);
-    expect(deltaMs).toBeLessThanOrEqual(16 * 60_000);
-  });
-
-  it("offline actions queue and flush on reconnect", () => {
-    const store = createShopStore();
-    store.setOnline(false);
-    expect(store.getState().connection.online).toBe(false);
-    expect(store.getState().connection.asOfLabel).toMatch(/AM|PM/);
-    store.queueAction("Print pick list");
-    store.queueAction("Add a note to ORD-1048");
-    expect(store.getState().connection.queue).toHaveLength(2);
-    const flushed = store.setOnline(true);
-    expect(flushed).toEqual(["Print pick list", "Add a note to ORD-1048"]);
-    expect(store.getState().connection.queue).toEqual([]);
-  });
-
-  it("receiveDelivery lands PO-0214 units on the shelf, once", () => {
-    const store = createShopStore();
-    expect(store.receiveDelivery("PO-0214")).toBe(true);
-    const ter = store.getState().products.flatMap((p) => p.variants).find((v) => v.sku === "SM-TER")!;
-    expect(ter.onShelf).toBe(50); // 2 + 48
-    expect(store.receiveDelivery("PO-0214")).toBe(false);
+  it("discount totals sum given; avgPct needs a real denominator", () => {
+    const list = [
+      { givenCents30d: 112600 },
+      { givenCents30d: 0 },
+    ] as unknown as Discount[];
+    expect(discountsTotalsFrom(list, 984000)).toEqual({
+      givenCents30d: 112600, ordersCents30d: 984000, avgPct: 11.4,
+    });
+    expect(discountsTotalsFrom(list).avgPct).toBe(0);
   });
 });
