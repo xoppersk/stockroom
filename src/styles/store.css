@@ -288,6 +288,7 @@
 @media (max-width: 760px) {
   .swrap { padding-left: 16px; padding-right: 16px; }
   .sheader-in { height: auto; padding-top: 14px; padding-bottom: 14px; }
+  .head-actions { flex-wrap: wrap; gap: 10px 18px; }
   .hero { grid-template-columns: minmax(0,1fr); padding-bottom: 48px; }
   .hero h1 { font-size: 56px; }
   .hero-img { min-height: 320px; }
