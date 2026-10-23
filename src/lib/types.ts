@@ -89,6 +89,10 @@ export interface SkuVariant {
   reorderPoint: number;
   priceCents: number;
   costCents: number | null;
+  /** Compare-at (was) price in cents; null = none. DB-mapped variants
+   *  carry the real product_variants.compare_at_price; fixture
+   *  variants may omit it. */
+  compareAtCents?: number | null;
   incoming?: IncomingStock;
   countPending?: boolean;
   waitlist?: number;
@@ -156,7 +160,7 @@ export interface StockMovement {
 /* ---------------- orders ---------------- */
 
 export type OrderStage = "held" | "to-pick" | "packing" | "ready" | "shipped" | "delivered";
-export type PaymentStatus = "paid" | "failed" | "partially-refunded" | "refunded" | "refund-requested";
+export type PaymentStatus = "paid" | "failed" | "partially-refunded" | "refunded" | "refund-requested" | "pending";
 export type HoldKind = "stock" | "payment" | "address" | "review";
 
 export interface OrderLine {
@@ -212,6 +216,9 @@ export interface RefundRequest {
 }
 
 export interface Order {
+  /** DB orders.id (uuid). Actions take this; `id` stays the order_number
+   *  used by routes/display. Fixture orders carry an empty string. */
+  uuid: string;
   id: string;
   customerSlug: string | null;
   customerName: string;
@@ -351,7 +358,7 @@ export type DiscountStatus = "running" | "scheduled" | "ended";
 
 export interface Discount {
   code: string;
-  kind: "percent" | "free-shipping";
+  kind: "percent" | "free-shipping" | "fixed-amount";
   pct: number | null;
   whatLabel: string;
   whoLabel: string;
@@ -367,6 +374,18 @@ export interface Discount {
   minOrderCents: number;
   usesPerCustomer?: number;
   wholesale?: boolean;
+  /* Console extras (additive; present on DB-mapped discounts from
+   * lib/shop/admin, absent on fixture discounts): raw fields the
+   * discount builder needs without parsing display labels. */
+  id?: string;
+  uuid?: string;
+  startsAt?: string;
+  endsAt?: string | null;
+  /** Integer cents of the raw discounts.value (15% → 1500; $5 → 500). */
+  valueCents?: number;
+  /** Raw DB kind: 'percentage' | 'fixed'. */
+  dbKind?: string;
+  rawKind?: string;
   estimate?: { qualifyingOrders: number; avgLabelCents: number; coverCents: number };
   bannerLabel?: string;
 }
