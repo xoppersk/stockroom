@@ -1,8 +1,11 @@
 import { Suspense } from "react";
+import { getProductBySlug, getProducts } from "@/lib/shop/catalog";
 import ProductClient from "./ProductClient";
 
-/* S-03 — canonical slug: linen-apron. Params are read inside the
-   <Suspense> boundary (Cache Components pattern). */
+/* S-03 — Product, wired to the real catalog: the published product (with
+   variants, images, stock) is read server-side from Supabase. Unknown /
+   unpublished slugs render the honest not-found state. */
+
 export default function ProductPage({
   params,
 }: {
@@ -21,5 +24,16 @@ async function ProductInner({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <ProductClient slug={slug} />;
+  const res = await getProductBySlug(slug);
+  if (!res.ok) {
+    return <ProductClient slug={slug} product={null} related={[]} error={res.error} />;
+  }
+  if (!res.data) {
+    return <ProductClient slug={slug} product={null} related={[]} error={null} />;
+  }
+  const allRes = await getProducts();
+  const related = allRes.ok
+    ? allRes.data.filter((p) => p.id !== res.data!.id).slice(0, 4)
+    : [];
+  return <ProductClient slug={slug} product={res.data} related={related} error={null} />;
 }
