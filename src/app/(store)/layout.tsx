@@ -7,6 +7,7 @@
 import { Suspense } from "react";
 import "../../styles/store.css";
 import StoreShell from "./StoreShell";
+import { AccountNav } from "./_components/account-nav";
 
 export default function StoreLayout({
   children,
@@ -14,10 +15,16 @@ export default function StoreLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense
-      fallback={<div className="store">{children}</div>}
-    >
-      <StoreShell>{children}</StoreShell>
+    <Suspense fallback={<div className="store">{children}</div>}>
+      <StoreShell
+        accountNav={
+          <Suspense fallback={null}>
+            <AccountNav />
+          </Suspense>
+        }
+      >
+        {children}
+      </StoreShell>
     </Suspense>
   );
 }
