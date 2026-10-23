@@ -1,387 +1,257 @@
 import {
-  CART_COOKIE,
   createShopAnonClient,
   createShopServiceClient,
   createShopUserClient,
-  getSessionUserId,
   productImageUrl,
   type ShopClient,
 } from "./db";
-import {
-  mapCartRow,
-  mapCartWithItemsRow,
-  mapCollectionRow,
-  mapDiscountRow,
-  mapInventoryLevelRow,
-  mapOrderListRow,
-  mapOrderRow,
-  mapProductDetailRow,
-  mapProductListRow,
-} from "./view";
-import type {
-  Cart,
-  CartWithItems,
-  Collection,
-  DiscountCode,
-  InventoryLevel,
-  Order,
-  OrderSummary,
-  Paginated,
-  ProductDetail,
-  ProductListItem,
-} from "./types";
-import { cookies } from "next/headers";
-import { randomUUID } from "crypto";
 
 /**
- * Public catalog/cart/order read model (adapted from v1
- * `src/lib/shop/catalog.ts`).
+ * Catalog reads for the storefront (adapted from v1 `src/lib/shop/catalog.ts`).
  *
- * Read strategy per table:
- * - products/product_images/variants/collections (published storefront
- *   reads): anon client when signed out (RLS SELECT on *_published
- *   views), user client when signed in. When the caller explicitly
- *   needs stock numbers (cart page, product page), the service client
- *   joins inventory_levels — inventory has no anon grant.
- * - carts/cart_items: service client (guest-token RLS cannot be
- *   satisfied from the anon key; see db.ts). Every query is scoped by
- *   the guest token or user id.
- * - discount_codes: service client, code-scoped queries.
- * - orders: user client for the customer's own list; service client for
- *   guest-token reads.
+ * Products / variants / images / categories are read with the caller's own
+ * client (anon or signed-in session) so the PUBLIC RLS policies (published
+ * only) do the gating — exactly what a real shopper can see.
  *
- * Product images resolve via productImageUrl() (public
- * `product-images` bucket, see 00010_storage_realtime).
+ * Stock is the exception: `inventory_levels` has no anon grant and a
+ * staff-read policy only, so available quantities are read with the
+ * service-role client when it is configured (Vercel prod). Without the key,
+ * `available` is null — "unknown", never an invented number — and checkout
+ * still enforces stock server-side inside create_checkout_session().
  */
 
-const PAGE_SIZE = 24;
+import type { ShopCategoryView, ShopProductView, ShopVariantView } from "./view";
 
-export type SortKey =
-  | "featured"
-  | "newest"
-  | "price-asc"
-  | "price-desc"
-  | "name-asc";
+export type { ShopCategoryView, ShopProductView, ShopVariantView } from "./view";
+export { placeholderBg, isDarkBg } from "./view";
 
-export interface ProductFilters {
-  q?: string;
-  collection?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  inStockOnly?: boolean;
-  sort?: SortKey;
-  page?: number;
+export type CatalogResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+/* ------------------------------------------------------------------ */
+/* Mapping helpers                                                     */
+/* ------------------------------------------------------------------ */
+
+function cents(numeric: string | number): number {
+  return Math.round(Number(numeric) * 100);
 }
 
-/** Signed-in → user client (RLS as the caller); signed out → anon client. */
-async function readerClient(): Promise<ShopClient> {
-  const userId = await getSessionUserId().catch(() => null);
-  if (userId) return createShopUserClient();
-  return createShopAnonClient();
-}
-
-function orderByFor(sort: SortKey | undefined): {
-  column: string;
-  ascending: boolean;
-} {
-  switch (sort) {
-    case "price-asc":
-      return { column: "min_price", ascending: true };
-    case "price-desc":
-      return { column: "min_price", ascending: false };
-    case "name-asc":
-      return { column: "name", ascending: true };
-    case "newest":
-      return { column: "created_at", ascending: false };
-    case "featured":
-    default:
-      return { column: "created_at", ascending: false };
+function optionMap(raw: unknown): Record<string, string> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof v === "string" || typeof v === "number") out[k] = String(v);
   }
+  return out;
 }
 
-export async function listProducts(
-  filters: ProductFilters = {},
-): Promise<Paginated<ProductListItem>> {
-  const client = await readerClient();
-  const page = Math.max(1, filters.page ?? 1);
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-  const { column, ascending } = orderByFor(filters.sort);
+/* ------------------------------------------------------------------ */
+/* Reads                                                               */
+/* ------------------------------------------------------------------ */
 
-  let query = client
-    .from("products_published")
-    .select("*", { count: "exact" });
-
-  if (filters.q) {
-    const term = filters.q.replace(/[%_]/g, "");
-    query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%`);
-  }
-  if (filters.collection) query = query.eq("collection_slug", filters.collection);
-  if (filters.minPrice != null) query = query.gte("min_price", filters.minPrice);
-  if (filters.maxPrice != null) query = query.lte("min_price", filters.maxPrice);
-  if (filters.inStockOnly) query = query.gt("total_stock", 0);
-
-  const { data, count, error } = await query
-    .order(column, { ascending })
-    .range(from, to);
-  if (error) throw new Error(`Catalog query failed: ${error.message}`);
-
-  return {
-    items: (data ?? []).map((row) =>
-      mapProductListRow(row as Parameters<typeof mapProductListRow>[0], productImageUrl),
-    ),
-    total: count ?? 0,
-    page,
-    pageSize: PAGE_SIZE,
-  };
-}
-
-export async function listCollections(): Promise<Collection[]> {
-  const client = await readerClient();
-  const { data, error } = await client
-    .from("collections_published")
-    .select("*")
-    .order("sort_order", { ascending: true });
-  if (error) throw new Error(`Collections query failed: ${error.message}`);
-  return (data ?? []).map((row) =>
-    mapCollectionRow(row as Parameters<typeof mapCollectionRow>[0], productImageUrl),
-  );
-}
-
-export async function getCollectionWithProducts(
-  slug: string,
-  filters: Omit<ProductFilters, "collection"> = {},
-): Promise<{ collection: Collection; products: Paginated<ProductListItem> } | null> {
-  const collection = await getCollection(slug);
-  if (!collection) return null;
-  const products = await listProducts({ ...filters, collection: slug });
-  return { collection, products };
-}
-
-export async function getCollection(slug: string): Promise<Collection | null> {
-  const client = await readerClient();
-  const { data, error } = await client
-    .from("collections_published")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (error) throw new Error(`Collection query failed: ${error.message}`);
-  if (!data) return null;
-  return mapCollectionRow(
-    data as Parameters<typeof mapCollectionRow>[0],
-    productImageUrl,
-  );
-}
-
-export async function getProduct(slug: string): Promise<ProductDetail | null> {
-  const client = await readerClient();
+async function stockByVariant(variantIds: string[]): Promise<Map<string, { onHand: number; threshold: number }> | null> {
+  if (variantIds.length === 0) return new Map();
   const svc = createShopServiceClient();
-
-  const { data, error } = await client
-    .from("products_published")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (error) throw new Error(`Product query failed: ${error.message}`);
-  if (!data) return null;
-
-  // Images + variants from the published views (anon-safe).
-  const [{ data: images }, { data: variants }] = await Promise.all([
-    client
-      .from("product_images_published")
-      .select("*")
-      .eq("product_id", data.id)
-      .order("position", { ascending: true }),
-    client
-      .from("product_variants_published")
-      .select("*")
-      .eq("product_id", data.id)
-      .order("position", { ascending: true }),
-  ]);
-
-  // Stock levels need the service role (no anon grant).
-  let stockBySku = new Map<string, number>();
-  if (svc && variants && variants.length > 0) {
-    const skus = variants.map((v) => v.sku).filter(Boolean) as string[];
-    if (skus.length > 0) {
-      const { data: levels } = await svc
-        .from("inventory_levels")
-        .select("sku,on_hand,reserved")
-        .in("sku", skus);
-      for (const row of levels ?? []) {
-        stockBySku.set(row.sku, Math.max(0, row.on_hand - row.reserved));
-      }
-    }
-  }
-
-  return mapProductDetailRow(
-    {
-      product: data as Parameters<typeof mapProductDetailRow>[0]["product"],
-      images: (images ?? []) as Parameters<typeof mapProductDetailRow>[0]["images"],
-      variants: (variants ?? []) as Parameters<typeof mapProductDetailRow>[0]["variants"],
-      stockBySku,
-    },
-    productImageUrl,
-  );
-}
-
-export async function getProductById(id: string): Promise<ProductDetail | null> {
-  const client = await readerClient();
-  const { data, error } = await client
-    .from("products_published")
-    .select("slug")
-    .eq("id", id)
-    .maybeSingle();
-  if (error || !data) return null;
-  return getProduct(data.slug);
-}
-
-// ---------------------------------------------------------------------------
-// Cart
-// ---------------------------------------------------------------------------
-
-interface CartIdentity {
-  guestToken: string | null;
-  userId: string | null;
-}
-
-async function cartIdentity(): Promise<CartIdentity> {
-  const cookieStore = await cookies();
-  const userId = await getSessionUserId().catch(() => null);
-  const guestToken = cookieStore.get(CART_COOKIE)?.value ?? null;
-  return { guestToken, userId };
-}
-
-/** Ensure a guest token exists; returns it (sets the cookie when missing). */
-export async function ensureGuestToken(): Promise<string> {
-  const cookieStore = await cookies();
-  const existing = cookieStore.get(CART_COOKIE)?.value;
-  if (existing) return existing;
-  const token = randomUUID();
-  cookieStore.set(CART_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
-  return token;
-}
-
-export async function getActiveCart(): Promise<CartWithItems | null> {
-  const svc = createShopServiceClient();
-  if (!svc) return null;
-  const { guestToken, userId } = await cartIdentity();
-  if (!guestToken && !userId) return null;
-
-  let query = svc.from("carts").select("*,items:cart_items(*)");
-  if (userId) query = query.eq("user_id", userId);
-  else query = query.eq("guest_token", guestToken!);
-
-  const { data, error } = await query
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(`Cart query failed: ${error.message}`);
-  if (!data) return null;
-  return mapCartWithItemsRow(
-    data as Parameters<typeof mapCartWithItemsRow>[0],
-    productImageUrl,
-  );
-}
-
-export async function getCartCount(): Promise<number> {
-  const cart = await getActiveCart();
-  return cart?.items.reduce((n, i) => n + i.qty, 0) ?? 0;
-}
-
-// ---------------------------------------------------------------------------
-// Discounts (public validation)
-// ---------------------------------------------------------------------------
-
-export async function validateDiscountCode(
-  code: string,
-): Promise<DiscountCode | null> {
-  const svc = createShopServiceClient();
-  if (!svc) return null;
-  const normalized = code.trim().toUpperCase();
-  if (!normalized) return null;
-  const { data, error } = await svc
-    .from("discount_codes")
-    .select("*")
-    .eq("code", normalized)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error || !data) return null;
-  const now = new Date();
-  if (data.starts_at && new Date(data.starts_at) > now) return null;
-  if (data.ends_at && new Date(data.ends_at) < now) return null;
-  return mapDiscountRow(data as Parameters<typeof mapDiscountRow>[0]);
-}
-
-// ---------------------------------------------------------------------------
-// Orders (customer reads)
-// ---------------------------------------------------------------------------
-
-export async function listMyOrders(): Promise<OrderSummary[]> {
-  const userId = await getSessionUserId().catch(() => null);
-  const client = userId ? await createShopUserClient() : createShopAnonClient();
-  if (!userId) return [];
-  const { data, error } = await client
-    .from("orders")
-    .select("id,number,status,total,created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(`Orders query failed: ${error.message}`);
-  return (data ?? []).map((row) =>
-    mapOrderListRow(row as Parameters<typeof mapOrderListRow>[0]),
-  );
-}
-
-export async function getOrder(id: string): Promise<Order | null> {
-  const svc = createShopServiceClient();
-  const userId = await getSessionUserId().catch(() => null);
-
-  // Signed-in customers read their own order through RLS.
-  if (userId) {
-    const client = await createShopUserClient();
-    const { data, error } = await client
-      .from("orders")
-      .select("*,items:order_items(*)")
-      .eq("id", id)
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (error) throw new Error(`Order query failed: ${error.message}`);
-    if (data)
-      return mapOrderRow(data as Parameters<typeof mapOrderRow>[0], productImageUrl);
-  }
-
-  // Guest receipt page: service client scoped by the cart cookie token.
-  if (!svc) return null;
-  const { guestToken } = await cartIdentity();
-  if (!guestToken) return null;
-  const { data, error } = await svc
-    .from("orders")
-    .select("*,items:order_items(*)")
-    .eq("id", id)
-    .eq("guest_token", guestToken)
-    .maybeSingle();
-  if (error) throw new Error(`Order query failed: ${error.message}`);
-  if (!data) return null;
-  return mapOrderRow(data as Parameters<typeof mapOrderRow>[0], productImageUrl);
-}
-
-export async function getInventoryLevels(
-  skus: string[],
-): Promise<InventoryLevel[]> {
-  const svc = createShopServiceClient();
-  if (!svc || skus.length === 0) return [];
+  if (!svc) return null; // stock not readable in this environment
   const { data, error } = await svc
     .from("inventory_levels")
-    .select("*")
-    .in("sku", skus);
-  if (error) throw new Error(`Inventory query failed: ${error.message}`);
-  return (data ?? []).map((row) =>
-    mapInventoryLevelRow(row as Parameters<typeof mapInventoryLevelRow>[0]),
-  );
+    .select("variant_id, quantity_on_hand, low_stock_threshold")
+    .in("variant_id", variantIds);
+  if (error) {
+    console.error("[shop] inventory_levels read failed:", error.message);
+    return null;
+  }
+  return new Map((data ?? []).map((r) => [r.variant_id, { onHand: r.quantity_on_hand, threshold: r.low_stock_threshold }]));
 }
+
+interface RawProduct {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  category_id: string | null;
+  tags: string[];
+  created_at: string;
+}
+
+async function assemble(
+  client: ShopClient,
+  products: RawProduct[],
+): Promise<ShopProductView[]> {
+  if (products.length === 0) return [];
+  const ids = products.map((p) => p.id);
+  const [{ data: variants, error: vErr }, { data: images }, { data: categories }] = await Promise.all([
+    client
+      .from("product_variants")
+      .select("id, product_id, title, sku, option_values, price, compare_at_price, position")
+      .in("product_id", ids)
+      .order("position", { ascending: true }),
+    client
+      .from("product_images")
+      .select("product_id, storage_path, alt_text, position")
+      .in("product_id", ids)
+      .order("position", { ascending: true }),
+    client.from("categories").select("id, name, slug"),
+  ]);
+  if (vErr) console.error("[shop] variants read failed:", vErr.message);
+
+  const variantRows = variants ?? [];
+  const stock = await stockByVariant(variantRows.map((v) => v.id));
+  const categoryById = new Map((categories ?? []).map((c) => [c.id, c]));
+
+  const variantsByProduct = new Map<string, ShopVariantView[]>();
+  for (const v of variantRows) {
+    const options = optionMap(v.option_values);
+    const colour = options["Color"] ?? options["Colour"] ?? Object.values(options)[0] ?? v.title;
+    const inv = stock?.get(v.id);
+    const view: ShopVariantView = {
+      id: v.id,
+      title: v.title,
+      sku: v.sku,
+      colour,
+      options,
+      priceCents: cents(v.price),
+      compareAtCents: v.compare_at_price != null ? cents(v.compare_at_price) : null,
+      available: stock ? (inv?.onHand ?? 0) : null,
+      lowStockThreshold: stock ? (inv?.threshold ?? null) : null,
+    };
+    const list = variantsByProduct.get(v.product_id) ?? [];
+    list.push(view);
+    variantsByProduct.set(v.product_id, list);
+  }
+
+  const imagesByProduct = new Map<string, { url: string; alt: string }[]>();
+  for (const img of images ?? []) {
+    const list = imagesByProduct.get(img.product_id) ?? [];
+    list.push({ url: productImageUrl(img.storage_path), alt: img.alt_text || "" });
+    imagesByProduct.set(img.product_id, list);
+  }
+
+  return products.map((p) => {
+    const vs = variantsByProduct.get(p.id) ?? [];
+    const imgs = imagesByProduct.get(p.id) ?? [];
+    const prices = vs.map((v) => v.priceCents);
+    const minPrice = prices.length ? Math.min(...prices) : 0;
+    const maxPrice = prices.length ? Math.max(...prices) : 0;
+    const totalAvailable = stock ? vs.reduce((n, v) => n + (v.available ?? 0), 0) : null;
+    const cat = p.category_id ? categoryById.get(p.category_id) : undefined;
+    return {
+      id: p.id,
+      slug: p.slug,
+      name: p.title,
+      description: p.description,
+      priceCents: minPrice,
+      priceFrom: vs.length > 1 && minPrice !== maxPrice,
+      compareAtCents: vs[0]?.compareAtCents ?? null,
+      categoryId: p.category_id,
+      categorySlug: cat?.slug ?? null,
+      categoryName: cat?.name ?? null,
+      tags: p.tags ?? [],
+      variants: vs,
+      images: imgs,
+      imageUrl: imgs[0]?.url ?? null,
+      totalAvailable,
+      soldOut: stock !== null && vs.length > 0 && totalAvailable === 0,
+      createdAt: p.created_at,
+    };
+  });
+}
+
+const PRODUCT_COLS = "id, title, slug, description, category_id, tags, created_at";
+
+/** All published products with variants, images and (when readable) stock. */
+export async function getProducts(): Promise<CatalogResult<ShopProductView[]>> {
+  try {
+    const client = await createShopUserClient();
+    const { data, error } = await client
+      .from("products")
+      .select(PRODUCT_COLS)
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: await assemble(client, (data ?? []) as RawProduct[]) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Catalog read failed." };
+  }
+}
+
+/** Published products in one category (by category slug). */
+export async function getProductsByCategorySlug(slug: string): Promise<CatalogResult<{ category: ShopCategoryView | null; products: ShopProductView[] }>> {
+  try {
+    const client = await createShopUserClient();
+    const { data: cat, error: catErr } = await client
+      .from("categories")
+      .select("id, name, slug")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (catErr) return { ok: false, error: catErr.message };
+    if (!cat) return { ok: true, data: { category: null, products: [] } };
+    const { data, error } = await client
+      .from("products")
+      .select(PRODUCT_COLS)
+      .eq("status", "published")
+      .eq("category_id", cat.id)
+      .order("created_at", { ascending: false });
+    if (error) return { ok: false, error: error.message };
+    const products = await assemble(client, (data ?? []) as RawProduct[]);
+    return {
+      ok: true,
+      data: {
+        category: { id: cat.id, name: cat.name, slug: cat.slug, productCount: products.length },
+        products,
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Catalog read failed." };
+  }
+}
+
+/** One published product by slug, or null when it does not exist / is not published. */
+export async function getProductBySlug(slug: string): Promise<CatalogResult<ShopProductView | null>> {
+  try {
+    const client = await createShopUserClient();
+    const { data, error } = await client
+      .from("products")
+      .select(PRODUCT_COLS)
+      .eq("status", "published")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) return { ok: false, error: error.message };
+    if (!data) return { ok: true, data: null };
+    const [view] = await assemble(client, [data as RawProduct]);
+    return { ok: true, data: view ?? null };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Catalog read failed." };
+  }
+}
+
+/** All categories with published-product counts. */
+export async function getCategories(): Promise<CatalogResult<ShopCategoryView[]>> {
+  try {
+    const client = createShopAnonClient();
+    const [{ data: categories, error }, { data: products }] = await Promise.all([
+      client.from("categories").select("id, name, slug").order("name", { ascending: true }),
+      client.from("products").select("id, category_id").eq("status", "published"),
+    ]);
+    if (error) return { ok: false, error: error.message };
+    const counts = new Map<string, number>();
+    for (const p of products ?? []) {
+      if (p.category_id) counts.set(p.category_id, (counts.get(p.category_id) ?? 0) + 1);
+    }
+    return {
+      ok: true,
+      data: (categories ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        productCount: counts.get(c.id) ?? 0,
+      })),
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Catalog read failed." };
+  }
+}
+
+/** Alias named for the deliverable (collections == categories in the DB). */
+export const getCollections = getCategories;
