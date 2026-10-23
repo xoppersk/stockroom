@@ -1,30 +1,24 @@
-import { getPermissionMatrix, getTeam } from "@/lib/api";
-import { normalizePermissions, normalizeTeam } from "../admin-data";
+import { getConsoleActor, listConsoleTeam } from "@/lib/shop/admin";
+import { buildTeamView, REAL_PERMISSION_MATRIX } from "../admin-data";
 import TeamClient from "./TeamClient";
 
 /* A-01 · /admin/settings/team — people, pending invites and the
-   permission matrix (Team.html). Data: @/lib/api getTeam() +
-   getPermissionMatrix(). */
+   permission matrix (Team.html). Members are the real profiles +
+   user_roles rows (listConsoleTeam); the matrix is derived from the
+   DB capability rules (admin-data). There is no invites table — the
+   invite panel renders empty with its honest disabled state
+   (ruling 12). */
 export default async function TeamPage() {
-  let teamRaw: unknown = null;
-  let permRaw: unknown = null;
-  try {
-    teamRaw = await getTeam();
-  } catch {
-    teamRaw = null;
-  }
-  try {
-    permRaw = await getPermissionMatrix();
-  } catch {
-    permRaw = null;
-  }
-  const team = normalizeTeam(teamRaw);
-  const permissions = normalizePermissions(permRaw);
+  const [members, actor] = await Promise.all([
+    listConsoleTeam(),
+    getConsoleActor(),
+  ]);
   return (
     <TeamClient
-      members={team.members}
-      invites={team.invites}
-      permissions={permissions}
+      members={buildTeamView(members)}
+      invites={[]}
+      permissions={REAL_PERMISSION_MATRIX}
+      actorIsAdmin={actor.role === "admin"}
     />
   );
 }
