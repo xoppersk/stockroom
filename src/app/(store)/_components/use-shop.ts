@@ -1,94 +1,234 @@
 "use client";
-/* Adapter over the shop store (@/lib/store). SR-02 fix: the previous
-   version read cart/skus/hold off the store OBJECT (which carries only
-   methods) and never subscribed, so the cart rendered empty forever.
-   This version reads reactive state via useShopState() — cart lines,
-   live SKU availability and the checkout hold all come from the one
-   store (§10) — and mutates via useShop() methods. Display fields for a
-   cart line (name, variant, price, photo) come from ./data's
-   CART_DISPLAY, keyed by SKU. */
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useShop, useShopState } from "@/lib/store";
-import { listSkus } from "@/lib/api";
-import { CART_DISPLAY, DEMO_CART } from "./data";
+/**
+ * Storefront cart hook — REAL cart state from /api/cart (carts/cart_items
+ * in Supabase, guest-token cookie or signed-in user), replacing the old
+ * fixture store adapter. The fixture store (@/lib/store) now drives only
+ * console state and pure UI state elsewhere; it is NOT consulted here.
+ *
+ * The hook is self-contained: it fetches the cart on mount, keeps it in
+ * React state, and every mutation goes through the API routes and adopts
+ * the server-returned cart (prices always come from the server).
+ * `window` event `stockroom:cart-changed` keeps multiple hook instances
+ * (header badge lives in chrome.tsx, owned by W-AUTH) roughly in sync.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-export type CartLine = {
-  sku: string; slug: string; name: string; variant: string;
-  qty: number; priceCents: number; photoBg: string; photoLabel: string; dark: boolean;
-};
-
-function lineFor(sku: string, qty: number): CartLine | null {
-  const d = CART_DISPLAY[sku];
-  if (!d) return null;
-  return { sku, qty, ...d };
+export interface CartLine {
+  itemId: string;
+  variantId: string;
+  productId: string;
+  slug: string;
+  name: string;
+  variant: string;
+  sku: string;
+  qty: number;
+  priceCents: number;
+  lineTotalCents: number;
+  imageUrl: string | null;
+  available: number | null;
+  photoBg: string;
+  photoLabel: string;
+  dark: boolean;
 }
+
+interface ApiCartLine {
+  itemId: string;
+  variantId: string;
+  productId: string;
+  productSlug: string;
+  productTitle: string;
+  variantTitle: string;
+  sku: string;
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+  imageUrl: string | null;
+  available: number | null;
+}
+
+interface ApiCart {
+  cartId: string;
+  lines: ApiCartLine[];
+  itemCount: number;
+  subtotalCents: number;
+  discountCents: number;
+  totalCents: number;
+  discountCode: string | null;
+}
+
+const PALETTE = ["#3A3530", "#D9D0C1", "#9A4E2E", "#ECE9E3", "#6B7F6A", "#C9B79A", "#8C5A3C", "#E8D5A8", "#A57B4F", "#57534E"];
+function placeholderBg(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return PALETTE[h % PALETTE.length]!;
+}
+function isDark(hex: string): boolean {
+  const c = hex.replace("#", "");
+  const lum = 0.2126 * parseInt(c.slice(0, 2), 16) + 0.7152 * parseInt(c.slice(2, 4), 16) + 0.0722 * parseInt(c.slice(4, 6), 16);
+  return lum < 140;
+}
+
+function toLine(l: ApiCartLine): CartLine {
+  const bg = placeholderBg(l.productSlug);
+  return {
+    itemId: l.itemId,
+    variantId: l.variantId,
+    productId: l.productId,
+    slug: l.productSlug,
+    name: l.productTitle,
+    variant: l.variantTitle,
+    sku: l.sku,
+    qty: l.quantity,
+    priceCents: l.unitPriceCents,
+    lineTotalCents: l.lineTotalCents,
+    imageUrl: l.imageUrl,
+    available: l.available,
+    photoBg: bg,
+    photoLabel: `Photo placeholder: ${l.productTitle.toLowerCase()}`,
+    dark: isDark(bg),
+  };
+}
+
+const CART_EVENT = "stockroom:cart-changed";
 
 export function useShopCart() {
-  const shop = useShop();
-  const state = useShopState();
+  const [cart, setCart] = useState<ApiCart | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const aliveRef = useRef(true);
 
-  const lines: CartLine[] = useMemo(
-    () =>
-      state.cart
-        .map((ci) => lineFor(ci.sku, ci.qty))
-        .filter((l): l is CartLine => !!l),
-    [state.cart],
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cart", { cache: "no-store" });
+      const json = (await res.json()) as { cart: ApiCart | null };
+      if (!aliveRef.current) return;
+      setCart(json.cart);
+    } catch {
+      if (aliveRef.current) setCart(null);
+    } finally {
+      if (aliveRef.current) setLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    // Initial load from the cart API (external system); state updates land
+    // after the fetch resolves, not synchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
+    const onChange = () => void refresh();
+    window.addEventListener(CART_EVENT, onChange);
+    return () => {
+      aliveRef.current = false;
+      window.removeEventListener(CART_EVENT, onChange);
+    };
+  }, [refresh]);
+
+  const broadcast = useCallback(() => {
+    window.dispatchEvent(new Event(CART_EVENT));
+  }, []);
+
+  const mutate = useCallback(
+    async (fn: () => Promise<Response>): Promise<{ ok: boolean; error?: string }> => {
+      setBusy(true);
+      setError(null);
+      try {
+        const res = await fn();
+        const json = (await res.json().catch(() => ({}))) as { cart?: ApiCart; error?: string };
+        if (!res.ok) {
+          setError(json.error ?? "Something went wrong. Please try again.");
+          return { ok: false, error: json.error };
+        }
+        if (json.cart) setCart(json.cart);
+        broadcast();
+        return { ok: true };
+      } catch {
+        setError("Something went wrong. Please try again.");
+        return { ok: false, error: "network" };
+      } finally {
+        if (aliveRef.current) setBusy(false);
+      }
+    },
+    [broadcast],
   );
-  const count = lines.reduce((n, l) => n + l.qty, 0);
 
   const addToCart = useCallback(
-    (line: Omit<CartLine, "photoBg" | "photoLabel" | "dark"> & Partial<CartLine>) => {
-      shop.addToCart(line.sku, line.qty ?? 1);
-    },
-    [shop],
+    async (variantId: string, qty = 1) =>
+      mutate(() =>
+        fetch("/api/cart/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ variantId, quantity: qty }),
+        }),
+      ),
+    [mutate],
   );
+
   const setQty = useCallback(
-    (sku: string, qty: number) => shop.setCartQty(sku, qty),
-    [shop],
+    async (itemId: string, qty: number) =>
+      mutate(() =>
+        fetch(`/api/cart/items/${itemId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quantity: qty }),
+        }),
+      ),
+    [mutate],
   );
+
   const removeFromCart = useCallback(
-    (sku: string) => shop.removeFromCart(sku),
-    [shop],
+    async (itemId: string) =>
+      mutate(() => fetch(`/api/cart/items/${itemId}`, { method: "DELETE" })),
+    [mutate],
   );
 
-  /* Live availability from the same stock truth as the console (§10):
-     available = on shelf − committed, read off the store's products. */
-  const skus = useMemo(() => listSkus(state.products), [state.products]);
-  const available = useCallback(
-    (sku: string) => {
-      const s = skus.find((x) => x.sku === sku);
-      return s ? s.onShelf - s.committed : undefined;
-    },
-    [skus],
+  const applyDiscount = useCallback(
+    async (code: string) =>
+      mutate(() =>
+        fetch("/api/cart/discount", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        }),
+      ),
+    [mutate],
   );
 
-  /* Checkout hold (S-05/X-07): the store's 15-minute hold, started on
-     demand via startCheckout(). Stored as an ISO instant on the shop
-     clock, which tracks real elapsed time. */
-  const holdExpiresAt: number | null = state.checkoutHoldExpiresAt
-    ? Date.parse(state.checkoutHoldExpiresAt)
-    : null;
-  const startHold = useCallback(() => {
-    shop.startCheckout();
-  }, [shop]);
+  const removeDiscount = useCallback(
+    async () => mutate(() => fetch("/api/cart/discount", { method: "DELETE" })),
+    [mutate],
+  );
 
-  /* The drawn S-04 composition (apron + napkins) is in the cart — the
-     Terracotta mug notice belongs to that state. */
-  const demoSeeded = DEMO_CART.every((d) => lines.some((l) => l.sku === d.sku));
-  const markTouched = useCallback(() => {
-    /* Kept for call-site compatibility; the store's seeded cart made the
-       old sessionStorage seed/touch dance unnecessary. */
-  }, []);
-  const cartNotice: string | null = null;
+  const lines: CartLine[] = useMemo(() => (cart?.lines ?? []).map(toLine), [cart]);
+  const count = cart?.itemCount ?? 0;
 
-  return { lines, count, addToCart, setQty, removeFromCart, available, holdExpiresAt, startHold, demoSeeded, markTouched, cartNotice };
+  return {
+    cart,
+    lines,
+    count,
+    loaded,
+    busy,
+    error,
+    subtotalCents: cart?.subtotalCents ?? 0,
+    discountCents: cart?.discountCents ?? 0,
+    totalCents: cart?.totalCents ?? 0,
+    discountCode: cart?.discountCode ?? null,
+    addToCart,
+    setQty,
+    removeFromCart,
+    applyDiscount,
+    removeDiscount,
+    refresh,
+  };
 }
 
-/** Ticking "now" (1s) for the live hold countdown. Initial 0 is
- *  prerender-safe; the effect sets the real clock on mount. */
+/** Ticking "now" (1s). Initial 0 is prerender-safe. */
 export function useNow(active: boolean): number {
   const [now, setNow] = useState(() => 0);
   useEffect(() => {
+    // Clock sync on mount (pattern carried over from the original hook).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(Date.now());
     if (!active) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
