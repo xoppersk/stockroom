@@ -1,39 +1,30 @@
 "use client";
 /* A-02 Settings form — all sections from Settings.html on one page.
 
-   Dirty tracking: SettingsDirtyProvider (../settings-dirty) holds the
-   saved fixture values vs the draft. The page loads in the drawn state:
-   the same-day cut-off already edited 2:00 PM → 1:00 PM and the
-   default box already changed (the fixture's two changed fields —
-   together the header's "2 unsaved changes"). Every edited field gets
-   the Field unsaved treatment, the sticky header count updates live,
-   Discard restores the saved values, and Save clears the dirty state
-   and persists the values into the client store (when it exposes a
-   settings setter) so they stick across the session. */
+   Per ruling 11 the ONLY editable-real fields are the store_settings
+   rows: tax rate, flat shipping rate, free-shipping threshold. The
+   dirty machinery (../settings-dirty) tracks exactly those three;
+   Save writes each changed field through updateStoreSetting and the
+   provider promotes draft → saved only when every write succeeds —
+   a rejection (settings are admin-write) keeps the fields dirty and
+   shows the reason. Everything else on the page is read-only truth:
+   store identity from config.ts, payments honestly not enabled (no
+   payment provider is connected), carriers unconfigured, alerts as
+   the real broadcast-notification behaviour. No control on this page
+   pretends to save. */
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Field } from "@/components/sr/Field";
 import { Stamp } from "@/components/sr/Stamp";
 import { Button } from "@/components/sr/Button";
-import { useShop } from "@/lib/store";
+import { updateStoreSetting } from "@/lib/shop/admin-actions";
 import {
   SettingsDirtyProvider,
   useSettingsDirty,
   type SettingsValues,
 } from "../settings-dirty";
-import {
-  normalizeSettings,
-  type AdminCarrier,
-  type AdminSettings,
-} from "./admin-data";
-
-type LooseShop = {
-  getState?: () => { settings?: unknown };
-  updateSettings?: (values: SettingsValues) => void;
-  saveSettings?: (values: SettingsValues) => void;
-  setSettings?: (values: SettingsValues) => void;
-};
+import type { AdminSettings } from "./admin-data";
 
 const SECTION_IDS: Record<string, string> = {
   store: "store",
@@ -44,57 +35,77 @@ const SECTION_IDS: Record<string, string> = {
   alerts: "alerts",
 };
 
+function parseDollars(raw: string): number | null {
+  const n = Number(raw.replace(/[^0-9.]/g, ""));
+  return raw.trim() === "" || Number.isNaN(n) ? null : Math.round(n * 100) / 100;
+}
+
 export default function SettingsForm({ settings }: { settings: AdminSettings }) {
-  const shop = useShop() as unknown as LooseShop;
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const lastSavedRef = useRef<SettingsValues>({ ...settings.fields });
 
-  /* Values saved earlier this session (via the store, if it grows a
-     settings slice) win over the fixture values, so saved settings
-     stick when you come back. The current store exposes no settings
-     slice, so this is inert today and Save persists to the provider's
-     saved state for the page session. */
-  const storedRaw = shop?.getState?.()?.settings;
-  const stored = useMemo(
-    () => (storedRaw ? normalizeSettings(storedRaw) : null),
-    [storedRaw],
-  );
-  const initialSaved = stored ? stored.fields : settings.fields;
-
-  /* The drawn initial draft (cut-off 2:00 PM → 1:00 PM and the default
-     box already changed — the header's "2 unsaved changes") comes from
-     the fixture's changed flags via normalizeSettings. If the store
-     already holds saved values from this session, the page opens
-     clean against them instead. */
-  const initialDraft = useMemo(
-    () => (stored ? {} : settings.draft),
-    [stored, settings.draft],
-  );
-
-  const persist = (values: SettingsValues) => {
-    try {
-      if (shop?.updateSettings) shop.updateSettings(values);
-      else if (shop?.saveSettings) shop.saveSettings(values);
-      else if (shop?.setSettings) shop.setSettings(values);
-    } catch {
-      /* Store persistence is best-effort; the provider's saved state
-         already cleared the dirty flags for this page. */
+  /* Persist only the fields that actually changed, in the action's
+     units (verified against the landed updateStoreSetting: tax_rate
+     takes percent points, shipping_flat / free_shipping_threshold
+     take DOLLARS, threshold also accepts null). */
+  const persist = async (values: SettingsValues): Promise<boolean> => {
+    const saved = lastSavedRef.current;
+    const jobs: { key: string; value: number | null }[] = [];
+    if (values.taxRatePct !== saved.taxRatePct) {
+      const pct = Number(values.taxRatePct);
+      if (Number.isNaN(pct) || pct < 0) {
+        setSaveError("Tax rate must be a number, 0 or more.");
+        return false;
+      }
+      jobs.push({ key: "tax_rate", value: pct });
     }
+    if (values.shippingFlat !== saved.shippingFlat) {
+      const dollars = parseDollars(values.shippingFlat ?? "");
+      if (dollars === null || dollars < 0) {
+        setSaveError("Flat shipping rate must be an amount, $0 or more.");
+        return false;
+      }
+      jobs.push({ key: "shipping_flat", value: dollars });
+    }
+    if (values.freeShipThreshold !== saved.freeShipThreshold) {
+      const raw = (values.freeShipThreshold ?? "").trim();
+      const dollars = raw === "" ? null : parseDollars(raw);
+      if (raw !== "" && (dollars === null || dollars < 0)) {
+        setSaveError("Free-shipping threshold must be an amount, or empty for no threshold.");
+        return false;
+      }
+      jobs.push({ key: "free_shipping_threshold", value: dollars });
+    }
+    for (const job of jobs) {
+      const result = await updateStoreSetting(job.key, job.value);
+      if (!result.ok) {
+        setSaveError(result.reason);
+        return false;
+      }
+    }
+    lastSavedRef.current = { ...values };
+    setSaveError(null);
+    return true;
   };
 
   return (
-    <SettingsDirtyProvider
-      initialSaved={initialSaved}
-      initialDraft={initialDraft}
-      onSave={persist}
-    >
-      <SettingsFormInner settings={settings} />
+    <SettingsDirtyProvider initialSaved={settings.fields} onSave={persist}>
+      <SettingsFormInner settings={settings} saveError={saveError} />
     </SettingsDirtyProvider>
   );
 }
 
-function SettingsFormInner({ settings }: { settings: AdminSettings }) {
+function SettingsFormInner({
+  settings,
+  saveError,
+}: {
+  settings: AdminSettings;
+  saveError: string | null;
+}) {
   const dirty = useSettingsDirty();
   const params = useSearchParams();
   const { values, setValue, isDirty, changedFrom } = dirty;
+  const [saving, setSaving] = useState(false);
 
   /* Nav items for the page sections arrive as /admin/settings#payments
      (shared SettingsNav) or ?section=payments — scroll the section into
@@ -111,35 +122,14 @@ function SettingsFormInner({ settings }: { settings: AdminSettings }) {
     if (el) el.scrollIntoView({ block: "start" });
   }, [params]);
 
-  const pickupDirty = isDirty("pickupDays") || isDirty("pickupOpen") || isDirty("pickupClose");
-  const slipDirty = isDirty("slipNote");
-  const carriersDirty = settings.carriers.some((c) => isDirty(c.id));
-
-  const carrier = (c: AdminCarrier) => (
-    <label className="chk" key={c.id}>
-      <input
-        type="checkbox"
-        checked={values[c.id] === "on"}
-        onChange={(e) => setValue(c.id, e.target.checked ? "on" : "off")}
-      />{" "}
-      {c.name}
-      {c.note ? (
-        <span
-          className={c.noteMono ? "mono" : undefined}
-          style={{ color: "var(--muted)", fontSize: 12 }}
-        >
-          {c.note}
-        </span>
-      ) : null}
-    </label>
-  );
-
   return (
     <form
       className="adm-settings-main"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        dirty.save();
+        setSaving(true);
+        await dirty.save();
+        setSaving(false);
       }}
     >
       <div className="adm-pagehead adm-pagehead--sticky">
@@ -158,98 +148,33 @@ function SettingsFormInner({ settings }: { settings: AdminSettings }) {
             </span>
           ) : null}
           <Button type="button" onClick={dirty.discard} disabled={dirty.dirtyCount === 0}>
+
             Discard
           </Button>
-          <Button type="submit" variant="tape" disabled={dirty.dirtyCount === 0}>
+          <Button type="submit" variant="tape" disabled={dirty.dirtyCount === 0 || saving}>
             Save changes
           </Button>
         </div>
       </div>
 
+      {saveError && (
+        <p className="ops-rule-note" role="alert" style={{ color: "var(--problem, #b3261e)" }}>
+          {saveError}
+        </p>
+      )}
+
       <section id="store" className="panel adm-section" aria-labelledby="h-store">
         <div className="ph">
           <h2 id="h-store">Store</h2>
         </div>
-        <Field
-          label="Store name"
-          help="Shown on receipts and the storefront."
-          htmlFor="s-name"
-          unsavedFrom={changedFrom("storeName")}
-        >
-          <input
-            id="s-name"
-            className="in"
-            style={{ maxWidth: 360 }}
-            value={values.storeName ?? ""}
-            onChange={(e) => setValue("storeName", e.target.value)}
-          />
+        <Field label="Store name" help="Shown on receipts and the storefront." htmlFor="s-name">
+          <input id="s-name" className="in" style={{ maxWidth: 360 }} value={settings.storeName} readOnly />
         </Field>
-        <Field
-          label="Workshop address"
-          help="Return address and pickup point."
-          htmlFor="s-addr"
-          unsavedFrom={changedFrom("address")}
-        >
-          <input
-            id="s-addr"
-            className="in"
-            style={{ maxWidth: 420 }}
-            value={values.address ?? ""}
-            onChange={(e) => setValue("address", e.target.value)}
-          />
+        <Field label="Workshop address" help="Return address and pickup point." htmlFor="s-addr">
+          <input id="s-addr" className="in" style={{ maxWidth: 420 }} value={settings.address} readOnly />
         </Field>
-        <Field label="Pickup hours">
-          <div className="adm-control-row">
-            <label htmlFor="ph-d" className="sr-only">
-              Pickup days
-            </label>
-            <select
-              id="ph-d"
-              className={`in${isDirty("pickupDays") ? " adm-input--unsaved" : ""}`}
-              value={values.pickupDays ?? ""}
-              onChange={(e) => setValue("pickupDays", e.target.value)}
-            >
-              <option>Tue – Sat</option>
-              <option>Mon – Fri</option>
-              <option>Every day</option>
-            </select>
-            <label htmlFor="ph-o" className="sr-only">
-              Opens
-            </label>
-            <input
-              id="ph-o"
-              className={`in mono${isDirty("pickupOpen") ? " adm-input--unsaved" : ""}`}
-              style={{ width: 100 }}
-              value={values.pickupOpen ?? ""}
-              onChange={(e) => setValue("pickupOpen", e.target.value)}
-            />
-            <span className="adm-control-to">to</span>
-            <label htmlFor="ph-c" className="sr-only">
-              Closes
-            </label>
-            <input
-              id="ph-c"
-              className={`in mono${isDirty("pickupClose") ? " adm-input--unsaved" : ""}`}
-              style={{ width: 100 }}
-              value={values.pickupClose ?? ""}
-              onChange={(e) => setValue("pickupClose", e.target.value)}
-            />
-          </div>
-          {pickupDirty ? <span className="field-note">Changed · not saved</span> : null}
-        </Field>
-        <Field
-          label="Customer reply address"
-          help="Receipts come from here."
-          htmlFor="s-mail"
-          unsavedFrom={changedFrom("replyEmail")}
-        >
-          <input
-            id="s-mail"
-            className="in mono"
-            style={{ maxWidth: 300 }}
-            value={values.replyEmail ?? ""}
-            onChange={(e) => setValue("replyEmail", e.target.value)}
-          />
+        <Field label="Customer reply address" help="Receipts come from here." htmlFor="s-mail">
+          <input id="s-mail" className="in mono" style={{ maxWidth: 300 }} value={settings.replyEmail} readOnly />
         </Field>
       </section>
 
@@ -261,50 +186,39 @@ function SettingsFormInner({ settings }: { settings: AdminSettings }) {
           </span>
         </div>
         <Field
-          label="Same-day cut-off"
-          help="Orders paid before this ship today."
-          htmlFor="f-cut"
-          unsavedFrom={changedFrom("cutoff")}
+          label="Flat shipping rate"
+          help="Charged on every shipped order below the free-shipping threshold."
+          htmlFor="f-ship"
+          unsavedFrom={changedFrom("shippingFlat")}
         >
           <input
-            id="f-cut"
-            className="in mono"
-            style={{ width: 100 }}
-            value={values.cutoff ?? ""}
-            onChange={(e) => setValue("cutoff", e.target.value)}
+            id="f-ship"
+            className={`in mono${isDirty("shippingFlat") ? " adm-input--unsaved" : ""}`}
+            style={{ width: 120 }}
+            value={values.shippingFlat ?? ""}
+            onChange={(e) => setValue("shippingFlat", e.target.value)}
+          />
+        </Field>
+        <Field
+          label="Free shipping threshold"
+          help="Orders at or above this ship free. Leave empty for no threshold."
+          htmlFor="f-free"
+          unsavedFrom={changedFrom("freeShipThreshold")}
+        >
+          <input
+            id="f-free"
+            className={`in mono${isDirty("freeShipThreshold") ? " adm-input--unsaved" : ""}`}
+            style={{ width: 120 }}
+            placeholder="No threshold"
+            value={values.freeShipThreshold ?? ""}
+            onChange={(e) => setValue("freeShipThreshold", e.target.value)}
           />
         </Field>
         <Field label="Carriers">
-          <div>{settings.carriers.map(carrier)}</div>
-          {carriersDirty ? <span className="field-note">Changed · not saved</span> : null}
-        </Field>
-        <Field
-          label="Default box"
-          help="Used for label rates until packed."
-          htmlFor="f-box"
-          unsavedFrom={changedFrom("defaultBox")}
-        >
-          <select
-            id="f-box"
-            className="in"
-            style={{ maxWidth: 300 }}
-            value={values.defaultBox ?? ""}
-            onChange={(e) => setValue("defaultBox", e.target.value)}
-          >
-            {settings.boxOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Packing slip note" htmlFor="f-slip">
-          <textarea
-            id="f-slip"
-            className={`in adm-textarea${slipDirty ? " adm-input--unsaved" : ""}`}
-            style={{ height: 64, maxWidth: 520 }}
-            value={values.slipNote ?? ""}
-            onChange={(e) => setValue("slipNote", e.target.value)}
-          />
-          {slipDirty ? <span className="field-note">Changed · not saved</span> : null}
+          <span>
+            No carriers are configured — shipped orders charge the flat rate
+            above, and pickup is arranged at the counter.
+          </span>
         </Field>
       </section>
 
@@ -314,52 +228,28 @@ function SettingsFormInner({ settings }: { settings: AdminSettings }) {
         </div>
         <Field label="Card payments">
           <div className="adm-stripe-line">
-            <Stamp tone="paid">Connected</Stamp>
+            <Stamp tone="muted">Not enabled</Stamp>
             <span>
-              Stripe · account ending{" "}
-              <span className="mono">{settings.stripeAccountEnding}</span>
-            </span>
-            <a
-              href="#"
-              className="adm-stripe-link"
-              onClick={(e) => e.preventDefault()}
-            >
-              Manage in Stripe
-            </a>
-          </div>
-        </Field>
-        <Field label="Payouts" help={settings.payoutSchedule}>
-          <div className="adm-payout-stack">
-            <span className="adm-payout-line">
-              Next payout{" "}
-              <b className="adm-payout-figure">{settings.nextPayout}</b> on{" "}
-              {settings.nextPayoutDate}
-            </span>
-            <span className="adm-payout-to">
-              To business checking ending {settings.payoutAccountEnding}
+              Online payment isn’t enabled yet — no payment provider is
+              connected, so orders are paid at the counter or on pickup.
             </span>
           </div>
         </Field>
-        <Field label="Sales tax">
-          <div className="adm-tax-wrap">
-            <div role="table" aria-label="Tax rates" className="adm-tax">
-              <div role="row" className="adm-tax-row adm-tax-row--head">
-                <span role="columnheader">Region</span>
-                <span role="columnheader">Rate</span>
-                <span role="columnheader">Collecting</span>
-              </div>
-              {settings.taxRows.map((row) => (
-                <div role="row" className="adm-tax-row" key={row.region}>
-                  <span role="cell">{row.region}</span>
-                  <span role="cell" className="mono">
-                    {row.rate}
-                  </span>
-                  <span role="cell" className={row.muted ? "adm-tax-muted" : undefined}>
-                    {row.collecting}
-                  </span>
-                </div>
-              ))}
-            </div>
+        <Field
+          label="Sales tax"
+          help="Applied to every order at checkout."
+          htmlFor="p-tax"
+          unsavedFrom={changedFrom("taxRatePct")}
+        >
+          <div className="adm-control-row">
+            <input
+              id="p-tax"
+              className={`in mono${isDirty("taxRatePct") ? " adm-input--unsaved" : ""}`}
+              style={{ width: 100 }}
+              value={values.taxRatePct ?? ""}
+              onChange={(e) => setValue("taxRatePct", e.target.value)}
+            />
+            <span className="adm-control-to">%</span>
           </div>
         </Field>
       </section>
@@ -392,9 +282,10 @@ function SettingsFormInner({ settings }: { settings: AdminSettings }) {
         <div className="adm-danger-body">
           <span className="adm-danger-text">
             Puts the storefront in “back soon” mode. Open orders still ship;
-            nothing can be bought until you reopen.
+            nothing can be bought until you reopen. Pausing the storefront
+            isn’t available yet.
           </span>
-          <Button type="button" variant="destructive">
+          <Button type="button" variant="destructive" disabled>
             Pause storefront
           </Button>
         </div>
