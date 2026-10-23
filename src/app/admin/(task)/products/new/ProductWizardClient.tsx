@@ -1,224 +1,211 @@
 "use client";
 
-/* C-06 Product wizard — screens/ProductNew.html (3 steps).
- * Client island: real products list + collection list arrive from
- * the server; the island draws SKUs from the store prefix, builds
- * variants from colour × pattern, and POSTs the draft to the real
- * createProduct server action (@/lib/shop/admin-actions). Unsaved-
- * change guard, dirty segments and the ledger-preview starting value
- * follow the screen's design. */
+/* C-06 Product wizard client island — layout preserved from the
+   fixture build (screens/ProductWizard.html, step 2 of 4 "Variants
+   and stock"); the option builder is live: colour × pattern chips
+   produce SKUs from the pattern <prefix>-<colour>-<pattern>.
+ *
+ * Real build (adaptations A-WIZ-1..3 in the W-CATALOG log): the
+ * wizard opens BLANK — title / price / cost / collection are entered
+ * in the header block (the drawn step-1 summary); Save draft and
+ * Continue both call the real createProduct action (status draft —
+ * inventory_levels auto-create via the DB trigger). Continue lands
+ * on the new product's editor, where photos live. Action rejections
+ * surface in the notice line. */
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { money } from "@/lib/format";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/sr/Button";
 import { Stamp } from "@/components/sr/Stamp";
-import { createProductDraft } from "@/lib/shop/admin-actions";
+import {
+  adjustStock,
+  createProduct,
+  setVariantThreshold,
+} from "@/lib/shop/admin-actions";
+import { money } from "@/lib/format";
+import "@/styles/console-core.css";
 
-type VariantDraft = {
-  colour: string;
-  pattern: string;
-  sku: string;
-  stock: string;
-  reorder: string;
+type Variant = { colour: string; pattern: string; sku: string; stock: string; reorder: string };
+
+const SKU_PART: Record<string, string> = {
+  Natural: "NAT",
+  Charcoal: "CHR",
+  Plain: "PL",
+  Stripe: "ST",
 };
+function skuPart(v: string): string {
+  return SKU_PART[v] ?? v.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase();
+}
 
-function slugify(v: string): string {
-  return v
+function skuPrefix(title: string): string {
+  const words = title.replace(/[^A-Za-z ]/g, " ").split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return (words[0]![0]! + words[1]![0]!).toUpperCase();
+  if (words.length === 1) return words[0]!.slice(0, 2).toUpperCase();
+  return "PR";
+}
+
+function slugify(title: string): string {
+  return title
     .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 64);
+    .replace(/^-+|-+$/g, "");
 }
 
-function prefixFrom(title: string, existing: string[]): string {
-  const base = slugify(title)
-    .split("-")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 4);
-  const stem = base || "PRD";
-  let n = 0;
-  let candidate = stem;
-  while (existing.some((p) => p.sku.startsWith(candidate))) {
-    n += 1;
-    candidate = `${stem}${n}`;
-  }
-  return candidate;
+function parseMoneyInput(v: string): number | null {
+  const num = Number.parseFloat(v.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(num) ? Math.round(num * 100) : null;
 }
 
-function parseCents(raw: string): number {
-  const digits = raw.replace(/[^0-9.]/g, "");
-  const n = Number(digits);
-  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : 0;
-}
-
-function titleCase(v: string): string {
-  return v
-    .trim()
-    .toLowerCase()
-    .replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-}
-
-export default function ProductWizardClient({
-  existingSkus,
-  collections,
-  storePrefix,
-}: {
-  existingSkus: string[];
-  collections: string[];
-  storePrefix: string;
-}) {
-  // Step state
-  const [step, setStep] = useState(1);
-  const [confirmed, setConfirmed] = useState(false);
-
-  // Step 1: details
+export default function ProductWizardClient({ collections }: { collections: string[] }) {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [cost, setCost] = useState("");
   const [collection, setCollection] = useState("");
   const [description, setDescription] = useState("");
-
-  // Step 2: options
   const [colours, setColours] = useState<string[]>([]);
   const [patterns, setPatterns] = useState<string[]>([]);
   const [colourInput, setColourInput] = useState("");
   const [patternInput, setPatternInput] = useState("");
-
-  // Step 3: stock per variant (keyed by SKU)
   const [stock, setStock] = useState<Record<string, string>>({});
   const [reorder, setReorder] = useState<Record<string, string>>({});
+  const [notice, setNotice] = useState("");
+  const [pending, startTransition] = useTransition();
 
-  const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-
-  const priceCents = parseCents(price);
-  const costCents = parseCents(cost);
-
-  const prefix = useMemo(
-    () => prefixFrom(title, existingSkus.map((s) => ({ sku: s })) as never[] & string[]),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [title],
-  );
-
-  const variants: VariantDraft[] = useMemo(() => {
-    const cs = colours.length ? colours : [""];
-    const ps = patterns.length ? patterns : [""];
-    const out: VariantDraft[] = [];
-    for (const c of cs) {
-      for (const p of ps) {
-        const colourBit = c ? slugify(c).replace(/-/g, "").slice(0, 3).toUpperCase() : "";
-        const patternBit = p ? slugify(p).replace(/-/g, "").slice(0, 3).toUpperCase() : "";
-        const bits = [colourBit, patternBit].filter(Boolean).join("-");
-        const sku = bits ? `${storePrefix || prefix}-${bits}` : `${storePrefix || prefix}-STD`;
-        out.push({
-          colour: titleCase(c),
-          pattern: titleCase(p),
-          sku,
-          stock: stock[sku] ?? "",
-          reorder: reorder[sku] ?? "",
-        });
-      }
-    }
-    return out;
-  }, [colours, patterns, prefix, storePrefix, stock, reorder]);
+  const prefix = skuPrefix(title);
+  const variants = useMemo<Variant[]>(() => {
+    const cols = colours.length ? colours : [""];
+    const pats = patterns.length ? patterns : [""];
+    if (!colours.length && !patterns.length) return [];
+    return cols.flatMap((colour) =>
+      pats.map((pattern) => {
+        const parts = [prefix, colour && skuPart(colour), pattern && skuPart(pattern)].filter(Boolean);
+        const sku = parts.join("-");
+        return { colour, pattern, sku, stock: stock[sku] ?? "", reorder: reorder[sku] ?? "10" };
+      }),
+    );
+  }, [colours, patterns, stock, reorder, prefix]);
 
   const missing = variants.filter((v) => v.stock.trim() === "");
-  const units = variants.reduce((s, v) => s + (Number(v.stock) || 0), 0);
-
-  const detailsDone = title.trim().length > 0 && priceCents > 0;
+  const units = variants.reduce((a, v) => a + (Number.parseInt(v.stock, 10) || 0), 0);
+  const priceCents = parseMoneyInput(price) ?? 0;
+  const costCents = parseMoneyInput(cost) ?? 0;
+  const detailsDone = title.trim().length > 0 && priceCents > 0 && collection.trim().length > 0;
   const variantsDone = variants.length > 0;
-  const stockDone = variants.length > 0 && missing.length === 0;
-  const doneCount = [detailsDone, variantsDone, stockDone].filter(Boolean).length;
+  const stockDone = variantsDone && missing.length === 0;
+  const doneCount = (detailsDone ? 1 : 0) + (variantsDone ? 1 : 0) + (stockDone ? 1 : 0);
 
-  const addValue = (kind: "colour" | "pattern") => {
+  function addValue(kind: "colour" | "pattern") {
+    const raw = (kind === "colour" ? colourInput : patternInput).trim();
+    if (!raw) return;
+    const value = raw.charAt(0).toUpperCase() + raw.slice(1);
     if (kind === "colour") {
-      const v = titleCase(colourInput);
-      if (v && !colours.includes(v)) setColours([...colours, v]);
+      if (!colours.includes(value)) setColours([...colours, value]);
       setColourInput("");
     } else {
-      const v = titleCase(patternInput);
-      if (v && !patterns.includes(v)) setPatterns([...patterns, v]);
+      if (!patterns.includes(value)) setPatterns([...patterns, value]);
       setPatternInput("");
     }
-  };
+  }
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pending) return;
-    setPending(true);
-    setNotice(null);
-    try {
-      const res = await createProductDraft({
-        title: title.trim(),
-        description: description.trim(),
-        priceCents,
-        costCents: cost.trim() ? costCents : null,
-        collection: collection.trim() || null,
-        variants: variants.map((v) => ({
-          sku: v.sku,
-          label: [v.colour, v.pattern].filter(Boolean).join(" · ") || "Standard",
-          onHand: Number(v.stock) || 0,
-          reorderPoint: Number(v.reorder) || 0,
-          priceCents,
-        })),
-      });
-      if (!res.ok) throw new Error(res.error ?? "Couldn't save the draft.");
-      setNotice("Draft saved — continue to photos to publish it.");
-    } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Couldn't save. Try again.");
-    } finally {
-      setPending(false);
+  function submit() {
+    if (!detailsDone) {
+      setNotice("Give the product a title, a price and a collection first.");
+      return;
     }
-  };
+    if (!variantsDone) {
+      setNotice("Add at least one colour or pattern — every product needs a variant with its own SKU.");
+      return;
+    }
+    const slug = slugify(title);
+    const payload = {
+      title: title.trim(),
+      slug,
+      description: description.trim(),
+      collection: collection.trim(),
+      status: "draft" as const,
+      variants: variants.map((v) => ({
+        title: [v.colour, v.pattern].filter(Boolean).join(" · ") || "Default",
+        sku: v.sku,
+        option_values: {
+          ...(v.colour ? { Color: v.colour } : {}),
+          ...(v.pattern ? { Pattern: v.pattern } : {}),
+        },
+        priceCents,
+        compareAtCents: null,
+        costCents: costCents || null,
+        shelf: "",
+        quantity: Number.parseInt(v.stock, 10) || 0,
+        threshold: Number.parseInt(v.reorder, 10) || 10,
+      })),
+    };
+    setNotice("");
+    startTransition(async () => {
+      const res = await createProduct(payload);
+      if (!res.ok) {
+        setNotice(res.reason);
+        return;
+      }
+      /* createProduct (as landed) creates the product + variants but
+         does not apply starting stock or per-variant thresholds —
+         inventory_levels auto-create at 0 / threshold 10 via the DB
+         trigger. Land both here through the real actions (they
+         resolve SKU codes), so the wizard's numbers are true.
+         Failures are named, not hidden (log gap 2b). */
+      const failures: string[] = [];
+      for (const v of payload.variants) {
+        if (v.quantity > 0) {
+          const r = await adjustStock(v.sku, v.quantity, "restock_received", "Opening stock.");
+          if (!r.ok) failures.push(`${v.sku} stock: ${r.reason}`);
+        }
+        if (v.threshold !== 10) {
+          const r = await setVariantThreshold(v.sku, v.threshold);
+          if (!r.ok) failures.push(`${v.sku} reorder point: ${r.reason}`);
+        }
+      }
+      if (failures.length > 0) {
+        setNotice(
+          `Draft created, but some starting figures didn't land — ${failures.join(" · ")} Fix them from the product editor or Inventory.`,
+        );
+        return;
+      }
+      router.push(`/admin/products/${slug}`);
+      router.refresh();
+    });
+  }
 
   return (
     <>
-      {/* Step band */}
-      <section className="cc-task-band" aria-labelledby="wz-t">
-        <div className="cc-band-stack">
-          <Link href="/admin/products" className="cc-backlink">← Products</Link>
-          <h1 id="wz-t" className="cc-h1">New product</h1>
-          <span className="cc-sub">Step {step} of 3 · {step === 1 ? "Details" : step === 2 ? "Options" : "Stock"}</span>
-        </div>
-        <div className="cc-band-actions" role="group" aria-label="Wizard steps">
-          {[1, 2, 3].map((n) => (
-            <Button
-              key={n}
-              variant={n === step ? "tape" : undefined}
-              disabled={n === 2 && !detailsDone}
-              onClick={() => setStep(n)}
-            >
-              {n === 1 ? "1 · Details" : n === 2 ? "2 · Options" : "3 · Stock"}
-            </Button>
-          ))}
-        </div>
-      </section>
+      {/* Steps (ProductWizard.html) */}
+      <nav aria-label="Steps" className="cc-steps-nav">
+        <ol>
+          <li className={detailsDone ? "cc-step-done" : "cc-step-now"}>
+            <span className="cc-step-kicker">{detailsDone ? "1 · Done" : "1 · Now"}</span>
+            <b className="cc-step-name">Details</b>
+          </li>
+          <li aria-current="step" className={detailsDone ? "cc-step-now" : "cc-step-todo"}>
+            <span className="cc-step-kicker">2 · Now</span>
+            <b className="cc-step-name">Variants and stock</b>
+          </li>
+          <li className="cc-step-todo">
+            <span className="cc-step-kicker">3</span>
+            <b className="cc-step-name">Photos</b>
+          </li>
+          <li className="cc-step-todo">
+            <span className="cc-step-kicker">4</span>
+            <b className="cc-step-name">Publish</b>
+          </li>
+        </ol>
+      </nav>
 
-      {/* Confirm-drawn-details gate (step 1 of the screen) */}
-      {!confirmed ? (
-        <div className="sr-page">
-          <section className="cc-panel" aria-labelledby="wz-cf">
-            <div className="cc-ph"><h2 id="wz-cf">Before we start</h2></div>
-            <div className="cc-pb">
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
-                Draw the product's details first — title, price, collection — then we'll build
-                its variants and stock together. Nothing is saved until you choose “Save draft”.
-              </p>
-              <div className="cc-btnrow" style={{ marginTop: 16 }}>
-                <Button variant="tape" size="lg" onClick={() => setConfirmed(true)}>Draw the details</Button>
-              </div>
-            </div>
-          </section>
-        </div>
-      ) : (
-        <div className="sr-page sr-col" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, alignItems: "start" }}>
+      <div className="sr-page">
+        <div className="sr-cols">
           <form
-            onSubmit={(e) => void onSubmit(e)}
+            className="sr-col-main"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit();
+            }}
           >
             {/* Step 1 details — the drawn summary block, as inputs. */}
             <section className="cc-panel" aria-labelledby="wz-dt">
@@ -296,6 +283,7 @@ export default function ProductWizardClient({
                         {p}
                         <button type="button" aria-label={`Remove ${p}`} onClick={() => setPatterns(patterns.filter((x) => x !== p))}>×</button>
                       </span>
+                    ))}
                     ))}
                     <input
                       id="o2"
