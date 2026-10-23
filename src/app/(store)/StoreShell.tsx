@@ -10,14 +10,17 @@ const SHOP_ROUTES = (p: string | null) =>
 
 export default function StoreShell({
   children,
+  accountNav,
 }: {
   children: React.ReactNode;
+  /** Server-rendered account area (session-aware) from the layout. */
+  accountNav?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const shop = SHOP_ROUTES(pathname);
   return (
     <div className={`store${shop ? "" : " store-grey"}`}>
-      {shop && <StoreHeader />}
+      {shop && <StoreHeader accountNav={accountNav} />}
       {children}
     </div>
   );
