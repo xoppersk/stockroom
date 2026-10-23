@@ -243,6 +243,7 @@ export type ShopDiscountRedemption = {
   created_at: string;
 };
 
+/** 00012 — absent until that migration is applied. */
 export type ShopPurchaseOrder = {
   id: string;
   supplier: string;
@@ -253,6 +254,7 @@ export type ShopPurchaseOrder = {
   updated_at: string;
 };
 
+/** 00012 — absent until that migration is applied. */
 export type ShopPurchaseOrderLine = {
   id: string;
   po_id: string;
