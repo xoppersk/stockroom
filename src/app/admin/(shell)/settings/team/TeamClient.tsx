@@ -5,35 +5,43 @@
    unsaved-changes header): a changed role gets the Field unsaved
    treatment on the select plus a "Changed from X · not saved" note,
    and a Discard / Save bar appears at the foot of the People panel.
-   The invite form (opened by "Invite someone") adds a pending invite
-   row locally; new invites run Oct 6 → Oct 13, the same 7 days as the
-   drawn invite (Oct 5 → Oct 12). */
+   Save writes each changed role through updateMemberRole (user_roles
+   is admin-write — the selects are disabled for non-admin actors and
+   a rejection keeps the change dirty and shows the reason).
+   Invites (ruling 12): there is no invites table and no mailer, so
+   the panel keeps its drawn layout with the submit disabled and
+   honest "Invites aren’t enabled yet" copy. */
 
 import { useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/sr/Button";
 import { Stamp } from "@/components/sr/Stamp";
 import { PermissionMatrix } from "@/components/sr/PermissionMatrix";
-import type { TeamInvite, TeamMember } from "../admin-data";
+import { updateMemberRole } from "@/lib/shop/admin-actions";
+import { dbRoleOfDisplay, type TeamInvite, type TeamMember } from "../admin-data";
 
-const INVITE_ROLES = ["Fulfillment", "Customer service", "Manager", "Bookkeeper"];
+const INVITE_ROLES = ["Fulfillment", "Customer service"];
 
 export default function TeamClient({
   members,
   invites: initialInvites,
   permissions,
+  actorIsAdmin,
 }: {
   members: TeamMember[];
   invites: TeamInvite[];
   permissions: { roles: string[]; rows: { capability: string; values: string[] }[] };
+  actorIsAdmin: boolean;
 }) {
   const [savedRoles, setSavedRoles] = useState<Record<string, string>>(() =>
     Object.fromEntries(members.map((m) => [m.id, m.role])),
   );
   const [roles, setRoles] = useState<Record<string, string>>(savedRoles);
-  const [invites, setInvites] = useState<TeamInvite[]>(initialInvites);
+  const [invites] = useState<TeamInvite[]>(initialInvites);
   const [formOpen, setFormOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Fulfillment");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const dirtyIds = useMemo(
     () => members.filter((m) => (roles[m.id] ?? m.role) !== (savedRoles[m.id] ?? m.role)).map((m) => m.id),
@@ -41,23 +49,27 @@ export default function TeamClient({
   );
 
   const sendInvite = (e: FormEvent) => {
+    /* Submit is disabled (ruling 12) — this only guards the Enter key. */
     e.preventDefault();
-    const email = inviteEmail.trim();
-    if (!email) return;
-    setInvites((prev) => [
-      ...prev,
-      {
-        id: `invite-${email}`,
-        email,
-        role: inviteRole,
-        note: "Invited Oct 6 by you · expires Oct 13",
-        lastIn: "Not joined",
-      },
-    ]);
-    setInviteEmail("");
-    setInviteRole("Fulfillment");
-    setFormOpen(false);
   };
+
+  async function saveRoles() {
+    if (saving || dirtyIds.length === 0) return;
+    setSaving(true);
+    setSaveError(null);
+    for (const id of dirtyIds) {
+      const display = roles[id];
+      if (!display) continue;
+      const result = await updateMemberRole(id, dbRoleOfDisplay(display));
+      if (!result.ok) {
+        setSaveError(result.reason);
+        setSaving(false);
+        return;
+      }
+    }
+    setSavedRoles(roles);
+    setSaving(false);
+  }
 
   return (
     <div className="adm-settings-main">
@@ -108,10 +120,16 @@ export default function TeamClient({
                 ))}
               </select>
             </div>
-            <Button type="submit">Send invite</Button>
+            <Button type="submit" disabled>
+              Send invite
+            </Button>
             <Button type="button" onClick={() => setFormOpen(false)}>
               Cancel
             </Button>
+            <span className="field-note">
+              Invites aren’t enabled yet — new team members are added by the
+              Owner directly.
+            </span>
           </form>
         </section>
       ) : null}
@@ -119,6 +137,9 @@ export default function TeamClient({
       <section className="panel" aria-labelledby="pp">
         <div className="ph">
           <h2 id="pp">People</h2>
+          {!actorIsAdmin && (
+            <span className="ph-note">Only the Owner can change roles</span>
+          )}
         </div>
         <div className="adm-table-scroll">
           <div role="table" aria-label="People" style={{ minWidth: 620 }}>
@@ -157,6 +178,7 @@ export default function TeamClient({
                           id={`role-${member.id}`}
                           className={`adm-role-select${dirty ? " adm-input--unsaved" : ""}`}
                           value={roles[member.id] ?? member.role}
+                          disabled={!actorIsAdmin}
                           onChange={(e) =>
                             setRoles((prev) => ({ ...prev, [member.id]: e.target.value }))
                           }
@@ -178,13 +200,7 @@ export default function TeamClient({
                   <span role="cell" className="adm-lastin">
                     {member.lastIn}
                   </span>
-                  <span role="cell" className="adm-rowaction">
-                    {member.you ? null : (
-                      <a href="#" onClick={(e) => e.preventDefault()}>
-                        Remove
-                      </a>
-                    )}
-                  </span>
+                  <span role="cell" className="adm-rowaction" />
                 </div>
               );
             })}
@@ -218,15 +234,18 @@ export default function TeamClient({
                 <span role="cell" className="adm-lastin">
                   {invite.lastIn}
                 </span>
-                <span role="cell" className="adm-rowaction">
-                  <a href="#" onClick={(e) => e.preventDefault()}>
-                    Resend
-                  </a>
-                </span>
+                <span role="cell" className="adm-rowaction" />
               </div>
             ))}
           </div>
         </div>
+        {saveError && (
+          <div style={{ padding: "10px 20px 0" }}>
+            <span className="field-error" role="alert">
+              {saveError}
+            </span>
+          </div>
+        )}
         {dirtyIds.length > 0 ? (
           <div className="adm-team-dirtybar">
             <span className="adm-unsaved" role="status">
@@ -237,11 +256,7 @@ export default function TeamClient({
               <Button size="sm" onClick={() => setRoles(savedRoles)}>
                 Discard
               </Button>
-              <Button
-                size="sm"
-                variant="tape"
-                onClick={() => setSavedRoles(roles)}
-              >
+              <Button size="sm" variant="tape" onClick={saveRoles} disabled={saving}>
                 Save changes
               </Button>
             </span>
