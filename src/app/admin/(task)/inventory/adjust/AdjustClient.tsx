@@ -195,6 +195,9 @@ export default function AdjustClient({ skus, audit, movements }: Props) {
       /* The append-only log has no zero-delta rows (the RPC raises on
          delta 0 by design): a matching count is honestly a no-op. */
       setNotice(
+        reason === "Counted"
+          ? "Count matches the shelf — nothing to record."
+          : "That adjustment would not change the shelf count — nothing to record.",
       );
       return;
     }
