@@ -357,7 +357,7 @@ function LoadingDashboard() {
         </div>
         <div aria-hidden="true" className="cc-shift-actions">
           <span className="cc-shift-stack" style={{ alignItems: "flex-end", paddingRight: 18, borderRight: "1px solid var(--rule)" }}>
-            <SkeletonBlock width={80} height={12} />
+            <SkeletonBlock width={80} height={11} />
             <SkeletonBlock width={110} height={30} />
           </span>
           <span className="cc-shift-stack">
