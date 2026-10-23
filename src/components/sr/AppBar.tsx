@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SHOP_NAME, SHOP_SHORT } from "@/lib/config";
+import { createClient } from "@/lib/supabase/client";
 
 export type AppBarCurrent =
   | "dashboard"
@@ -71,6 +72,7 @@ export function AppBar({
   const below = lowStockCount;
 
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const [query, setQuery] = useState(() => params.get("q") ?? "");
   useEffect(() => {
     // Sync the search box with the URL's ?q= state (external system).
@@ -187,6 +189,26 @@ export function AppBar({
       >
         {initials}
       </Link>
+      {/* Sign-out (production pass): the console previously had NO sign-out
+          control — the only one lived in the storefront header. Rendered
+          only with a real actor (the dev showcase passes none). Ends the
+          Supabase session, then lands on the staff sign-in page. */}
+      {actorName ? (
+        <button
+          type="button"
+          className="bar-signout"
+          disabled={signingOut}
+          onClick={async () => {
+            setSigningOut(true);
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            router.push("/admin/login");
+            router.refresh();
+          }}
+        >
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
+      ) : null}
     </header>
   );
 }
