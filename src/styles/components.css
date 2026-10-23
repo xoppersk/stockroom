@@ -105,6 +105,24 @@
   text-decoration: none;
   flex: none;
 }
+.bar-signout {
+  flex: none;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: #b8b3ac; /* NON-TOKEN: matches the bar tab resting colour */
+  font: 500 13px/1 var(--font-sans);
+  cursor: pointer;
+}
+.bar-signout:hover {
+  color: #fff;
+}
+.bar-signout:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 /* SR-07 — global search, exactly as the console screens draw it:
    280px dark field at the right of the bar, icon, ghost input, "/" chip. */
 .bar-search {
