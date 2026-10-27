@@ -87,7 +87,7 @@ export function StoreFooter({ variant }: { variant: "full" | "slim" }) {
     return (
       <footer className="sfooter-slim">
         <div className="swrap n sfooter-slim-in">
-          <span>{SHOP_NAME} · {SHOP_ADDRESS} · questions <span className="mono" style={{ fontSize: 12 }}>10–6</span>, <a href="mailto:hello@sevynlabs.io">hello@sevynlabs.io</a></span>
+          <span>{SHOP_NAME} · {SHOP_ADDRESS} · questions <span className="mono" style={{ fontSize: 12 }}>10–6</span>, <a href="mailto:hello@sevynlabs.io">hello@sevynlabs.io</a> or <a href="tel:+12762702729">(276) 270-2729</a></span>
           <nav aria-label="Policies">
             <a href="#">Shipping and returns</a><a href="#">Privacy</a><a href="#">Terms</a>
           </nav>
